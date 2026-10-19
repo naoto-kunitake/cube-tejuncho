@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+dist
+coverage
+# 文書は手で整える (日本語の表や箇条書きを Prettier が崩す)
+*.md
