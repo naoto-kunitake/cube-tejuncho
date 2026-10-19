@@ -43,7 +43,7 @@ React と見た目の規約。コードの一般的な書き方は `coding-style
 - トークンは `src/app/tokens.css` の `@theme` と CSS 変数が正。ライトは `:root`、ダークは `.dark`
 - 見た目はユーティリティクラスで書く。クラスの結合は `cn()`、見た目の種類 (大きさ・塗り) は `cva`
 - 生の値 (`text-[13px]`、`#333`、`mt-[7px]`) を書かない。トークンにない値が要るときは、まずトークンを疑う
-- 文字の大きさは型スケールのクラス (`text-title` 20 / `text-alg` 24 / `text-input` 16 / `text-body` 15 / `text-small` 14 / `text-label` 13) だけを使う
+- 文字の大きさは型スケールのクラス (`text-title` 20 / `text-alg` 24 / `text-alg-compact` 17 / `text-input` 16 / `text-body` 15 / `text-small` 14 / `text-label` 13 / `text-caption` 12) だけを使う
 - 余白は 4 の刻みで、基本は 8 の倍数 (区画の間 24、バーの下 16、見出し → 内容 8、タイルの間 8)。カードの中 12 と行の高さ 52 は決めた例外で、他に例外を増やさない
 - hover は `hover:` (v4 では hover できる端末だけに効く)。focus は `focus-visible:` だけ
 - CSS-in-JS と部品ごとの CSS ファイルを作らない。図の SVG だけはインラインの `style` で色変数を参照する
