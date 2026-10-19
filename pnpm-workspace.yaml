@@ -1,0 +1,5 @@
+saveExact: true
+
+# lefthook のフックは prepare の `lefthook install` で入れるので、postinstall は不要
+allowBuilds:
+  lefthook: false
