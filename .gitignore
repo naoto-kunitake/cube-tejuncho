@@ -15,7 +15,7 @@ coverage
 # Local overrides
 lefthook-local.yml
 .claude/settings.local.json
-.claude/review-stamp
+.claude/review-stamp*
 
 # dotenv environment variable files
 .env

@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: 直近の変更 (ステージ済みの差分) を、この案件の規約 (coding-style / frontend-patterns / project-structure) に照らして点検し、重要度つきの報告を返すレビュアー。/commit の中で使う。コードの点検を頼まれたときにも使う。ファイルは変更しない。
+description: 直近の変更 (ステージ済みの差分、または頼まれた範囲) を、この案件の規約 (coding-style / frontend-patterns / project-structure) に照らして点検し、重要度つきの報告を返すレビュアー。/commit (ステージ済み) と /pr (ブランチ全体) の中で使う。コードの点検を頼まれたときにも使う。ファイルは変更しない。
 tools: Read, Grep, Glob, Bash
 model: sonnet
 color: cyan
