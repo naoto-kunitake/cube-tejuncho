@@ -14,8 +14,14 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  # 検査ごとに別のジョブにして、PR にどれが落ちたかを名前で出す。1 つ落ちても残りを走らせ、直す箇所を 1 回で全部出す
+  check:
     if: ${{ !github.event.pull_request.draft }}
+    name: ${{ matrix.task }}
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [type-check, lint, format-check, test, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,16 +30,15 @@ jobs:
         with:
           node-version-file: .tool-versions
           cache: pnpm
-      - id: install
-        run: pnpm install --frozen-lockfile
-      # 1 つ失敗しても残りを走らせ、直す箇所を 1 回で全部出す
-      - run: pnpm type-check
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      - run: pnpm lint
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      - run: pnpm format-check
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      - run: pnpm test
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-      - run: pnpm build
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ${{ matrix.task }}
+
+  # 必須チェックはこの 1 つ。検査を増やしてもルールセットを変えずに済み、列挙し忘れで素通りすることもない。
+  # always() で必ず走らせる (needs が落ちると既定では飛ばされ、飛ばされたチェックは成功扱いになる)
+  ci:
+    if: ${{ always() }}
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
