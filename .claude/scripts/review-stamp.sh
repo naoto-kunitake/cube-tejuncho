@@ -1,18 +1,44 @@
 #!/bin/bash
-# ステージ済みの差分の印 (SHA-256)。/commit が `write` で書き、check-self-review.sh が `hash` で照合する。
-# 計算を 1 か所にして、2 つがずれて全コミットが止まる事故を防ぐ。
+# レビューを通った差分の印 (SHA-256)。計算を 1 か所にして、書く側と照合する側がずれて全部が止まる事故を防ぐ。
+# - ステージ済みの差分: /commit が `write` で書き、check-self-review.sh が `hash` で照合する
+# - ブランチ全体の差分 (main との差): /pr が `write-branch` で書き、check-branch-review.sh が `hash-branch` で照合する
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel)
 STAMP_FILE="$ROOT/.claude/review-stamp"
+BRANCH_STAMP_FILE="$ROOT/.claude/review-stamp-branch"
 
 hash_staged() {
   git -C "$ROOT" diff --cached | shasum -a 256 | awk '{print $1}'
+}
+
+# 比較の基準。ローカルの main がなければ origin/main。どちらもなければ失敗させる (黙って「差分なし」にしない)
+resolve_base() {
+  git -C "$ROOT" rev-parse --verify -q main 2>/dev/null && return 0
+  git -C "$ROOT" rev-parse --verify -q origin/main 2>/dev/null && return 0
+  echo "review-stamp: main も origin/main も見つからない" >&2
+  return 1
+}
+
+hash_branch() {
+  local base
+  base=$(resolve_base)
+  git -C "$ROOT" diff "$base...HEAD" | shasum -a 256 | awk '{print $1}'
+}
+
+files_branch() {
+  local base
+  base=$(resolve_base)
+  git -C "$ROOT" diff "$base...HEAD" --name-only
 }
 
 case "${1:-}" in
   hash) hash_staged ;;
   write) hash_staged > "$STAMP_FILE" ;;
   read) cat "$STAMP_FILE" 2>/dev/null || true ;;
-  *) echo "usage: review-stamp.sh hash|write|read" >&2; exit 1 ;;
+  hash-branch) hash_branch ;;
+  write-branch) hash_branch > "$BRANCH_STAMP_FILE" ;;
+  read-branch) cat "$BRANCH_STAMP_FILE" 2>/dev/null || true ;;
+  files-branch) files_branch ;;
+  *) echo "usage: review-stamp.sh hash|write|read|hash-branch|write-branch|read-branch|files-branch" >&2; exit 1 ;;
 esac

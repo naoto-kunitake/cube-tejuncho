@@ -1,7 +1,7 @@
 {
   "language": "japanese",
   "attribution": {
-    "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
+    "commit": "",
     "pr": ""
   },
   "permissions": {
@@ -62,6 +62,10 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/check-pr-template.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/check-branch-review.sh\""
           }
         ]
       }
