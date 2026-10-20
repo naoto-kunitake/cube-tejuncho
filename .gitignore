@@ -26,3 +26,6 @@ lefthook-local.yml
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# Vitest の既定の出力先
+.vitest

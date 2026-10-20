@@ -1,0 +1,176 @@
+/*
+ * 見た目の正。色はデジタル庁デザインシステム (DADS) のトークンで、例外 (地と面 2 の生成り、テーマ色、再生の枠) は
+ * モックで決めた値。ライトは :root、ダークは .dark で同じ変数を差し替え、部品の CSS は触らない。
+ * Tailwind のクラスにする変数は下の @theme inline に置き、既定のパレット・型スケール・角・影は使わない。
+ */
+:root {
+  color-scheme: light;
+
+  --ground: #f2f0ea;
+  --surface: #ffffff;
+  --surface-2: #f7f6f2;
+
+  --ink: #333333;
+  --ink-strong: #1a1a1a;
+  --muted: #666666;
+  --placeholder: #767676;
+  --disabled: #b3b3b3;
+
+  --line: #cccccc;
+  --line-strong: #666666;
+  --line-state: #b3b3b3;
+  --line-hover: #000000;
+
+  --danger: #ec0000;
+  --danger-hover: #a90000;
+  --danger-active: #620000;
+  --danger-tint: #fdeeee;
+  --on-danger: #ffffff;
+
+  --inverse: #1a1a1a;
+  --on-inverse: #ffffff;
+
+  --focus: #000000;
+  --focus-ring: #ffd43d;
+
+  /* テーマ色。既定は墨 (= ink-strong)。文字色は墨 / 白のうち対比が高い方 */
+  --accent: #1a1a1a;
+  --on-accent: #ffffff;
+
+  /* 白い面の上の hover / 押下と、地の上 (丸ボタン・タブ・空の枠) の 1 段濃い hover / 押下 */
+  --hover: #f2f2f2;
+  --press: #e6e6e6;
+  --hover-ground: #e6e6e6;
+  --press-ground: #cccccc;
+
+  /* 図の色。図は SVG のインライン style からこの変数を参照する */
+  --sticker-yellow: #ffd400;
+  --sticker-white: #ffffff;
+  --sticker-green: #00a651;
+  --sticker-blue: #0b55c4;
+  --sticker-red: #c8102e;
+  --sticker-orange: #ff6d00;
+  --sticker-none: #b0aca2;
+  --sticker-edge: #1c1b19;
+  --frame: #1c1b19;
+  --frame-edge: #3a3935;
+
+  /* DADS の elevation */
+  --elevation-1: 0 2px 8px 1px rgb(0 0 0 / 0.1), 0 1px 5px 0 rgb(0 0 0 / 0.3);
+  --elevation-2: 0 2px 12px 2px rgb(0 0 0 / 0.1), 0 1px 6px 0 rgb(0 0 0 / 0.3);
+  --elevation-3: 0 4px 16px 3px rgb(0 0 0 / 0.1), 0 1px 6px 0 rgb(0 0 0 / 0.3);
+  --elevation-4: 0 6px 20px 4px rgb(0 0 0 / 0.1), 0 2px 6px 0 rgb(0 0 0 / 0.3);
+  --elevation-5: 0 8px 24px 5px rgb(0 0 0 / 0.1), 0 2px 10px 0 rgb(0 0 0 / 0.3);
+}
+
+/* DADS の灰を反転。地は純灰 (生成りに対応する暗い暖色は DADS にない) */
+.dark {
+  color-scheme: dark;
+
+  --ground: #1a1a1a;
+  --surface: #333333;
+  --surface-2: #1a1a1a;
+
+  --ink: #f2f2f2;
+  --ink-strong: #ffffff;
+  --muted: #b3b3b3;
+  /* 420 だと面 800 の上で 4.2:1 に届かないので 300 */
+  --placeholder: #b3b3b3;
+  --disabled: #666666;
+
+  --line: #4d4d4d;
+  --line-strong: #949494;
+  --line-state: #666666;
+  --line-hover: #ffffff;
+
+  --danger: #ff7171;
+  --danger-hover: #ff9696;
+  --danger-active: #ffbbbb;
+  --danger-tint: rgb(255 113 113 / 0.16);
+  --on-danger: #1a1a1a;
+
+  --inverse: #f2f2f2;
+  --on-inverse: #1a1a1a;
+
+  --focus: #ffffff;
+
+  --accent: #ffffff;
+  --on-accent: #1a1a1a;
+
+  --hover: #4d4d4d;
+  --press: #666666;
+  --hover-ground: #333333;
+  --press-ground: #4d4d4d;
+
+  --sticker-none: #666666;
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-strong: var(--ink-strong);
+  --color-muted: var(--muted);
+  --color-placeholder: var(--placeholder);
+  --color-disabled: var(--disabled);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-line-state: var(--line-state);
+  --color-line-hover: var(--line-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-active: var(--danger-active);
+  --color-danger-tint: var(--danger-tint);
+  --color-on-danger: var(--on-danger);
+  --color-inverse: var(--inverse);
+  --color-on-inverse: var(--on-inverse);
+  --color-focus: var(--focus);
+  --color-focus-ring: var(--focus-ring);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-hover: var(--hover);
+  --color-press: var(--press);
+  --color-hover-ground: var(--hover-ground);
+  --color-press-ground: var(--press-ground);
+
+  /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す */
+  --color-background: var(--ground);
+  --color-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--on-accent);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--on-danger);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--focus);
+
+  --font-sans: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* 型スケール。画面の題 20 / 詳細のメイン手順 24 / 手順の入力・再生シート・記号 17 / 入力欄と題 16 /
+     行・タブ・ボタン 15 / 説明・文字ボタン 14 / 区画見出し・ラベル・副文 13 / 自作タイルの手順 12 */
+  --text-*: initial;
+  --text-title: 20px;
+  --text-alg: 24px;
+  --text-alg-compact: 17px;
+  --text-input: 16px;
+  --text-body: 15px;
+  --text-small: 14px;
+  --text-label: 13px;
+  --text-caption: 12px;
+
+  --radius-*: initial;
+  --radius-md: 10px;
+
+  --shadow-*: initial;
+  --shadow-1: var(--elevation-1);
+  --shadow-2: var(--elevation-2);
+  --shadow-3: var(--elevation-3);
+  --shadow-4: var(--elevation-4);
+  --shadow-5: var(--elevation-5);
+}
