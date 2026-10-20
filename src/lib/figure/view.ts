@@ -1,0 +1,89 @@
+export type StickerColor = 'Y' | 'W' | 'G' | 'B' | 'R' | 'O';
+// N は関係ないパーツの灰
+export type FigureColor = StickerColor | 'N';
+
+export const TOP_COLORS = ['yellow', 'white'] as const;
+export type TopColor = (typeof TOP_COLORS)[number];
+export const FRONT_COLORS = ['green', 'red', 'blue', 'orange'] as const;
+export type FrontColor = (typeof FRONT_COLORS)[number];
+
+export type Side<T> = readonly [T, T, T];
+export type TopFace<T> = readonly [T, T, T, T, T, T, T, T, T];
+
+// 標準形: 上面 9 マス (左上から行ごと) + 側面の上段 3 マスずつ (左から)
+export type TopView = {
+  u: TopFace<StickerColor>;
+  f: Side<StickerColor>;
+  r: Side<StickerColor>;
+  b: Side<StickerColor>;
+  l: Side<StickerColor>;
+};
+
+export type FigureView = {
+  u: TopFace<FigureColor>;
+  f: Side<FigureColor>;
+  r: Side<FigureColor>;
+  b: Side<FigureColor>;
+  l: Side<FigureColor>;
+};
+
+function mapSide<T, U>(side: Side<T>, convert: (value: T) => U): Side<U> {
+  return [convert(side[0]), convert(side[1]), convert(side[2])];
+}
+
+function mapFace<T, U>(face: TopFace<T>, convert: (value: T) => U): TopFace<U> {
+  const [a, b, c, d, e, f, g, h, i] = face;
+  return [convert(a), convert(b), convert(c), convert(d), convert(e), convert(f), convert(g), convert(h), convert(i)];
+}
+
+export type ViewSettings = {
+  topColor: TopColor;
+  frontColor: FrontColor;
+};
+
+const FRONT_COLOR_LETTER: Record<FrontColor, StickerColor> = { green: 'G', red: 'R', blue: 'B', orange: 'O' };
+
+// 白上は x2 で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
+const WHITE_TOP: Record<StickerColor, StickerColor> = { Y: 'W', W: 'Y', R: 'O', O: 'R', G: 'G', B: 'B' };
+const SIDE_SEQUENCE: Record<TopColor, readonly StickerColor[]> = {
+  yellow: ['G', 'O', 'B', 'R'],
+  white: ['G', 'R', 'B', 'O'],
+};
+
+export function recolorView(view: TopView, settings: ViewSettings): TopView {
+  const sequence = SIDE_SEQUENCE[settings.topColor];
+  const shift = Math.max(0, sequence.indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
+  const recolor = (color: StickerColor): StickerColor => {
+    const topped = settings.topColor === 'white' ? WHITE_TOP[color] : color;
+    const index = sequence.indexOf(topped);
+    if (index < 0) {
+      return topped;
+    }
+    // 前面の色の変更は全体の y 回転で、側面の色の巡回置換になる
+    return sequence[(index + shift) % sequence.length] ?? topped;
+  };
+  return {
+    u: mapFace(view.u, recolor),
+    f: mapSide(view.f, recolor),
+    r: mapSide(view.r, recolor),
+    b: mapSide(view.b, recolor),
+    l: mapSide(view.l, recolor),
+  };
+}
+
+// 判断の手がかり: 側面の揃っている塊 (両端が同色 = ヘッドライト、隣り同士が同色 = 2 連、3 つ同色 = 3 連) だけ色を残す
+function keepBlocks(side: Side<StickerColor>): Side<FigureColor> {
+  const [a, b, c] = side;
+  const isHeadlight = a === c;
+  return [isHeadlight || a === b ? a : 'N', a === b || b === c ? b : 'N', isHeadlight || b === c ? c : 'N'];
+}
+
+export function cueView(view: TopView): FigureView {
+  return {
+    u: view.u,
+    f: keepBlocks(view.f),
+    r: keepBlocks(view.r),
+    b: keepBlocks(view.b),
+    l: keepBlocks(view.l),
+  };
+}
