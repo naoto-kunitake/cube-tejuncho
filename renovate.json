@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":semanticCommitTypeAll(chore)",
+    "schedule:monthly",
+    "group:allNonMajor"
+  ],
+  "timezone": "Asia/Tokyo",
+  "rangeStrategy": "pin",
+  "semanticCommits": "enabled",
+  "osvVulnerabilityAlerts": true
+}
