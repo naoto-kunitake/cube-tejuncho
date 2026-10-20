@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_call:
+
+# 同じ PR の古い実行は打ち切る (workflow_call のときは deploy 側の concurrency に従う)
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - id: install
+        run: pnpm install --frozen-lockfile
+      # 1 つ失敗しても残りを走らせ、直す箇所を 1 回で全部出す
+      - run: pnpm type-check
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: pnpm lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: pnpm format-check
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: pnpm test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+      - run: pnpm build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
