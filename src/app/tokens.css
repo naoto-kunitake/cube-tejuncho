@@ -38,9 +38,10 @@
   /* テーマ色。既定は墨 (= ink-strong)。文字色は墨 / 白のうち対比が高い方 */
   --accent: #1a1a1a;
   --on-accent: #ffffff;
-  /* 塗りボタンの hover は 900 → 1000、押下は 1200 の近似。文字ボタンはテーマ色を薄く敷く */
-  --accent-hover: color-mix(in srgb, var(--accent) 85%, #000);
-  --accent-press: color-mix(in srgb, var(--accent) 60%, #000);
+  /* 塗りボタンの hover / 押下は文字色の方へ寄せる。墨なら明るく、黄のような明るいテーマ色なら暗くなり、
+     どのテーマ色でも見える方向に動く (黒へ寄せると墨では見えない)。文字ボタンはテーマ色を薄く敷く */
+  --accent-hover: color-mix(in oklab, var(--accent), var(--on-accent) 12%);
+  --accent-press: color-mix(in oklab, var(--accent), var(--on-accent) 24%);
   --accent-tint-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
   --accent-tint-press: color-mix(in srgb, var(--accent) 20%, #fff);
 
