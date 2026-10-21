@@ -90,6 +90,7 @@ export type DocumentStore = {
   document: Document;
   loadIssue: LoadIssue | null;
   addRegistration: (patternId: string, mainAlg: AlgEntry) => void;
+  setLastTab: (categoryId: string) => void;
   dismissLoadIssue: () => void;
 };
 
@@ -124,6 +125,12 @@ export function createDocumentStore(storage: KeyValueStorage) {
               const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
               return { document: { ...state.document, registrations: [...others, registration] } };
             });
+            reportStorageIssue();
+          },
+          setLastTab: (categoryId) => {
+            set((state) => ({
+              document: { ...state.document, settings: { ...state.document.settings, lastTab: categoryId } },
+            }));
             reportStorageIssue();
           },
           dismissLoadIssue: () => {

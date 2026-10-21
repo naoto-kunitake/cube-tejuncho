@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createEmptyDocument, DocumentSchema } from './document';
+import { createEmptyDocument, DocumentSchema, findRegistration } from './document';
 
 describe('DocumentSchema', () => {
   it('空の文書は検証を通る', () => {
@@ -52,5 +52,24 @@ describe('createEmptyDocument', () => {
       dismissedBanners: [],
       lastTab: 'pll',
     });
+  });
+});
+
+describe('findRegistration', () => {
+  const registration = {
+    patternId: 'pll-ua',
+    recognition: '',
+    mainAlg: { text: 'R U', mnemonic: '', fingering: '' },
+    altAlgs: [],
+    createdAt: '',
+    updatedAt: '',
+  };
+
+  it('patternId が一致する登録を返す', () => {
+    expect(findRegistration([registration], 'pll-ua')).toBe(registration);
+  });
+
+  it('見つからないときは undefined', () => {
+    expect(findRegistration([registration], 'pll-ub')).toBeUndefined();
   });
 });

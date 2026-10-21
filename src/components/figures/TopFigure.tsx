@@ -1,6 +1,7 @@
 import { type Arrow, arrowPaths } from '@/lib/figure/arrows';
 import { cellPosition, FIGURE_LAYOUT, SIDE_FAR, SIDE_NEAR } from '@/lib/figure/layout';
 import type { FigureColor, FigureView } from '@/lib/figure/view';
+import { cn } from '@/lib/utils';
 
 const COLOR_VARIABLE: Record<FigureColor, string> = {
   Y: 'var(--sticker-yellow)',
@@ -51,7 +52,7 @@ type TopFigureProps = {
 
 export function TopFigure({ view, arrows = [], label, className }: TopFigureProps) {
   return (
-    <svg viewBox={viewBox} role="img" aria-label={label} className={className}>
+    <svg viewBox={viewBox} role="img" aria-label={label} className={cn('block aspect-square h-auto w-full', className)}>
       {view.u.map((color, index) => (
         <Sticker
           key={`u${index}`}
