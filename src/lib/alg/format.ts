@@ -3,7 +3,7 @@ import { cleanAlgText, type Move, parseAlg } from './parse';
 export const WIDE_STYLES = ['r', 'Rw'] as const;
 export type WideStyle = (typeof WIDE_STYLES)[number];
 
-function formatMove(move: Move, wideStyle: WideStyle): string {
+export function formatMove(move: Move, wideStyle: WideStyle): string {
   if (!move.isWide) {
     return move.base + move.suffix;
   }
