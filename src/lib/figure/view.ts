@@ -50,9 +50,14 @@ const SIDE_SEQUENCE: Record<TopColor, readonly StickerColor[]> = {
   white: ['G', 'R', 'B', 'O'],
 };
 
+// 前面の色を正面に持ってくるのに要る y 回転の回数 (0〜3)。側面の色の巡回と再生の開始姿勢が同じ値を使う
+export function frontColorTurns(settings: ViewSettings): number {
+  return Math.max(0, SIDE_SEQUENCE[settings.topColor].indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
+}
+
 export function recolorView(view: TopView, settings: ViewSettings): TopView {
   const sequence = SIDE_SEQUENCE[settings.topColor];
-  const shift = Math.max(0, sequence.indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
+  const shift = frontColorTurns(settings);
   const recolor = (color: StickerColor): StickerColor => {
     const topped = settings.topColor === 'white' ? WHITE_TOP[color] : color;
     const index = sequence.indexOf(topped);
