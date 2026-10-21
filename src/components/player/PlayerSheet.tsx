@@ -46,12 +46,13 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
     };
   }, [onClose]);
 
+  // 狭い幅は親指の届く底のシート。広い幅は窓が縦に長く、底に出すと押した場所から遠いので中央のカードにする
   return (
     <dialog
       ref={dialogRef}
       aria-label={copy.a11y.playerSheet}
       onClose={onClose}
-      className="m-0 mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-5 text-ink shadow-5 backdrop:bg-black/60 md:mx-auto"
+      className="m-0 mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-5 text-ink shadow-5 backdrop:bg-black/60 md:m-auto md:max-w-100 md:rounded-sheet md:border"
     >
       <div className="flex items-center justify-end">
         <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
