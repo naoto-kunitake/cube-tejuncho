@@ -1,22 +1,24 @@
 import { Link } from 'react-router';
 
+import { AlgText } from '@/components/AlgText';
 import { SECTION_LABEL_CLASS } from '@/components/SectionHeading';
 import { PILL_TAP_AREA_CLASS, TEXT_PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import type { WideStyle } from '@/lib/alg/format';
 import { cn } from '@/lib/utils';
 
-import { AlgText } from './AlgText';
+import { PlayPill } from './PlayPill';
 
 type StandardAlgCardProps = {
   alg: string;
   wideStyle: WideStyle;
   editPath: string;
   onUse: () => void;
+  onPlay: () => void;
 };
 
 // 未登録のときだけ出す基本手順の提案。まだ自分のものではない手順なので薄い文字と破線
-export function StandardAlgCard({ alg, wideStyle, editPath, onUse }: StandardAlgCardProps) {
+export function StandardAlgCard({ alg, wideStyle, editPath, onUse, onPlay }: StandardAlgCardProps) {
   return (
     <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-line-state bg-surface p-4">
       <p className={SECTION_LABEL_CLASS}>{copy.detail.standardAlg}</p>
@@ -25,6 +27,7 @@ export function StandardAlgCard({ alg, wideStyle, editPath, onUse }: StandardAlg
         wideStyle={wideStyle}
         className="w-full min-w-0 text-title leading-alg font-medium tracking-title text-muted"
       />
+      <PlayPill onClick={onPlay} />
       <div className="flex items-center gap-2">
         <button
           type="button"

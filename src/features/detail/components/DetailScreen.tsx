@@ -1,8 +1,10 @@
 import { ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { TopFigure } from '@/components/figures/TopFigure';
 import { IconLink } from '@/components/IconButton';
+import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { SectionHeading } from '@/components/SectionHeading';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
@@ -25,6 +27,8 @@ function PatternDetail({ preset }: PatternDetailProps) {
   const registration = findRegistration(registrations, preset.id);
   const view = recolorView(preset.view, settings);
   const editPath = `/p/${preset.id}/edit`;
+  // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
+  const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6">
@@ -68,18 +72,46 @@ function PatternDetail({ preset }: PatternDetailProps) {
             onUse={() => {
               addRegistration(preset.id, { text: preset.standardAlg, mnemonic: '', fingering: '' });
             }}
+            onPlay={() => {
+              setPlayingAlg(preset.standardAlg);
+            }}
           />
         ) : (
-          <AlgCard alg={registration.mainAlg} wideStyle={settings.wideStyle} isMain />
+          <AlgCard
+            alg={registration.mainAlg}
+            wideStyle={settings.wideStyle}
+            isMain
+            onPlay={() => {
+              setPlayingAlg(registration.mainAlg.text);
+            }}
+          />
         )}
       </section>
       {registration !== undefined && registration.altAlgs.length > 0 && (
         <section className="flex flex-col gap-2">
           <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
           {registration.altAlgs.map((alg, index) => (
-            <AlgCard key={index} alg={alg} wideStyle={settings.wideStyle} isMain={false} />
+            <AlgCard
+              key={index}
+              alg={alg}
+              wideStyle={settings.wideStyle}
+              isMain={false}
+              onPlay={() => {
+                setPlayingAlg(alg.text);
+              }}
+            />
           ))}
         </section>
+      )}
+      {playingAlg !== null && (
+        <PlayerSheet
+          algText={playingAlg}
+          category="pll"
+          settings={settings}
+          onClose={() => {
+            setPlayingAlg(null);
+          }}
+        />
       )}
     </div>
   );

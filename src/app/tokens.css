@@ -190,6 +190,8 @@
 
   --radius-*: initial;
   --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-sheet: 22px;
 
   --shadow-*: initial;
   --shadow-1: var(--elevation-1);
