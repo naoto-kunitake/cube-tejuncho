@@ -57,6 +57,12 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
+  it('選んだタブは設定に残り、読み直しても残る', () => {
+    const storage = persistedStorage();
+    createDocumentStore(storage).getState().setLastTab('oll');
+    expect(createDocumentStore(storage).getState().document.settings.lastTab).toBe('oll');
+  });
+
   it('登録して保存した文書は読み直しても残る', () => {
     const storage = persistedStorage();
     createDocumentStore(storage).getState().addRegistration('pll-ua', UA_ALG);

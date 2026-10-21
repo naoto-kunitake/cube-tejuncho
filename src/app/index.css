@@ -1,3 +1,5 @@
+/* JetBrains Mono (OFL) は同梱して配信する。外部へ取りに行かず、オフラインでも欠けない。立体は使わないので通常のウェイトだけ */
+@import '@fontsource-variable/jetbrains-mono/wght.css';
 @import 'tailwindcss';
 @import './tokens.css';
 
@@ -12,5 +14,77 @@
   body {
     background-color: var(--color-ground);
     color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-screen);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 押せるボタンは指の形に (Tailwind の既定は矢印) */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* DADS のフォーカス: 黒 4px + 黄 2px の二重 (ダークは白 + 黄)。見た目の値は変えない */
+  :focus-visible {
+    outline: 4px solid var(--color-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+  }
+}
+
+/* トップバーの上の余白 16。ホーム画面から開いたときはノッチのぶん (safe-area) を足す */
+@utility pt-bar {
+  padding-top: max(--spacing(4), env(safe-area-inset-top));
+}
+
+/* 一覧のタイルの格子。狭い幅は 3 列、広い幅はタイルの幅 (120px) で列数を決める */
+@utility grid-tiles {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  @variant md {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+/* 手順の文字: 1 動き (M2、U') を 1 語として折り返す。塊 (括弧) の中も同じ間隔。
+   gap の縦は行間、横は字間に近い役割なので、4 刻みの余白の規則の対象外 (カードの中 12 と同じ決めた例外) */
+@utility alg-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 0.45em;
+}
+@utility alg-wrap-main {
+  gap: 6px 0.45em;
+}
+@utility alg-chunk {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: inherit;
+}
+
+/* 覚え方・指使いの 2 列 (見出しの幅に合わせる)。gap は同じく余白の規則の対象外 */
+@utility note-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+}
+
+/* 横に流れるタブ列のスクロールバーは隠す (スマホアプリと同じ) */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 押せる部品の遷移 (モックと同じ値)。動きを減らす設定では付けない */
+@utility pressable {
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      background-color 0.12s,
+      border-color 0.12s,
+      box-shadow 0.12s,
+      transform 0.08s;
   }
 }

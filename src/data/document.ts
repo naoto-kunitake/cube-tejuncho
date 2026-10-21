@@ -99,3 +99,7 @@ export function createEmptyDocument(): Document {
     settings: createDefaultSettings(),
   };
 }
+
+export function findRegistration(registrations: readonly Registration[], patternId: string): Registration | undefined {
+  return registrations.find((entry) => entry.patternId === patternId);
+}

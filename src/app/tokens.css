@@ -20,6 +20,8 @@
   --line-strong: #666666;
   --line-state: #b3b3b3;
   --line-hover: #000000;
+  /* 未選択のタブの枠。線 (200) より濃く、濃い線 (600) より薄い */
+  --line-muted: #949494;
 
   --danger: #ec0000;
   --danger-hover: #a90000;
@@ -36,6 +38,12 @@
   /* テーマ色。既定は墨 (= ink-strong)。文字色は墨 / 白のうち対比が高い方 */
   --accent: #1a1a1a;
   --on-accent: #ffffff;
+  /* 塗りボタンの hover / 押下は文字色の方へ寄せる。墨なら明るく、黄のような明るいテーマ色なら暗くなり、
+     どのテーマ色でも見える方向に動く (黒へ寄せると墨では見えない)。文字ボタンはテーマ色を薄く敷く */
+  --accent-hover: color-mix(in oklab, var(--accent), var(--on-accent) 12%);
+  --accent-press: color-mix(in oklab, var(--accent), var(--on-accent) 24%);
+  --accent-tint-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  --accent-tint-press: color-mix(in srgb, var(--accent) 20%, #fff);
 
   /* 白い面の上の hover / 押下と、地の上 (丸ボタン・タブ・空の枠) の 1 段濃い hover / 押下 */
   --hover: #f2f2f2;
@@ -82,6 +90,7 @@
   --line-strong: #949494;
   --line-state: #666666;
   --line-hover: #ffffff;
+  --line-muted: #7f7f7f;
 
   --danger: #ff7171;
   --danger-hover: #ff9696;
@@ -122,6 +131,7 @@
   --color-line-strong: var(--line-strong);
   --color-line-state: var(--line-state);
   --color-line-hover: var(--line-hover);
+  --color-line-muted: var(--line-muted);
   --color-danger: var(--danger);
   --color-danger-hover: var(--danger-hover);
   --color-danger-active: var(--danger-active);
@@ -133,12 +143,17 @@
   --color-focus-ring: var(--focus-ring);
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-press: var(--accent-press);
+  --color-accent-tint-hover: var(--accent-tint-hover);
+  --color-accent-tint-press: var(--accent-tint-press);
   --color-hover: var(--hover);
   --color-press: var(--press);
   --color-hover-ground: var(--hover-ground);
   --color-press-ground: var(--press-ground);
 
-  /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す */
+  /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す。
+     input は型スケールの text-input (16) と衝突するので割り当てず、部品側で line-strong を使う */
   --color-background: var(--ground);
   --color-foreground: var(--ink);
   --color-primary: var(--accent);
@@ -146,11 +161,12 @@
   --color-destructive: var(--danger);
   --color-destructive-foreground: var(--on-danger);
   --color-border: var(--line);
-  --color-input: var(--line-strong);
   --color-ring: var(--focus);
 
   --font-sans: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* 合字は無効 (記号の 1 文字 1 文字を読ませる) */
+  --font-mono--font-feature-settings: 'liga' 0, 'calt' 0;
 
   /* 型スケール。画面の題 20 / 詳細のメイン手順 24 / 手順の入力・再生シート・記号 17 / 入力欄と題 16 /
      行・タブ・ボタン 15 / 説明・文字ボタン 14 / 区画見出し・ラベル・副文 13 / 自作タイルの手順 12 */
@@ -163,6 +179,14 @@
   --text-small: 14px;
   --text-label: 13px;
   --text-caption: 12px;
+
+  /* 字間: 題と手順の文字は .01em、件数は .02em、区画見出しは既定の widest (.1em) */
+  --tracking-title: 0.01em;
+  --tracking-count: 0.02em;
+  /* 行間: タイルの名前 1.2、手順の文字 1.3、本文 1.5 (既定の normal)、画面全体 1.55 */
+  --leading-name: 1.2;
+  --leading-alg: 1.3;
+  --leading-screen: 1.55;
 
   --radius-*: initial;
   --radius-md: 10px;
