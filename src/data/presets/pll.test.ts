@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { parseAlg } from '@/lib/alg/parse';
+import { cubingAlgOrThrow } from '@/lib/cube/alg.fixtures';
+import { applyAlg, isSolved } from '@/lib/cube/kpuzzle';
+import { caseStartState, topViewOf } from '@/lib/cube/view';
 import { arrowPaths } from '@/lib/figure/arrows';
 
 import { PLL_PRESETS, PLL_SHAPE_ORDER } from './pll';
@@ -188,4 +191,24 @@ describe('PLL_PRESETS', () => {
       expect(PLL_SHAPE_ORDER).toContain(preset.shape);
     }
   });
+});
+
+describe('PLL のプリセット', () => {
+  it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
+    '%s の基本手順を開始状態に回すと揃う',
+    async (_, preset) => {
+      const alg = cubingAlgOrThrow(preset.standardAlg);
+      expect(isSolved(applyAlg(await caseStartState(alg), alg))).toBe(true);
+    },
+  );
+
+  it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
+    '%s の図の配置は手順から計算した状態と一致する (上面の向きは 4 通りのどれか)',
+    async (_, preset) => {
+      const start = await caseStartState(cubingAlgOrThrow(preset.standardAlg));
+      // 図は AUF を正規化した向きで持つので、上面を 0〜3 回まわしたどれかと一致する
+      const views = ['', 'U', 'U2', "U'"].map((turn) => topViewOf(applyAlg(start, turn)));
+      expect(views).toContainEqual(preset.view);
+    },
+  );
 });
