@@ -34,6 +34,7 @@ describe('DetailScreen', () => {
     renderDetail('/p/pll-ua');
     expect(screen.getByRole('heading', { level: 1, name: 'Ua' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: copy.detail.useThisAlg })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.a11y.editPattern('Ua') })).toHaveAttribute('href', '/p/pll-ua/edit');
   });
 
   it('基本手順の再生を押すとシートが開く', async () => {

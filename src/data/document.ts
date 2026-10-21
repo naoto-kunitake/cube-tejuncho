@@ -5,7 +5,7 @@ import { FRONT_COLORS, TOP_COLORS } from '@/lib/figure/view';
 
 export const DOCUMENT_VERSION = 1;
 
-const AlgEntrySchema = z.object({
+export const AlgEntrySchema = z.object({
   text: z.string(),
   mnemonic: z.string(),
   fingering: z.string(),
@@ -21,6 +21,8 @@ const RegistrationSchema = z.object({
   updatedAt: z.string(),
 });
 export type Registration = z.infer<typeof RegistrationSchema>;
+// 編集画面が保存する部分 (id と日時は保存側が付ける)
+export type RegistrationData = Pick<Registration, 'recognition' | 'mainAlg' | 'altAlgs'>;
 
 const CategorySchema = z.object({
   id: z.string(),

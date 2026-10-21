@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
-import { type AlgEntry, createEmptyDocument, type Document, DOCUMENT_VERSION, DocumentSchema } from './document';
+import {
+  type AlgEntry,
+  createEmptyDocument,
+  type Document,
+  DOCUMENT_VERSION,
+  DocumentSchema,
+  type RegistrationData,
+} from './document';
 import { migrateDocument } from './migrate';
 import { createStorage, type KeyValueStorage } from './storage';
 
@@ -90,6 +97,8 @@ export type DocumentStore = {
   document: Document;
   loadIssue: LoadIssue | null;
   addRegistration: (patternId: string, mainAlg: AlgEntry) => void;
+  saveRegistration: (patternId: string, data: RegistrationData) => void;
+  removeRegistration: (patternId: string) => void;
   setLastTab: (categoryId: string) => void;
   dismissLoadIssue: () => void;
 };
@@ -125,6 +134,25 @@ export function createDocumentStore(storage: KeyValueStorage) {
               const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
               return { document: { ...state.document, registrations: [...others, registration] } };
             });
+            reportStorageIssue();
+          },
+          saveRegistration: (patternId, data) => {
+            set((state) => {
+              const now = new Date().toISOString();
+              const existing = state.document.registrations.find((entry) => entry.patternId === patternId);
+              const registration = { patternId, ...data, createdAt: existing?.createdAt ?? now, updatedAt: now };
+              const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
+              return { document: { ...state.document, registrations: [...others, registration] } };
+            });
+            reportStorageIssue();
+          },
+          removeRegistration: (patternId) => {
+            set((state) => ({
+              document: {
+                ...state.document,
+                registrations: state.document.registrations.filter((entry) => entry.patternId !== patternId),
+              },
+            }));
             reportStorageIssue();
           },
           setLastTab: (categoryId) => {

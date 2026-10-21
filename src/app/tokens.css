@@ -15,6 +15,7 @@
   --muted: #666666;
   --placeholder: #767676;
   --disabled: #b3b3b3;
+  --on-disabled: #f2f2f2;
 
   --line: #cccccc;
   --line-strong: #666666;
@@ -85,6 +86,7 @@
   /* 420 だと面 800 の上で 4.2:1 に届かないので 300 */
   --placeholder: #b3b3b3;
   --disabled: #666666;
+  --on-disabled: #4d4d4d;
 
   --line: #4d4d4d;
   --line-strong: #949494;
@@ -127,6 +129,7 @@
   --color-muted: var(--muted);
   --color-placeholder: var(--placeholder);
   --color-disabled: var(--disabled);
+  --color-on-disabled: var(--on-disabled);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-line-state: var(--line-state);
@@ -191,6 +194,7 @@
   --radius-*: initial;
   --radius-md: 10px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-sheet: 22px;
 
   --shadow-*: initial;
