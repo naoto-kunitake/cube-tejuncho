@@ -24,11 +24,19 @@
     cursor: pointer;
   }
 
-  /* DADS のフォーカス: 黒 4px + 黄 2px の二重 (ダークは白 + 黄)。見た目の値は変えない */
+  /* DADS のフォーカス: 黒 4px + 黄 2px の二重 (ダークは白 + 黄)。見た目の値は変えない (文字入力欄のポインタ操作だけ下で例外) */
   :focus-visible {
     outline: 4px solid var(--color-focus);
     outline-offset: 2px;
     box-shadow: 0 0 0 2px var(--color-focus-ring);
+  }
+
+  /* 文字入力欄はクリックで入っても :focus-visible になる。ポインタで入ったときは二重の輪を出さず、
+     枠を墨の 2px にする (枠 1 + 影 1 で太さを変えずに描く)。キーボードで入ったときは上の輪のまま */
+  html[data-input-modality='pointer'] :is(input, textarea, select):focus-visible {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
   }
 }
 

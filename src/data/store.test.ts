@@ -112,3 +112,29 @@ describe('createDocumentStore', () => {
     expect(store.getState().loadIssue).toBeNull();
   });
 });
+
+describe('saveRegistration / removeRegistration', () => {
+  const DATA = { recognition: 'r', mainAlg: UA_ALG, altAlgs: [] };
+
+  it('保存すると判断と手順が入る', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    store.getState().saveRegistration('pll-ua', DATA);
+    expect(store.getState().document.registrations).toMatchObject([{ patternId: 'pll-ua', ...DATA }]);
+  });
+
+  it('保存し直すと置き換わり、作成日時は変わらない', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    store.getState().saveRegistration('pll-ua', DATA);
+    const createdAt = store.getState().document.registrations[0]?.createdAt;
+    store.getState().saveRegistration('pll-ua', { ...DATA, recognition: 'r2' });
+    expect(store.getState().document.registrations).toHaveLength(1);
+    expect(store.getState().document.registrations[0]).toMatchObject({ recognition: 'r2', createdAt });
+  });
+
+  it('消すと文書から消える', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    store.getState().saveRegistration('pll-ua', DATA);
+    store.getState().removeRegistration('pll-ua');
+    expect(store.getState().document.registrations).toEqual([]);
+  });
+});

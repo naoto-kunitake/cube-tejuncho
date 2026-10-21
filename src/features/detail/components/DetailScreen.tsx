@@ -1,4 +1,4 @@
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -56,6 +56,7 @@ function PatternDetail({ preset }: PatternDetailProps) {
         {registration === undefined && (
           <Link
             to={editPath}
+            state={{ focus: 'recognition' }}
             className="w-full rounded-md border border-dashed border-line-state px-3 py-2.75 text-center text-body leading-normal text-muted pressable hover:border-line-strong hover:bg-hover-ground"
           >
             {copy.detail.writeRecognition}
@@ -133,6 +134,11 @@ export function DetailScreen() {
             {preset === undefined ? copy.detail.notFound : preset.name}
           </h1>
         </div>
+        {preset !== undefined && (
+          <IconLink to={`/p/${preset.id}/edit`} label={copy.a11y.editPattern(preset.name)}>
+            <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
+          </IconLink>
+        )}
       </TopBar>
       {preset !== undefined && <PatternDetail preset={preset} />}
     </section>

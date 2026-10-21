@@ -1,11 +1,10 @@
 import { Link } from 'react-router';
 
 import { AlgText } from '@/components/AlgText';
+import { Button, buttonVariants } from '@/components/Button';
 import { SECTION_LABEL_CLASS } from '@/components/SectionHeading';
-import { PILL_TAP_AREA_CLASS, TEXT_PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import type { WideStyle } from '@/lib/alg/format';
-import { cn } from '@/lib/utils';
 
 import { PlayPill } from './PlayPill';
 
@@ -29,23 +28,10 @@ export function StandardAlgCard({ alg, wideStyle, editPath, onUse, onPlay }: Sta
       />
       <PlayPill onClick={onPlay} />
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onUse}
-          className={cn(
-            PILL_TAP_AREA_CLASS,
-            'inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-accent bg-accent px-4 text-body font-bold whitespace-nowrap text-on-accent pressable hover:bg-accent-hover active:scale-98 active:bg-accent-press',
-          )}
-        >
+        <Button variant="primary" onClick={onUse}>
           {copy.detail.useThisAlg}
-        </button>
-        <Link
-          to={editPath}
-          className={cn(
-            TEXT_PILL_TAP_AREA_CLASS,
-            'inline-flex min-h-9 items-center rounded-full px-3 text-small font-medium whitespace-nowrap text-accent pressable hover:bg-accent-tint-hover active:bg-accent-tint-press',
-          )}
-        >
+        </Button>
+        <Link to={editPath} state={{ focus: 'alg' }} className={buttonVariants({ variant: 'text' })}>
           {copy.detail.registerMyself}
         </Link>
       </div>
