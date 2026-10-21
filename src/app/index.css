@@ -32,6 +32,11 @@
   }
 }
 
+/* トップバーの上の余白 16。ホーム画面から開いたときはノッチのぶん (safe-area) を足す */
+@utility pt-bar {
+  padding-top: max(--spacing(4), env(safe-area-inset-top));
+}
+
 /* 一覧のタイルの格子。狭い幅は 3 列、広い幅はタイルの幅 (120px) で列数を決める */
 @utility grid-tiles {
   grid-template-columns: repeat(3, minmax(0, 1fr));
