@@ -1,3 +1,4 @@
+import { OLL_PRESETS, type OllPreset } from './oll';
 import { PLL_PRESETS, type PllPreset } from './pll';
 
 export const PRESET_CATEGORY_IDS = ['pll', 'oll', 'f2l'] as const;
@@ -6,9 +7,9 @@ export type PresetCategoryId = (typeof PRESET_CATEGORY_IDS)[number];
 type PresetBase = Pick<PllPreset, 'id' | 'name' | 'standardAlg' | 'view'>;
 
 // 画面が扱うプリセット。どのカテゴリのものかを持ち、矢印と手がかりの図は PLL だけ。
-// OLL と F2L はデータがまだないので共通の部分だけ (足すときにそのカテゴリの型に置き換える)
+// F2L はデータがまだないので共通の部分だけ (足すときにそのカテゴリの型に置き換える)
 export type Preset =
-  (PllPreset & { category: 'pll' }) | (PresetBase & { category: 'oll' }) | (PresetBase & { category: 'f2l' });
+  (PllPreset & { category: 'pll' }) | (OllPreset & { category: 'oll' }) | (PresetBase & { category: 'f2l' });
 
 function withCategory<T extends PresetBase, C extends PresetCategoryId>(
   presets: readonly T[],
@@ -17,10 +18,10 @@ function withCategory<T extends PresetBase, C extends PresetCategoryId>(
   return presets.map((preset) => ({ ...preset, category }));
 }
 
-// カテゴリごとのプリセット。OLL と F2L はまだない
+// カテゴリごとのプリセット。F2L はまだない
 const CATALOG: Record<PresetCategoryId, readonly Preset[]> = {
   pll: withCategory(PLL_PRESETS, 'pll'),
-  oll: [],
+  oll: withCategory(OLL_PRESETS, 'oll'),
   f2l: [],
 };
 

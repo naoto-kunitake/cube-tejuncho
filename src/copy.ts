@@ -1,4 +1,5 @@
 import type { PresetCategoryId } from '@/data/presets/catalog';
+import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
@@ -10,7 +11,9 @@ type Copy = {
     categories: Record<PresetCategoryId, string>;
     registeredCount: (registered: number, total: number) => string;
     pllShapes: Record<PllShape, string>;
-    standardOrder: string;
+    ollShapes: Record<OllShape, string>;
+    // 種類ごとでないときの見出し (PLL は標準順、OLL / F2L は番号順)
+    standardOrder: Record<PresetCategoryId, string>;
     addPattern: string;
     noAlg: string;
   };
@@ -146,7 +149,25 @@ export const copy = {
       bar1: '3連1つ',
       none: 'ヘッドライト・3連なし',
     },
-    standardOrder: '標準順',
+    // OLL の呼び名は日本語圏で複数の出典がある語を優先し (だーおか・cubequest)、定訳のない群は説明的な語
+    ollShapes: {
+      cross: '十字',
+      cornersOriented: 'コーナー揃い',
+      t: 'T型',
+      line: 'I型',
+      c: 'C型',
+      z: 'Z型',
+      bigL: 'L字型',
+      p: 'P型',
+      square: 'スクエア',
+      lightning: 'サンダー',
+      fish: 'フィッシュ',
+      w: 'W型',
+      smallL: '小L型',
+      other: 'その他',
+      dot: 'ドット',
+    },
+    standardOrder: { pll: '標準順', oll: '番号順', f2l: '番号順' },
     addPattern: 'パターンを追加',
     noAlg: '手順なし',
   },

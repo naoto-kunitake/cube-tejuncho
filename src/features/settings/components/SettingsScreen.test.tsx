@@ -53,7 +53,8 @@ describe('SettingsScreen', () => {
   it('カテゴリの区画にプリセットの行と追加の行がある', () => {
     renderSettings();
     expect(screen.getByText(copy.list.categories.pll)).toBeInTheDocument();
-    expect(screen.getByText(copy.settings.preset)).toBeInTheDocument();
+    expect(screen.getByText(copy.list.categories.oll)).toBeInTheDocument();
+    expect(screen.getAllByText(copy.settings.preset)).toHaveLength(2);
     expect(screen.getByRole('button', { name: copy.settings.addCategory })).toBeInTheDocument();
   });
 

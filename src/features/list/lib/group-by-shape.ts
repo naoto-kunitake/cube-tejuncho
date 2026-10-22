@@ -1,5 +1,6 @@
 import { copy } from '@/copy';
 import type { Preset, PresetCategoryId } from '@/data/presets/catalog';
+import { OLL_SHAPE_ORDER } from '@/data/presets/oll';
 import { PLL_SHAPE_ORDER } from '@/data/presets/pll';
 
 export type ShapeSection = { label: string; presets: readonly Preset[] };
@@ -12,6 +13,7 @@ function shapeHeadingsOf(category: PresetCategoryId): readonly ShapeHeading[] {
     case 'pll':
       return PLL_SHAPE_ORDER.map((shape) => ({ shape, label: copy.list.pllShapes[shape] }));
     case 'oll':
+      return OLL_SHAPE_ORDER.map((shape) => ({ shape, label: copy.list.ollShapes[shape] }));
     case 'f2l':
       return [];
   }
@@ -23,7 +25,7 @@ export function groupByShape(
   sortOrder: 'shape' | 'standard',
 ): ShapeSection[] {
   if (sortOrder === 'standard') {
-    return [{ label: copy.list.standardOrder, presets }];
+    return [{ label: copy.list.standardOrder[category], presets }];
   }
   return shapeHeadingsOf(category)
     .map((heading) => ({

@@ -5,7 +5,7 @@ import { ALL_PRESETS, hasPresets, presetsOf } from './catalog';
 describe('hasPresets', () => {
   it('データがあるプリセットのカテゴリだけ true', () => {
     expect(hasPresets('pll')).toBe(true);
-    expect(hasPresets('oll')).toBe(false);
+    expect(hasPresets('oll')).toBe(true);
     expect(hasPresets('f2l')).toBe(false);
   });
 
