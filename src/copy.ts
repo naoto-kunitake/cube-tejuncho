@@ -47,6 +47,11 @@ type Copy = {
     restoredDraft: string;
     removedRegistration: (name: string) => string;
   };
+  keypad: {
+    backspace: string;
+    clear: string;
+    keyboard: string;
+  };
   dialog: {
     cancel: string;
   };
@@ -74,6 +79,7 @@ type Copy = {
     edit: string;
     editPattern: (name: string) => string;
     closeEdit: string;
+    keypad: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
     cueFigure: (name: string) => string;
     playerSheet: string;
@@ -153,6 +159,11 @@ export const copy = {
     restoredDraft: '書きかけを復元しました',
     removedRegistration: (name) => `${name} の登録を消しました`,
   },
+  keypad: {
+    backspace: '削除',
+    clear: '全消去',
+    keyboard: 'キーボード',
+  },
   dialog: {
     cancel: 'キャンセル',
   },
@@ -180,6 +191,7 @@ export const copy = {
     edit: '編集',
     editPattern: (name) => `${name} を編集`,
     closeEdit: '閉じる',
+    keypad: '手順キーパッド',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
     cueFigure: (name) => `${name} の判断の手がかり`,
     playerSheet: '手順の再生',

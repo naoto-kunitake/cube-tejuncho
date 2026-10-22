@@ -13,13 +13,28 @@ type AlgEditCardProps = {
   index: number;
   card: EditCard;
   inputRef: (element: HTMLInputElement | null) => void;
+  // 専用キーパッドで入力する間は端末のキーボードを出さない
+  usesKeypad: boolean;
   onChange: (card: EditCard) => void;
+  onFocus: () => void;
+  // 欄を離れたときに呼ぶ。false を返したら離れていない扱い (キーボードの切り替えで焦点を入れ直す間)
+  onBlur: () => boolean;
   onMakeMain: () => void;
   onDelete: () => void;
 };
 
 // 手順 1 枚ぶんの編集 (メイン手順もほかの手順も同じ構造)。欄を全幅にするため縦積み
-export function AlgEditCard({ index, card, inputRef, onChange, onMakeMain, onDelete }: AlgEditCardProps) {
+export function AlgEditCard({
+  index,
+  card,
+  inputRef,
+  usesKeypad,
+  onChange,
+  onFocus,
+  onBlur,
+  onMakeMain,
+  onDelete,
+}: AlgEditCardProps) {
   const isMain = index === 0;
   const error = algErrorOf(card.text);
   // 検証は欄を離れたときと保存時 (打鍵ごとに赤くしない)。保存済みの手順が読めないときは開いた時点で示す。直した瞬間に消す
@@ -58,6 +73,7 @@ export function AlgEditCard({ index, card, inputRef, onChange, onMakeMain, onDel
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"
+        inputMode={usesKeypad ? 'none' : undefined}
         aria-invalid={shownError !== null}
         aria-describedby={shownError === null ? undefined : errorId}
         className={cn(
@@ -68,8 +84,11 @@ export function AlgEditCard({ index, card, inputRef, onChange, onMakeMain, onDel
         onChange={(event) => {
           onChange({ ...card, text: event.target.value });
         }}
+        onFocus={onFocus}
         onBlur={() => {
-          setHasLeft(true);
+          if (onBlur()) {
+            setHasLeft(true);
+          }
         }}
       />
       {shownError !== null && (
