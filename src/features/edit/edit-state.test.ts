@@ -20,10 +20,11 @@ const ENTRY_B = { text: "R U'", mnemonic: '', fingering: 'b' };
 const CARD_A = newCard(ENTRY_A);
 const CARD_B = newCard(ENTRY_B);
 const EMPTY = newCard();
+const FIELDS = { name: '', categoryId: '' };
 
 describe('formFrom', () => {
   it('未登録なら空のカード 1 枚', () => {
-    const form = formFrom(undefined);
+    const form = formFrom(undefined, FIELDS);
     expect(form.recognition).toBe('');
     expect(entriesOf(form.cards)).toEqual([EMPTY_CARD]);
   });
@@ -37,14 +38,15 @@ describe('formFrom', () => {
       createdAt: '',
       updatedAt: '',
     };
-    const form = formFrom(registration);
+    const form = formFrom(registration, FIELDS);
+    expect(form.name).toBe('');
     expect(entriesOf(form.cards)).toEqual([ENTRY_A, ENTRY_B]);
     expect(new Set(form.cards.map((card) => card.id)).size).toBe(2);
   });
 });
 
 describe('formSnapshot', () => {
-  const base = { recognition: 'r', cards: [CARD_A] };
+  const base = { ...FIELDS, recognition: 'r', cards: [CARD_A] };
 
   it('空のカードを足しただけなら同じ', () => {
     expect(formSnapshot({ ...base, cards: [CARD_A, EMPTY] })).toBe(formSnapshot(base));
@@ -61,16 +63,24 @@ describe('formSnapshot', () => {
   it('内容が違えば別', () => {
     expect(formSnapshot({ ...base, recognition: 'x' })).not.toBe(formSnapshot(base));
   });
+
+  it('名前が違えば別', () => {
+    expect(formSnapshot({ ...base, name: 'x' })).not.toBe(formSnapshot(base));
+  });
 });
 
 describe('registrationDataFrom', () => {
   it('手順のあるカードの 1 枚目がメインで、残りがほかの手順', () => {
-    const form = { recognition: ' r ', cards: [newCard({ ...EMPTY_CARD, mnemonic: 'memo' }), CARD_A, CARD_B] };
+    const form = {
+      ...FIELDS,
+      recognition: ' r ',
+      cards: [newCard({ ...EMPTY_CARD, mnemonic: 'memo' }), CARD_A, CARD_B],
+    };
     expect(registrationDataFrom(form)).toEqual({ recognition: 'r', mainAlg: ENTRY_A, altAlgs: [ENTRY_B] });
   });
 
   it('判断だけでも残す', () => {
-    expect(registrationDataFrom({ recognition: 'r', cards: [EMPTY] })).toEqual({
+    expect(registrationDataFrom({ ...FIELDS, recognition: 'r', cards: [EMPTY] })).toEqual({
       recognition: 'r',
       mainAlg: EMPTY_CARD,
       altAlgs: [],
@@ -78,7 +88,7 @@ describe('registrationDataFrom', () => {
   });
 
   it('何もなければ null', () => {
-    expect(registrationDataFrom({ recognition: ' ', cards: [EMPTY] })).toBeNull();
+    expect(registrationDataFrom({ ...FIELDS, recognition: ' ', cards: [EMPTY] })).toBeNull();
   });
 });
 
@@ -90,13 +100,15 @@ describe('algErrorOf', () => {
 
   it('読めない記号は誤り', () => {
     expect(algErrorOf('R Q')?.kind).toBe('unknownSymbol');
-    expect(hasInvalidCard({ recognition: '', cards: [CARD_A, newCard({ ...EMPTY_CARD, text: '(R' })] })).toBe(true);
+    expect(
+      hasInvalidCard({ ...FIELDS, recognition: '', cards: [CARD_A, newCard({ ...EMPTY_CARD, text: '(R' })] }),
+    ).toBe(true);
   });
 });
 
 describe('standardAlgToAdd', () => {
   it('表記の揺れがあっても同じ手順があれば出さない', () => {
-    const form = { recognition: '', cards: [newCard({ ...EMPTY_CARD, text: "R　U　R'" })] };
+    const form = { ...FIELDS, recognition: '', cards: [newCard({ ...EMPTY_CARD, text: "R　U　R'" })] };
     expect(standardAlgToAdd(form, "R U R'")).toBeNull();
     expect(standardAlgToAdd(form, "R U2 R'")).toBe("R U2 R'");
   });

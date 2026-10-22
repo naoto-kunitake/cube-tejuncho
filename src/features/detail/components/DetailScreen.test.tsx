@@ -47,4 +47,42 @@ describe('DetailScreen', () => {
     renderDetail('/p/unknown');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();
   });
+
+  it('自作パターンは名前とメイン手順を出し、手順がなければ登録の空枠を出す', () => {
+    const document = createEmptyDocument();
+    document.categories = [{ id: 'c1', name: 'COLL' }];
+    document.patterns = [
+      { id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' },
+      { id: 'p2', categoryId: 'c1', name: 'Empty', createdAt: '', updatedAt: '' },
+    ];
+    document.registrations = [
+      {
+        patternId: 'p1',
+        recognition: '',
+        mainAlg: { text: "R U R' U R U2 R'", mnemonic: '', fingering: '' },
+        altAlgs: [],
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        patternId: 'p2',
+        recognition: '判断だけ',
+        mainAlg: { text: '', mnemonic: '', fingering: '' },
+        altAlgs: [],
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+    useDocumentStore.setState({ document });
+    const { unmount } = renderDetail('/p/p1');
+    expect(screen.getByRole('heading', { level: 1, name: 'Sune' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: copy.detail.useThisAlg })).not.toBeInTheDocument();
+    expect(screen.getAllByText("R U R' U R U2 R'").length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: copy.detail.writeRecognition })).toBeInTheDocument();
+    unmount();
+    renderDetail('/p/p2');
+    expect(screen.getByText('判断だけ')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: copy.detail.writeRecognition })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.detail.registerAlg })).toHaveAttribute('href', '/p/p2/edit');
+  });
 });

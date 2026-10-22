@@ -10,6 +10,8 @@ type Copy = {
     registeredCount: (registered: number, total: number) => string;
     pllShapes: Record<PllShape, string>;
     standardOrder: string;
+    addPattern: string;
+    noAlg: string;
   };
   detail: {
     notFound: string;
@@ -20,12 +22,20 @@ type Copy = {
     useThisAlg: string;
     registerMyself: string;
     writeRecognition: string;
+    registerAlg: string;
     mnemonic: string;
     fingering: string;
   };
   edit: {
     title: (name: string) => string;
+    newTitle: string;
     save: string;
+    name: string;
+    category: string;
+    deletePattern: string;
+    deletePatternTitle: (name: string) => string;
+    deletePatternAction: string;
+    deletedPattern: (name: string) => string;
     recognition: string;
     recognitionHint: (runs: string[]) => string;
     sideRun: (side: SideName, run: SideRun) => string;
@@ -60,6 +70,15 @@ type Copy = {
   };
   settings: {
     title: string;
+    categories: string;
+    preset: string;
+    patternCount: (count: number) => string;
+    addCategory: string;
+    newCategoryTitle: string;
+    categoryName: string;
+    categoryNamePlaceholder: string;
+    duplicateCategory: string;
+    add: string;
   };
   notation: {
     title: string;
@@ -80,6 +99,7 @@ type Copy = {
     editPattern: (name: string) => string;
     closeEdit: string;
     keypad: string;
+    categorySheet: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
     cueFigure: (name: string) => string;
     playerSheet: string;
@@ -109,6 +129,8 @@ export const copy = {
       none: 'ヘッドライト・3連なし',
     },
     standardOrder: '標準順',
+    addPattern: 'パターンを追加',
+    noAlg: '手順なし',
   },
   detail: {
     notFound: 'パターンが見つかりません',
@@ -119,12 +141,20 @@ export const copy = {
     useThisAlg: 'この手順を使う',
     registerMyself: '自分で登録',
     writeRecognition: '判断を書く',
+    registerAlg: '手順を登録',
     mnemonic: '覚え方',
     fingering: '指使い',
   },
   edit: {
     title: (name) => `${name} を編集`,
+    newTitle: '新しいパターン',
     save: '保存',
+    name: '名前',
+    category: 'カテゴリ',
+    deletePattern: 'このパターンを削除',
+    deletePatternTitle: (name) => `「${name}」を削除`,
+    deletePatternAction: '削除',
+    deletedPattern: (name) => `「${name}」を削除しました`,
     recognition: '判断',
     recognitionHint: (runs) => `例: ${runs.join('、')}`,
     sideRun: (side, run) => `${SIDE_NAMES[side]}に${SIDE_RUNS[run]}`,
@@ -172,6 +202,15 @@ export const copy = {
   },
   settings: {
     title: '設定',
+    categories: 'カテゴリ',
+    preset: 'プリセット',
+    patternCount: (count) => `${count}件`,
+    addCategory: 'カテゴリを追加',
+    newCategoryTitle: '新しいカテゴリ',
+    categoryName: '名前',
+    categoryNamePlaceholder: '例: F2L、COLL、練習中',
+    duplicateCategory: '同じ名前のカテゴリがあります',
+    add: '追加',
   },
   notation: {
     title: '回転記号',
@@ -192,6 +231,7 @@ export const copy = {
     editPattern: (name) => `${name} を編集`,
     closeEdit: '閉じる',
     keypad: '手順キーパッド',
+    categorySheet: 'カテゴリ',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
     cueFigure: (name) => `${name} の判断の手がかり`,
     playerSheet: '手順の再生',

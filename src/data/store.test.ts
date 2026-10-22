@@ -138,3 +138,48 @@ describe('saveRegistration / removeRegistration', () => {
     expect(store.getState().document.registrations).toEqual([]);
   });
 });
+
+describe('カテゴリと自作パターン', () => {
+  const FIELDS = { name: 'My Alg', categoryId: 'cat1' };
+  const DATA = { recognition: 'r', mainAlg: UA_ALG, altAlgs: [] };
+
+  it('カテゴリを足すとタブの並びの末尾にも入る', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    const id = store.getState().addCategory('COLL');
+    expect(store.getState().document.categories).toEqual([{ id, name: 'COLL' }]);
+    expect(store.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l', id]);
+  });
+
+  it('自作パターンを登録つきで足すと両方が入る', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    const id = store.getState().addCustomPattern(FIELDS, DATA);
+    expect(store.getState().document.patterns).toMatchObject([{ id, ...FIELDS }]);
+    expect(store.getState().document.registrations).toMatchObject([{ patternId: id, ...DATA }]);
+  });
+
+  it('登録なしで足すとパターンだけが入る', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    store.getState().addCustomPattern(FIELDS, null);
+    expect(store.getState().document.registrations).toEqual([]);
+  });
+
+  it('名前とカテゴリを変えられる', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    const id = store.getState().addCustomPattern(FIELDS, null);
+    store.getState().updateCustomPattern(id, { name: 'Renamed', categoryId: 'cat2' });
+    expect(store.getState().document.patterns[0]).toMatchObject({ id, name: 'Renamed', categoryId: 'cat2' });
+  });
+
+  it('消すと登録とピン留めも消え、丸ごと戻せる', () => {
+    const store = createDocumentStore(createMemoryStorage());
+    const id = store.getState().addCustomPattern(FIELDS, DATA);
+    store.setState((state) => ({ document: { ...state.document, pinned: [id] } }));
+    const before = store.getState().document;
+    store.getState().removeCustomPattern(id);
+    expect(store.getState().document.patterns).toEqual([]);
+    expect(store.getState().document.registrations).toEqual([]);
+    expect(store.getState().document.pinned).toEqual([]);
+    store.getState().replaceDocument(before);
+    expect(store.getState().document).toEqual(before);
+  });
+});

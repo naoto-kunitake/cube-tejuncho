@@ -1,14 +1,14 @@
-import { useLocation, useParams } from 'react-router';
+import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { findRegistration } from '@/data/document';
-import { PLL_PRESETS } from '@/data/presets/pll';
+import { findPattern } from '@/data/patterns';
 import { useDocumentStore } from '@/data/store';
 
-import { EditForm, type FocusTarget } from './EditForm';
+import { EditForm, type EditTarget, type FocusTarget } from './EditForm';
 
-// 詳細の空枠 (判断を書く / 自分で登録) から来たときは、その欄に焦点を当てる。履歴の state で受け取り URL には持たない
+// 詳細の空枠 (判断を書く / 手順を登録) から来たときは、その欄に焦点を当てる。履歴の state で受け取り URL には持たない
 function focusTargetOf(state: unknown): FocusTarget | null {
   if (typeof state !== 'object' || state === null || !('focus' in state)) {
     return null;
@@ -23,15 +23,15 @@ function focusTargetOf(state: unknown): FocusTarget | null {
 }
 
 export function EditScreen() {
-  const { id = '' } = useParams();
+  const { id } = useParams();
   const location = useLocation();
-  const preset = PLL_PRESETS.find((entry) => entry.id === id);
-  const settings = useDocumentStore((state) => state.document.settings);
-  const registrations = useDocumentStore((state) => state.document.registrations);
+  const [searchParams] = useSearchParams();
+  const document = useDocumentStore((state) => state.document);
+  const target = targetOf(id, searchParams.get('category'), document.patterns, document.categories);
 
   return (
     <section aria-label={copy.a11y.edit} className="mx-auto flex w-full max-w-140 flex-col">
-      {preset === undefined ? (
+      {target === undefined ? (
         <TopBar>
           <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
             {copy.detail.notFound}
@@ -39,13 +39,30 @@ export function EditScreen() {
         </TopBar>
       ) : (
         <EditForm
-          key={preset.id}
-          preset={preset}
-          registration={findRegistration(registrations, preset.id)}
-          settings={settings}
+          key={id ?? 'new'}
+          target={target}
+          registration={id === undefined ? undefined : findRegistration(document.registrations, id)}
+          categories={document.categories}
+          settings={document.settings}
           initialFocus={focusTargetOf(location.state)}
         />
       )}
     </section>
   );
+}
+
+// /p/new は新規 (カテゴリは検索パラメータ。なければ最初の利用者のカテゴリ)。それ以外はプリセットか自作の編集
+function targetOf(
+  id: string | undefined,
+  categoryParam: string | null,
+  patterns: Parameters<typeof findPattern>[0]['patterns'],
+  categories: readonly { id: string }[],
+): EditTarget | undefined {
+  if (id === undefined) {
+    const categoryId = categories.some((category) => category.id === categoryParam)
+      ? categoryParam
+      : (categories[0]?.id ?? null);
+    return categoryId === null ? undefined : { kind: 'new', categoryId };
+  }
+  return findPattern({ patterns }, id);
 }

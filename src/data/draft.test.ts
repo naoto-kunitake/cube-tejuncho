@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { createDraftStore, draftKey } from './draft';
 import { createMemoryStorage } from './storage';
 
-const DATA = { recognition: '前にヘッドライト', cards: [{ text: 'R U', mnemonic: '', fingering: '' }] };
+const DATA = {
+  name: '',
+  categoryId: '',
+  recognition: '前にヘッドライト',
+  cards: [{ text: 'R U', mnemonic: '', fingering: '' }],
+};
 
 describe('createDraftStore', () => {
   it('書いた下書きを同じ鍵で読み戻す', () => {
@@ -27,5 +32,12 @@ describe('createDraftStore', () => {
     expect(store.read('pll-ua')).toBeNull();
     storage.setItem(draftKey('pll-ua'), JSON.stringify({ version: 99, ...DATA }));
     expect(store.read('pll-ua')).toBeNull();
+  });
+
+  it('名前とカテゴリのない古い下書きは空で補う', () => {
+    const storage = createMemoryStorage();
+    const store = createDraftStore(storage);
+    storage.setItem(draftKey('pll-ua'), JSON.stringify({ version: 1, recognition: 'r', cards: [] }));
+    expect(store.read('pll-ua')).toEqual({ name: '', categoryId: '', recognition: 'r', cards: [] });
   });
 });
