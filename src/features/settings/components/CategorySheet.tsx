@@ -1,10 +1,8 @@
-import { X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { Field, INPUT_CLASS } from '@/components/Field';
-import { IconButton } from '@/components/IconButton';
-import { Sheet } from '@/components/Sheet';
+import { Sheet, SheetHeader } from '@/components/Sheet';
 import { copy } from '@/copy';
 import { hasCategoryNamed } from '@/data/patterns';
 import { cn } from '@/lib/utils';
@@ -17,7 +15,7 @@ type CategorySheetProps = {
   onClose: () => void;
 };
 
-// 新しいカテゴリの名前を 1 つ聞く小さなシート。題は左、× は右。同じ名前があれば赤い 1 行で知らせ、追加できない
+// 新しいカテゴリの名前を 1 つ聞く小さなシート。同じ名前があれば赤い 1 行で知らせ、追加できない
 export function CategorySheet({ existingNames, onAdd, onClose }: CategorySheetProps) {
   const [name, setName] = useState('');
   const trimmed = name.trim();
@@ -26,14 +24,7 @@ export function CategorySheet({ existingNames, onAdd, onClose }: CategorySheetPr
 
   return (
     <Sheet label={copy.a11y.categorySheet} onClose={onClose}>
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="min-w-0 flex-1 truncate text-input font-bold text-ink-strong">
-          {copy.settings.newCategoryTitle}
-        </h2>
-        <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
-          <X size={22} strokeWidth={1.8} aria-hidden="true" />
-        </IconButton>
-      </div>
+      <SheetHeader title={copy.settings.newCategoryTitle} onClose={onClose} />
       <Field id="category-name" label={copy.settings.categoryName}>
         <input
           id="category-name"
