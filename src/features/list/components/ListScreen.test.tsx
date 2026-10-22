@@ -44,6 +44,19 @@ describe('ListScreen', () => {
     expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(21);
   });
 
+  it('OLL のタブには 57 種のタイルが 15 の形の見出しで並ぶ', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(57);
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(15);
+    expect(screen.getByText(copy.list.registeredCount(0, 57))).toBeInTheDocument();
+  });
+
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
     const user = userEvent.setup();
     withCustomCategory();

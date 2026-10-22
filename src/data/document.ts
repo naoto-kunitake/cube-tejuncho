@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { WIDE_STYLES } from '@/lib/alg/format';
 import { FRONT_COLORS, TOP_COLORS } from '@/lib/figure/view';
 
+import { PRESET_CATEGORY_IDS } from './presets/catalog';
+
 export const DOCUMENT_VERSION = 1;
 
 export const AlgEntrySchema = z.object({
@@ -69,8 +71,6 @@ export const DocumentSchema = z.object({
   settings: SettingsSchema,
 });
 export type Document = z.infer<typeof DocumentSchema>;
-
-const PRESET_CATEGORY_IDS = ['pll', 'oll', 'f2l'] as const;
 
 function createDefaultSettings(): Settings {
   return {

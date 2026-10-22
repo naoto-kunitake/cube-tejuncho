@@ -1,13 +1,11 @@
 import type { CustomPattern, Document } from './document';
-import { PLL_PRESETS, type PllPreset } from './presets/pll';
-
-export const PRESET_CATEGORY_ID = 'pll';
+import { ALL_PRESETS, type Preset } from './presets/catalog';
 
 // 画面が扱うパターンの参照。プリセットはコードに、自作は文書にある
-export type PatternRef = { kind: 'preset'; preset: PllPreset } | { kind: 'custom'; pattern: CustomPattern };
+export type PatternRef = { kind: 'preset'; preset: Preset } | { kind: 'custom'; pattern: CustomPattern };
 
 export function findPattern(document: Pick<Document, 'patterns'>, id: string): PatternRef | undefined {
-  const preset = PLL_PRESETS.find((entry) => entry.id === id);
+  const preset = ALL_PRESETS.find((entry) => entry.id === id);
   if (preset !== undefined) {
     return { kind: 'preset', preset };
   }

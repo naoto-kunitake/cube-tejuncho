@@ -43,6 +43,13 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('dialog', { name: copy.a11y.playerSheet })).toBeInTheDocument();
   });
 
+  it('OLL の詳細には手がかりの図を出さない', () => {
+    renderDetail('/p/oll-21');
+    expect(screen.getByRole('heading', { level: 1, name: 'OLL 21' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'OLL 21' })).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: copy.a11y.cueFigure('OLL 21') })).not.toBeInTheDocument();
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderDetail('/p/unknown');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();

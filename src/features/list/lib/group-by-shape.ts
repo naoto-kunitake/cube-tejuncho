@@ -1,14 +1,36 @@
 import { copy } from '@/copy';
-import { PLL_SHAPE_ORDER, type PllPreset } from '@/data/presets/pll';
+import type { Preset, PresetCategoryId } from '@/data/presets/catalog';
+import { OLL_SHAPE_ORDER } from '@/data/presets/oll';
+import { PLL_SHAPE_ORDER } from '@/data/presets/pll';
 
-export type ShapeSection = { label: string; presets: readonly PllPreset[] };
+export type ShapeSection = { label: string; presets: readonly Preset[] };
 
-export function groupByShape(presets: readonly PllPreset[], sortOrder: 'shape' | 'standard'): ShapeSection[] {
-  if (sortOrder === 'standard') {
-    return [{ label: copy.list.standardOrder, presets }];
+type ShapeHeading = { shape: string; label: string };
+
+// 形の見出しの並びと名前。形の鍵はカテゴリごとに別の型なので、ここで文字列に落として突き合わせる
+function shapeHeadingsOf(category: PresetCategoryId): readonly ShapeHeading[] {
+  switch (category) {
+    case 'pll':
+      return PLL_SHAPE_ORDER.map((shape) => ({ shape, label: copy.list.pllShapes[shape] }));
+    case 'oll':
+      return OLL_SHAPE_ORDER.map((shape) => ({ shape, label: copy.list.ollShapes[shape] }));
+    case 'f2l':
+      return [];
   }
-  return PLL_SHAPE_ORDER.map((shape) => ({
-    label: copy.list.pllShapes[shape],
-    presets: presets.filter((preset) => preset.shape === shape),
-  })).filter((section) => section.presets.length > 0);
+}
+
+export function groupByShape(
+  category: PresetCategoryId,
+  presets: readonly Preset[],
+  sortOrder: 'shape' | 'standard',
+): ShapeSection[] {
+  if (sortOrder === 'standard') {
+    return [{ label: copy.list.standardOrder[category], presets }];
+  }
+  return shapeHeadingsOf(category)
+    .map((heading) => ({
+      label: heading.label,
+      presets: presets.filter((preset) => 'shape' in preset && preset.shape === heading.shape),
+    }))
+    .filter((section) => section.presets.length > 0);
 }

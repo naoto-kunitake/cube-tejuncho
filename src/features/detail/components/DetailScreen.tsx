@@ -10,7 +10,7 @@ import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { type CustomPattern, findRegistration, type Registration, type Settings } from '@/data/document';
 import { findPattern, patternName } from '@/data/patterns';
-import type { PllPreset } from '@/data/presets/pll';
+import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { cueView, recolorView } from '@/lib/figure/view';
 
@@ -22,7 +22,7 @@ const EMPTY_SLOT_CLASS =
   'w-full rounded-md border border-dashed border-line-state px-3 py-2.75 text-center text-body leading-normal text-muted pressable hover:border-line-strong hover:bg-hover-ground';
 
 type PatternDetailProps = {
-  preset: PllPreset;
+  preset: Preset;
 };
 
 function PatternDetail({ preset }: PatternDetailProps) {
@@ -31,6 +31,9 @@ function PatternDetail({ preset }: PatternDetailProps) {
   const addRegistration = useDocumentStore((state) => state.addRegistration);
   const registration = findRegistration(registrations, preset.id);
   const view = recolorView(preset.view, settings);
+  // 入れ替えの矢印と手がかりの図は PLL だけ (OLL は上面の向きで見分ける)
+  const arrows = preset.category === 'pll' && settings.showArrows ? preset.arrows : [];
+  const hasCueFigure = preset.category === 'pll' && settings.showCueFigure;
   const editPath = `/p/${preset.id}/edit`;
   // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
   const [playingAlg, setPlayingAlg] = useState<string | null>(null);
@@ -41,10 +44,10 @@ function PatternDetail({ preset }: PatternDetailProps) {
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {/* SVG は viewBox 86 のうち外側 4 (4.65%) が空き。負の余白で打ち消し、ステッカーの外周をカードの余白 16 に揃える。
             2 枚: ステッカー幅 138 × 2 + 間 24 = カード内側 300 → SVG 幅 152、負の余白 7。1 枚: 240 → 11 */}
-        {settings.showCueFigure ? (
+        {hasCueFigure ? (
           <div className="flex w-full justify-center gap-6">
             <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+              <TopFigure view={view} arrows={arrows} label={preset.name} />
             </div>
             <div className="-m-1.75 w-38 flex-none">
               <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
@@ -52,7 +55,7 @@ function PatternDetail({ preset }: PatternDetailProps) {
           </div>
         ) : (
           <div className="-my-2.75 w-full max-w-60">
-            <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+            <TopFigure view={view} arrows={arrows} label={preset.name} />
           </div>
         )}
         {registration !== undefined && registration.recognition !== '' && (
@@ -108,7 +111,7 @@ function PatternDetail({ preset }: PatternDetailProps) {
       {playingAlg !== null && (
         <PlayerSheet
           algText={playingAlg}
-          category="pll"
+          category={preset.category}
           settings={settings}
           onClose={() => {
             setPlayingAlg(null);
