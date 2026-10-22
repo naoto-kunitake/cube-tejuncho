@@ -1,8 +1,9 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
@@ -20,11 +21,33 @@ function renderSettings() {
   );
 }
 
+const UA_ALG = { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' };
+
+function fileOf(content: string): File {
+  return new File([content], 'a.json', { type: 'application/json' });
+}
+
+function fileInput(): HTMLInputElement {
+  const input = document.querySelector('input[type="file"]');
+  if (!(input instanceof HTMLInputElement)) {
+    throw new Error('file input not found');
+  }
+  return input;
+}
+
+async function openImportSheet(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: copy.settings.importData }));
+}
+
 beforeEach(() => {
   useDocumentStore.setState({ document: createEmptyDocument() });
+  useToastStore.getState().dismiss();
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe('SettingsScreen', () => {
   it('カテゴリの区画にプリセットの行と追加の行がある', () => {
@@ -56,5 +79,77 @@ describe('SettingsScreen', () => {
     await user.type(screen.getByLabelText(copy.settings.categoryName), 'pll');
     expect(screen.getByText(copy.settings.duplicateCategory)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: copy.settings.add })).toBeDisabled();
+  });
+
+  it('データの区画に書き出すと読み込むの行がある', () => {
+    renderSettings();
+    expect(screen.getByRole('button', { name: copy.settings.exportData })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: copy.settings.importData })).toBeInTheDocument();
+  });
+
+  it('書き出すと文書そのものの JSON がファイルになり、件数とファイル名を知らせる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    let saved: Blob | null = null;
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: (blob: Blob) => {
+        saved = blob;
+        return 'blob:test';
+      },
+      revokeObjectURL: () => undefined,
+    });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: copy.settings.exportData }));
+    await vi.waitFor(() => {
+      expect(useToastStore.getState().toast?.text).toMatch(
+        /^1件を書き出しました \(キューブ手順帳-\d{4}-\d{2}-\d{2}\.json\)$/,
+      );
+    });
+    expect(saved).not.toBeNull();
+    expect(JSON.parse(await (saved ?? fileOf('')).text())).toEqual(useDocumentStore.getState().document);
+  });
+
+  it('置き換えで読み込むと今の登録が消え、ファイルの中身になる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    const imported = { ...createEmptyDocument(), categories: [{ id: 'c1', name: 'ZBLL' }] };
+    renderSettings();
+    await openImportSheet(user);
+    await user.click(screen.getByRole('radio', { name: new RegExp(copy.settings.importReplace) }));
+    await user.upload(fileInput(), fileOf(JSON.stringify(imported)));
+    await vi.waitFor(() => {
+      expect(useDocumentStore.getState().document).toEqual(imported);
+    });
+  });
+
+  it('読み込みは元に戻せる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await openImportSheet(user);
+    await user.click(screen.getByRole('radio', { name: new RegExp(copy.settings.importReplace) }));
+    await user.upload(fileInput(), fileOf(JSON.stringify(createEmptyDocument())));
+    await vi.waitFor(() => {
+      expect(useDocumentStore.getState().document.registrations).toHaveLength(0);
+    });
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
+  it('読めないファイルは知らせるだけで、文書は変わらない', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await openImportSheet(user);
+    await user.upload(fileInput(), fileOf('{ not json'));
+    expect(await screen.findByRole('alertdialog', { name: copy.settings.importFailedTitle })).toBeInTheDocument();
+    expect(useDocumentStore.getState().document).toEqual(before);
+    await user.click(screen.getByRole('button', { name: copy.dialog.close }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 });

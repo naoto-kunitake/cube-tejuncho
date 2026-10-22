@@ -1,6 +1,10 @@
+import { X } from 'lucide-react';
 import { type ReactNode, useEffect, useRef } from 'react';
 
+import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
+
+import { IconButton } from './IconButton';
 
 type SheetProps = {
   label: string;
@@ -46,5 +50,22 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
     >
       {children}
     </dialog>
+  );
+}
+
+type SheetHeaderProps = {
+  title: string;
+  onClose: () => void;
+};
+
+// 小さなシートの見出し。題は左、× は右
+export function SheetHeader({ title, onClose }: SheetHeaderProps) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <h2 className="min-w-0 flex-1 truncate text-input font-bold text-ink-strong">{title}</h2>
+      <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
+        <X size={22} strokeWidth={1.8} aria-hidden="true" />
+      </IconButton>
+    </div>
   );
 }

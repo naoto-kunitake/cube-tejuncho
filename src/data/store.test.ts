@@ -40,6 +40,24 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations[0]?.recognition).toBe('前面が 3 連');
   });
 
+  it('読み込んだ文書は追加なら今の登録と合わさり、保存される', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    const now = new Date().toISOString();
+    store.getState().importDocument(
+      {
+        ...createEmptyDocument(),
+        registrations: [
+          { patternId: 'pll-ub', recognition: '', mainAlg: UA_ALG, altAlgs: [], createdAt: now, updatedAt: now },
+        ],
+      },
+      'add',
+    );
+    expect(store.getState().document.registrations.map((entry) => entry.patternId)).toEqual(['pll-ua', 'pll-ub']);
+    expect(createDocumentStore(storage).getState().document.registrations).toHaveLength(2);
+  });
+
   it('起動しただけでは保存しない', () => {
     const storage = persistedStorage();
     createDocumentStore(storage).getState().addRegistration('pll-ua', UA_ALG);

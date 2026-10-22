@@ -10,6 +10,7 @@ import {
   DocumentSchema,
   type RegistrationData,
 } from './document';
+import { applyImport, type ImportMode } from './import-data';
 import { migrateDocument } from './migrate';
 import { createStorage, type KeyValueStorage } from './storage';
 
@@ -107,6 +108,7 @@ export type DocumentStore = {
   addCustomPattern: (fields: CustomPatternFields, data: RegistrationData | null) => string;
   updateCustomPattern: (patternId: string, fields: CustomPatternFields) => void;
   removeCustomPattern: (patternId: string) => void;
+  importDocument: (imported: Document, mode: ImportMode) => void;
   // 破壊的な操作の「元に戻す」。控えておいた文書を丸ごと戻す
   replaceDocument: (document: Document) => void;
   setLastTab: (categoryId: string) => void;
@@ -213,6 +215,10 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 pinned: state.document.pinned.filter((id) => id !== patternId),
               },
             }));
+            reportStorageIssue();
+          },
+          importDocument: (imported, mode) => {
+            set((state) => ({ document: applyImport(state.document, imported, mode) }));
             reportStorageIssue();
           },
           replaceDocument: (document) => {
