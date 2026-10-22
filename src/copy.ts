@@ -1,3 +1,4 @@
+import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { PllShape } from '@/data/presets/pll';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
@@ -6,7 +7,7 @@ import type { SideName, SideRun } from '@/lib/figure/describe';
 type Copy = {
   list: {
     title: string;
-    categories: Record<'pll', string>;
+    categories: Record<PresetCategoryId, string>;
     registeredCount: (registered: number, total: number) => string;
     pllShapes: Record<PllShape, string>;
     standardOrder: string;
@@ -136,7 +137,7 @@ const SIDE_RUNS: Record<SideRun, string> = { bar: '3連', headlights: 'ヘッド
 export const copy = {
   list: {
     title: 'キューブ手順帳',
-    categories: { pll: 'PLL' },
+    categories: { pll: 'PLL', oll: 'OLL', f2l: 'F2L' },
     registeredCount: (registered, total) => `登録済み ${registered}/${total}`,
     pllShapes: {
       headlights4: 'ヘッドライト4つ',

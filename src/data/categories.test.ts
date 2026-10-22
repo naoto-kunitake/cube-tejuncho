@@ -10,8 +10,8 @@ describe('categoryEntriesOf', () => {
     document.settings.tabOrder = ['pll', 'oll', 'f2l', 'c1'];
     document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'a', createdAt: '', updatedAt: '' }];
     expect(categoryEntriesOf(document)).toEqual([
-      { id: 'pll', name: null, isPreset: true, patternCount: 0 },
-      { id: 'c1', name: 'COLL', isPreset: false, patternCount: 1 },
+      { kind: 'preset', id: 'pll' },
+      { kind: 'custom', id: 'c1', name: 'COLL', patternCount: 1 },
     ]);
   });
 });

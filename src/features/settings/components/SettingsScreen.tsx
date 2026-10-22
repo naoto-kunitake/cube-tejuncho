@@ -33,7 +33,7 @@ export function SettingsScreen() {
   const [hasImportFailed, setHasImportFailed] = useState(false);
   const categories = categoryEntriesOf(document).map((category) => ({
     ...category,
-    label: category.name ?? copy.list.categories.pll,
+    label: category.kind === 'preset' ? copy.list.categories[category.id] : category.name,
   }));
 
   const exportDocument = async () => {
@@ -88,7 +88,9 @@ export function SettingsScreen() {
               <div key={category.id} className={ROW_CLASS}>
                 <span className="min-w-0 truncate">{category.label}</span>
                 <span className="text-label whitespace-nowrap text-muted tabular-nums">
-                  {category.isPreset ? copy.settings.preset : copy.settings.patternCount(category.patternCount)}
+                  {category.kind === 'preset'
+                    ? copy.settings.preset
+                    : copy.settings.patternCount(category.patternCount)}
                 </span>
               </div>
             ))}

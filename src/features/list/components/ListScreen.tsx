@@ -6,7 +6,7 @@ import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
 import { findRegistration, type Registration, type Settings } from '@/data/document';
-import { PLL_PRESETS } from '@/data/presets/pll';
+import { type PresetCategoryId, presetsOf } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { recolorView } from '@/lib/figure/view';
 
@@ -17,21 +17,23 @@ import { AddPatternTile, CustomTile } from './CustomTile';
 import { PatternTile } from './PatternTile';
 
 type PresetListProps = {
+  category: PresetCategoryId;
   settings: Settings;
   registrations: readonly Registration[];
 };
 
-function PresetList({ settings, registrations }: PresetListProps) {
-  const sections = groupByShape(PLL_PRESETS, settings.sortOrder.pll);
+function PresetList({ category, settings, registrations }: PresetListProps) {
+  const presets = presetsOf(category);
+  const sections = groupByShape(category, presets, settings.sortOrder[category]);
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
-  const registeredCount = PLL_PRESETS.filter((preset) => registeredIds.has(preset.id)).length;
+  const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
   return (
     <>
       <p
         className="mt-1 text-right text-label tracking-count whitespace-nowrap text-muted tabular-nums"
         aria-live="polite"
       >
-        {copy.list.registeredCount(registeredCount, PLL_PRESETS.length)}
+        {copy.list.registeredCount(registeredCount, presets.length)}
       </p>
       {/* 群の間は 24 (設定の区画と同じ)。見出しとタイルの間は 8 */}
       <div className="flex flex-col gap-6">
@@ -47,7 +49,7 @@ function PresetList({ settings, registrations }: PresetListProps) {
                 <PatternTile
                   key={preset.id}
                   patternId={preset.id}
-                  categoryLabel={copy.list.categories.pll}
+                  categoryLabel={copy.list.categories[category]}
                   name={preset.name}
                   view={recolorView(preset.view, settings)}
                   isRegistered={registeredIds.has(preset.id)}
@@ -87,13 +89,13 @@ function CustomList({ categoryId, registrations }: CustomListProps) {
 
 export function ListScreen() {
   const document = useDocumentStore((state) => state.document);
-  const categories = categoryEntriesOf(document).map((category) => ({
-    id: category.id,
-    label: category.name ?? copy.list.categories.pll,
-    isPreset: category.isPreset,
+  const entries = categoryEntriesOf(document);
+  const categories = entries.map((entry) => ({
+    id: entry.id,
+    label: entry.kind === 'preset' ? copy.list.categories[entry.id] : entry.name,
   }));
   const { categoryId, selectCategory } = useCategory(categories.map((category) => category.id));
-  const selected = categories.find((category) => category.id === categoryId);
+  const selected = entries.find((entry) => entry.id === categoryId);
 
   return (
     <section aria-label={copy.a11y.list} className="mx-auto flex w-full max-w-186 flex-col">
@@ -105,10 +107,14 @@ export function ListScreen() {
       </TopBar>
       <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
       <div className="flex flex-col gap-4 px-4 pb-6">
-        {selected?.isPreset === false ? (
-          <CustomList categoryId={categoryId} registrations={document.registrations} />
+        {selected?.kind === 'custom' ? (
+          <CustomList categoryId={selected.id} registrations={document.registrations} />
         ) : (
-          <PresetList settings={document.settings} registrations={document.registrations} />
+          <PresetList
+            category={selected?.kind === 'preset' ? selected.id : 'pll'}
+            settings={document.settings}
+            registrations={document.registrations}
+          />
         )}
       </div>
     </section>

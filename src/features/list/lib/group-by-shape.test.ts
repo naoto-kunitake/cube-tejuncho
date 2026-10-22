@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import type { PllPreset } from '@/data/presets/pll';
+import type { Preset } from '@/data/presets/catalog';
+import type { PllShape } from '@/data/presets/pll';
 
 import { groupByShape } from './group-by-shape';
 
-function presetOf(name: string, shape: PllPreset['shape']): PllPreset {
+function presetOf(name: string, shape: PllShape): Preset {
   return {
+    category: 'pll',
     id: `pll-${name.toLowerCase()}`,
     name,
     shape,
@@ -25,16 +27,16 @@ const PRESETS = [presetOf('T', 'headlights1'), presetOf('H', 'headlights4'), pre
 
 describe('groupByShape', () => {
   it('種類ごとでは形の並び順に見出しを作り、その中は元の順を保つ', () => {
-    const sections = groupByShape(PRESETS, 'shape');
+    const sections = groupByShape('pll', PRESETS, 'shape');
     expect(sections.map((section) => section.presets.map((preset) => preset.name))).toEqual([['H'], ['T', 'Aa']]);
   });
 
   it('該当するパターンがない形の見出しは出さない', () => {
-    expect(groupByShape(PRESETS, 'shape')).toHaveLength(2);
+    expect(groupByShape('pll', PRESETS, 'shape')).toHaveLength(2);
   });
 
   it('標準順では 1 つの見出しにまとまる', () => {
-    const sections = groupByShape(PRESETS, 'standard');
+    const sections = groupByShape('pll', PRESETS, 'standard');
     expect(sections).toHaveLength(1);
     expect(sections[0]?.presets).toEqual(PRESETS);
   });

@@ -14,7 +14,7 @@ import { copy } from '@/copy';
 import type { AlgEntry, Category, Registration, Settings } from '@/data/document';
 import { type DraftStore, draftStore as defaultDraftStore } from '@/data/draft';
 import type { PatternRef } from '@/data/patterns';
-import type { PllPreset } from '@/data/presets/pll';
+import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { describeSides } from '@/lib/figure/describe';
 import { cueView, recolorView } from '@/lib/figure/view';
@@ -87,18 +87,20 @@ function draftIdOf(target: EditTarget): string {
 }
 
 type PresetFigureProps = {
-  preset: PllPreset;
+  preset: Preset;
   settings: Settings;
 };
 
-// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる
+// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる。
+// 矢印と手がかりは PLL だけ
 function PresetFigure({ preset, settings }: PresetFigureProps) {
   const view = recolorView(preset.view, settings);
-  if (settings.showCueFigure) {
+  const arrows = preset.category === 'pll' && settings.showArrows ? preset.arrows : [];
+  if (preset.category === 'pll' && settings.showCueFigure) {
     return (
       <div className="flex w-full justify-center gap-6 pt-4.25">
         <div className="-m-1.75 w-38 flex-none">
-          <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+          <TopFigure view={view} arrows={arrows} label={preset.name} />
         </div>
         <div className="-m-1.75 w-38 flex-none">
           <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
@@ -109,7 +111,7 @@ function PresetFigure({ preset, settings }: PresetFigureProps) {
   return (
     <div className="flex justify-center pt-4.25">
       <div className="-my-2.75 w-full max-w-60">
-        <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+        <TopFigure view={view} arrows={arrows} label={preset.name} />
       </div>
     </div>
   );
@@ -168,10 +170,13 @@ export function EditForm({
   // 自作は名前が必須
   const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
+  // 側面の揃い方の手がかりは PLL だけ (OLL は上面の向きで見分ける)
   const runs =
-    target.kind === 'preset'
+    target.kind === 'preset' && target.preset.category === 'pll'
       ? describeSides(target.preset.view).map((entry) => copy.edit.sideRun(entry.side, entry.run))
-      : [];
+      : null;
+  const recognitionHint =
+    runs === null ? undefined : copy.edit.recognitionHint(runs.length > 0 ? runs : [copy.edit.noRuns]);
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
   // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
@@ -404,11 +409,7 @@ export function EditForm({
             ref={recognitionRef}
             id="recognition"
             value={form.recognition}
-            placeholder={
-              target.kind === 'preset'
-                ? copy.edit.recognitionHint(runs.length > 0 ? runs : [copy.edit.noRuns])
-                : undefined
-            }
+            placeholder={recognitionHint}
             onChange={(event) => {
               setForm((current) => ({ ...current, recognition: event.target.value }));
             }}
