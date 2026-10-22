@@ -64,6 +64,7 @@ type Copy = {
   };
   dialog: {
     cancel: string;
+    close: string;
   };
   toast: {
     undo: string;
@@ -79,6 +80,20 @@ type Copy = {
     categoryNamePlaceholder: string;
     duplicateCategory: string;
     add: string;
+    data: string;
+    dataHint: string;
+    exportData: string;
+    importData: string;
+    importAdd: string;
+    importAddHint: string;
+    importReplace: string;
+    importReplaceHint: string;
+    chooseFile: string;
+    exportFileName: (date: string) => string;
+    exported: (count: number, fileName: string) => string;
+    imported: (count: number) => string;
+    importFailedTitle: string;
+    importFailedBody: string;
   };
   notation: {
     title: string;
@@ -100,6 +115,8 @@ type Copy = {
     closeEdit: string;
     keypad: string;
     categorySheet: string;
+    importSheet: string;
+    importMode: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
     cueFigure: (name: string) => string;
     playerSheet: string;
@@ -196,6 +213,7 @@ export const copy = {
   },
   dialog: {
     cancel: 'キャンセル',
+    close: '閉じる',
   },
   toast: {
     undo: '元に戻す',
@@ -211,6 +229,20 @@ export const copy = {
     categoryNamePlaceholder: '例: F2L、COLL、練習中',
     duplicateCategory: '同じ名前のカテゴリがあります',
     add: '追加',
+    data: 'データ',
+    dataHint: '書き出したファイルがバックアップになります',
+    exportData: '書き出す',
+    importData: '読み込む',
+    importAdd: '追加',
+    importAddHint: '同じパターンは新しい方を残す',
+    importReplace: '置き換え',
+    importReplaceHint: '今のデータを消してから入れる',
+    chooseFile: 'ファイルを選ぶ',
+    exportFileName: (date) => `キューブ手順帳-${date}.json`,
+    exported: (count, fileName) => `${count}件を書き出しました (${fileName})`,
+    imported: (count) => `${count}件を読み込みました`,
+    importFailedTitle: '読み込めませんでした',
+    importFailedBody: 'このアプリで書き出したファイルを選んでください。',
   },
   notation: {
     title: '回転記号',
@@ -232,6 +264,8 @@ export const copy = {
     closeEdit: '閉じる',
     keypad: '手順キーパッド',
     categorySheet: 'カテゴリ',
+    importSheet: '読み込む',
+    importMode: '読み込み方',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
     cueFigure: (name) => `${name} の判断の手がかり`,
     playerSheet: '手順の再生',
