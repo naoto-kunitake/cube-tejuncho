@@ -12,6 +12,7 @@ import { recolorView } from '@/lib/figure/view';
 
 import { useCategory } from '../hooks/useCategory';
 import { groupByShape } from '../lib/group-by-shape';
+import { tileNameOf } from '../lib/tile-name';
 import { CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { PatternTile } from './PatternTile';
@@ -50,7 +51,7 @@ function PresetList({ category, settings, registrations }: PresetListProps) {
                   key={preset.id}
                   patternId={preset.id}
                   categoryLabel={copy.list.categories[category]}
-                  name={preset.name}
+                  name={tileNameOf(preset)}
                   view={recolorView(preset.view, settings)}
                   isRegistered={registeredIds.has(preset.id)}
                 />

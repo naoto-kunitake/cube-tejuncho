@@ -57,6 +57,19 @@ describe('ListScreen', () => {
     expect(screen.getByText(copy.list.registeredCount(0, 57))).toBeInTheDocument();
   });
 
+  it('OLL のタイルの見出しは番号だけで、読み上げ名にはカテゴリが付く', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.oll, '21', false) });
+    expect(tile).toHaveAttribute('href', '/p/oll-21');
+    expect(tile).toHaveTextContent(/^21$/);
+  });
+
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
     const user = userEvent.setup();
     withCustomCategory();
