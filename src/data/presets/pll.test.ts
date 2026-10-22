@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseAlg } from '@/lib/alg/parse';
-import { cubingAlgOrThrow } from '@/lib/cube/alg.fixtures';
-import { applyAlg, isSolved } from '@/lib/cube/kpuzzle';
-import { caseStartState, topViewOf } from '@/lib/cube/view';
 import { arrowPaths } from '@/lib/figure/arrows';
 
 import { PLL_PRESETS, PLL_SHAPE_ORDER } from './pll';
+import {
+  expectStandardAlgReadable,
+  expectStandardAlgSolves,
+  expectViewMatchesStandardAlg,
+  expectViewShape,
+} from './preset.fixtures';
 
 // ノートの AUF 正規化で確定した置換の型 (位置: 0 UBL 1 UB 2 UBR / 3 UL 4 中央 5 UR / 6 UFL 7 UF 8 UFR)
 const EXPECTED_ARROWS: Record<string, [number, number][]> = {
@@ -157,7 +159,7 @@ describe('PLL_PRESETS', () => {
   });
 
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))('%s の基本手順が読める', (_, preset) => {
-    expect(parseAlg(preset.standardAlg).ok).toBe(true);
+    expectStandardAlgReadable(preset.standardAlg);
   });
 
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
@@ -168,10 +170,7 @@ describe('PLL_PRESETS', () => {
   );
 
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))('%s の図は上面 9 と側面 3 ずつ', (_, preset) => {
-    expect(preset.view.u).toHaveLength(9);
-    for (const side of [preset.view.f, preset.view.r, preset.view.b, preset.view.l]) {
-      expect(side).toHaveLength(3);
-    }
+    expectViewShape(preset.view);
   });
 
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))('%s の矢印は図として描ける', (_, preset) => {
@@ -197,18 +196,14 @@ describe('PLL のプリセット', () => {
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
     '%s の基本手順を開始状態に回すと揃う',
     async (_, preset) => {
-      const alg = cubingAlgOrThrow(preset.standardAlg);
-      expect(isSolved(applyAlg(await caseStartState(alg), alg))).toBe(true);
+      await expectStandardAlgSolves(preset.standardAlg);
     },
   );
 
   it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
     '%s の図の配置は手順から計算した状態と一致する (上面の向きは 4 通りのどれか)',
     async (_, preset) => {
-      const start = await caseStartState(cubingAlgOrThrow(preset.standardAlg));
-      // 図は AUF を正規化した向きで持つので、上面を 0〜3 回まわしたどれかと一致する
-      const views = ['', 'U', 'U2', "U'"].map((turn) => topViewOf(applyAlg(start, turn)));
-      expect(views).toContainEqual(preset.view);
+      await expectViewMatchesStandardAlg(preset.standardAlg, preset.view);
     },
   );
 });
