@@ -30,15 +30,26 @@ const REGISTRATION = {
 };
 
 function renderEdit(path = '/p/pll-ua/edit', state?: unknown) {
+  const url = new URL(path, 'http://localhost');
   return render(
-    <MemoryRouter initialEntries={[{ pathname: path, state }]}>
+    <MemoryRouter initialEntries={[{ pathname: url.pathname, search: url.search, state }]}>
       <Routes>
+        <Route path="/" element={<p>list</p>} />
+        <Route path="/p/new" element={<EditScreen />} />
         <Route path="/p/:id" element={<p>detail</p>} />
         <Route path="/p/:id/edit" element={<EditScreen />} />
       </Routes>
       <Toast />
     </MemoryRouter>,
   );
+}
+
+function withCustomCategory() {
+  const document = createEmptyDocument();
+  document.categories = [{ id: 'c1', name: 'COLL' }];
+  document.settings.tabOrder = ['pll', 'c1'];
+  document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' }];
+  useDocumentStore.setState({ document });
 }
 
 function registrationOf(patternId: string) {
@@ -245,5 +256,52 @@ describe('EditScreen', () => {
   it('知らない id なら見つからないと出す', () => {
     renderEdit('/p/nope/edit');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();
+  });
+
+  it('新規は名前が必須で、保存すると自作パターンが増えて詳細に移る', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    renderEdit('/p/new?category=c1');
+    expect(screen.getByRole('heading', { level: 1, name: copy.edit.newTitle })).toBeInTheDocument();
+    expect(screen.getByLabelText(copy.edit.category)).toHaveValue('c1');
+    const save = screen.getByRole('button', { name: copy.edit.save });
+    expect(save).toBeDisabled();
+    await user.type(screen.getByLabelText(copy.edit.name), 'Anti-Sune');
+    await user.type(screen.getByLabelText(copy.edit.mainAlg), "R U2 R' U' R U' R'");
+    expect(save).toBeEnabled();
+    await user.click(save);
+    const { patterns, registrations } = useDocumentStore.getState().document;
+    expect(patterns).toHaveLength(2);
+    expect(patterns[1]).toMatchObject({ name: 'Anti-Sune', categoryId: 'c1' });
+    expect(registrations).toMatchObject([{ patternId: patterns[1]?.id, mainAlg: { text: "R U2 R' U' R U' R'" } }]);
+    expect(screen.getByText('detail')).toBeInTheDocument();
+  });
+
+  it('自作は名前を変えて保存できる', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    renderEdit('/p/p1/edit');
+    const name = screen.getByLabelText(copy.edit.name);
+    expect(name).toHaveValue('Sune');
+    await user.clear(name);
+    await user.type(name, 'Sune 2');
+    await user.click(screen.getByRole('button', { name: copy.edit.save }));
+    expect(useDocumentStore.getState().document.patterns[0]?.name).toBe('Sune 2');
+  });
+
+  it('自作の削除は確認のうえ一覧に戻り、元に戻せる', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    renderEdit('/p/p1/edit');
+    await user.click(screen.getByRole('button', { name: copy.edit.deletePattern }));
+    await user.click(
+      within(screen.getByRole('alertdialog', { name: copy.edit.deletePatternTitle('Sune') })).getByRole('button', {
+        name: copy.edit.deletePatternAction,
+      }),
+    );
+    expect(screen.getByText('list')).toBeInTheDocument();
+    expect(useDocumentStore.getState().document.patterns).toEqual([]);
+    await user.click(screen.getByRole('button', { name: copy.toast.undo }));
+    expect(useDocumentStore.getState().document.patterns).toMatchObject([{ id: 'p1', name: 'Sune' }]);
   });
 });

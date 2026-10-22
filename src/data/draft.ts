@@ -7,6 +7,9 @@ const DRAFT_VERSION = 1;
 
 const DraftSchema = z.object({
   version: z.literal(DRAFT_VERSION),
+  // 名前とカテゴリは自作だけが使う。古い下書きにはないので空で補う
+  name: z.string().default(''),
+  categoryId: z.string().default(''),
   recognition: z.string(),
   cards: z.array(AlgEntrySchema),
 });

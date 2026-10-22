@@ -5,14 +5,15 @@ import { useNavigate } from 'react-router';
 
 import { Button } from '@/components/Button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Field, TextArea } from '@/components/Field';
+import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
 import { TopFigure } from '@/components/figures/TopFigure';
 import { IconButton } from '@/components/IconButton';
 import { useToastStore } from '@/components/toast/toast-store';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
-import type { AlgEntry, Registration, Settings } from '@/data/document';
+import type { AlgEntry, Category, Registration, Settings } from '@/data/document';
 import { type DraftStore, draftStore as defaultDraftStore } from '@/data/draft';
+import type { PatternRef } from '@/data/patterns';
 import type { PllPreset } from '@/data/presets/pll';
 import { useDocumentStore } from '@/data/store';
 import { describeSides } from '@/lib/figure/describe';
@@ -42,12 +43,17 @@ import { AlgKeypad } from './AlgKeypad';
 
 // 入力のたびに書く下書きは 300ms まとめる (打鍵ごとに localStorage へ書かない)
 const DRAFT_DEBOUNCE_MS = 300;
+// 新規の下書きはパターンの id がまだないので固定の鍵
+const NEW_DRAFT_ID = 'new';
 
 export type FocusTarget = { kind: 'recognition' } | { kind: 'alg'; index: number };
+// 編集の対象: プリセット (名前とカテゴリは固定) / 自作 (名前とカテゴリも編集、削除あり) / 新規の自作
+export type EditTarget = PatternRef | { kind: 'new'; categoryId: string };
 
 type EditFormProps = {
-  preset: PllPreset;
+  target: EditTarget;
   registration: Registration | undefined;
+  categories: readonly Category[];
   settings: Settings;
   initialFocus: FocusTarget | null;
   draftStore?: DraftStore;
@@ -58,9 +64,61 @@ type PendingDelete = { index: number; card: EditCard };
 const ADD_ROW_CLASS =
   'flex min-h-11 w-full items-center gap-2 rounded-md border border-dashed border-line-state bg-surface px-3.5 text-left text-body font-medium text-muted pressable hover:border-line-strong hover:bg-hover';
 
+function fieldsOf(target: EditTarget) {
+  switch (target.kind) {
+    case 'preset':
+      return { name: '', categoryId: '' };
+    case 'custom':
+      return { name: target.pattern.name, categoryId: target.pattern.categoryId };
+    case 'new':
+      return { name: '', categoryId: target.categoryId };
+  }
+}
+
+function draftIdOf(target: EditTarget): string {
+  switch (target.kind) {
+    case 'preset':
+      return target.preset.id;
+    case 'custom':
+      return target.pattern.id;
+    case 'new':
+      return NEW_DRAFT_ID;
+  }
+}
+
+type PresetFigureProps = {
+  preset: PllPreset;
+  settings: Settings;
+};
+
+// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる
+function PresetFigure({ preset, settings }: PresetFigureProps) {
+  const view = recolorView(preset.view, settings);
+  if (settings.showCueFigure) {
+    return (
+      <div className="flex w-full justify-center gap-6 pt-4.25">
+        <div className="-m-1.75 w-38 flex-none">
+          <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+        </div>
+        <div className="-m-1.75 w-38 flex-none">
+          <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-center pt-4.25">
+      <div className="-my-2.75 w-full max-w-60">
+        <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
+      </div>
+    </div>
+  );
+}
+
 export function EditForm({
-  preset,
+  target,
   registration,
+  categories,
   settings,
   initialFocus,
   draftStore = defaultDraftStore,
@@ -68,21 +126,36 @@ export function EditForm({
   const navigate = useNavigate();
   const saveRegistration = useDocumentStore((state) => state.saveRegistration);
   const removeRegistration = useDocumentStore((state) => state.removeRegistration);
+  const addCustomPattern = useDocumentStore((state) => state.addCustomPattern);
+  const updateCustomPattern = useDocumentStore((state) => state.updateCustomPattern);
+  const removeCustomPattern = useDocumentStore((state) => state.removeCustomPattern);
+  const replaceDocument = useDocumentStore((state) => state.replaceDocument);
   const showToast = useToastStore((state) => state.show);
   const dismissToast = useToastStore((state) => state.dismiss);
-  const saved = formFrom(registration);
+  const draftId = draftIdOf(target);
+  const isCustom = target.kind !== 'preset';
+  const fields = fieldsOf(target);
+  const saved = formFrom(registration, fields);
   const baseSnapshot = formSnapshot(saved);
   // 書きかけがあれば復元して知らせる (黙って上書きしない)
   const [initial] = useState(() => {
-    const draft = draftStore.read(preset.id);
+    const draft = draftStore.read(draftId);
     return draft === null
       ? { form: saved, isRestored: false }
-      : { form: formFromEntries(draft.recognition, draft.cards), isRestored: true };
+      : {
+          form: formFromEntries(
+            isCustom ? { name: draft.name, categoryId: draft.categoryId || fields.categoryId } : fields,
+            draft.recognition,
+            draft.cards,
+          ),
+          isRestored: true,
+        };
   });
   const [form, setForm] = useState<EditFormValue>(initial.form);
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(initialFocus);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [isDiscarding, setIsDiscarding] = useState(false);
+  const [isDeletingPattern, setIsDeletingPattern] = useState(false);
   // キーパッドが効く手順の欄。欄を離れたら閉じる。「キーボード」で端末のキーボードに切り替えたら、その欄を離れるまで出さない
   const [keypadIndex, setKeypadIndex] = useState<number | null>(null);
   const [usesNativeKeyboard, setUsesNativeKeyboard] = useState(false);
@@ -92,11 +165,16 @@ export function EditForm({
   const ownToastRef = useRef<number | null>(null);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
   const isDirty = formSnapshot(form) !== baseSnapshot;
-  const canSave = !hasInvalidCard(form);
-  const standardAlg = standardAlgToAdd(form, preset.standardAlg);
-  const view = recolorView(preset.view, settings);
-  const runs = describeSides(preset.view).map((entry) => copy.edit.sideRun(entry.side, entry.run));
-  const detailPath = `/p/${preset.id}`;
+  // 自作は名前が必須
+  const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
+  const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
+  const runs =
+    target.kind === 'preset'
+      ? describeSides(target.preset.view).map((entry) => copy.edit.sideRun(entry.side, entry.run))
+      : [];
+  const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
+  // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧
+  const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
 
   useEffect(() => {
     if (!initial.isRestored) {
@@ -105,11 +183,13 @@ export function EditForm({
     ownToastRef.current = showToast(copy.edit.restoredDraft, {
       label: copy.edit.discard,
       run: () => {
-        draftStore.remove(preset.id);
-        setForm(formFrom(registration));
+        draftStore.remove(draftId);
+        setForm(formFrom(registration, fields));
       },
     });
-  }, [initial.isRestored, showToast, draftStore, preset.id, registration]);
+    // fields は target から毎回作られるので、target を依存に置く
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initial.isRestored, showToast, draftStore, draftId, registration, target]);
 
   useEffect(() => {
     return () => {
@@ -121,16 +201,21 @@ export function EditForm({
 
   useEffect(() => {
     if (!isDirty) {
-      draftStore.remove(preset.id);
+      draftStore.remove(draftId);
       return;
     }
     const timer = setTimeout(() => {
-      draftStore.write(preset.id, { recognition: form.recognition, cards: entriesOf(form.cards) });
+      draftStore.write(draftId, {
+        name: form.name,
+        categoryId: form.categoryId,
+        recognition: form.recognition,
+        cards: entriesOf(form.cards),
+      });
     }, DRAFT_DEBOUNCE_MS);
     return () => {
       clearTimeout(timer);
     };
-  }, [form, isDirty, preset.id, draftStore]);
+  }, [form, isDirty, draftId, draftStore]);
 
   useEffect(() => {
     if (focusTarget === null) {
@@ -203,30 +288,57 @@ export function EditForm({
     }
   };
 
-  const close = () => {
-    draftStore.remove(preset.id);
-    void navigate(detailPath, { replace: true });
+  const close = (path = backPath) => {
+    draftStore.remove(draftId);
+    void navigate(path, { replace: true });
   };
 
   const save = () => {
     const data = registrationDataFrom(form);
+    const patternFields = { name: form.name.trim(), categoryId: form.categoryId };
+    if (target.kind === 'new') {
+      const id = addCustomPattern(patternFields, data);
+      close(`/p/${id}`);
+      return;
+    }
+    if (target.kind === 'custom') {
+      updateCustomPattern(target.pattern.id, patternFields);
+    }
     if (data !== null) {
-      saveRegistration(preset.id, data);
+      saveRegistration(draftId, data);
       close();
       return;
     }
-    // 全部消して保存 = 登録を消す。確認は挟まず、詳細に戻ってから取り消せるようにする
-    removeRegistration(preset.id);
+    removeRegistration(draftId);
     close();
-    if (registration !== undefined) {
+    // プリセットで全部消して保存 = 登録を消す。確認は挟まず、詳細に戻ってから取り消せるようにする (自作はパターンが残るので知らせない)
+    if (target.kind === 'preset' && registration !== undefined) {
       const { recognition, mainAlg, altAlgs } = registration;
-      showToast(copy.edit.removedRegistration(preset.name), {
+      showToast(copy.edit.removedRegistration(target.preset.name), {
         label: copy.toast.undo,
         run: () => {
-          saveRegistration(preset.id, { recognition, mainAlg, altAlgs });
+          saveRegistration(draftId, { recognition, mainAlg, altAlgs });
         },
       });
     }
+  };
+
+  // 自作の削除: 確認のうえ一覧に戻り、文書を丸ごと戻す「元に戻す」を出す
+  const deletePattern = () => {
+    if (target.kind !== 'custom') {
+      return;
+    }
+    const before = useDocumentStore.getState().document;
+    const { id, name, categoryId } = target.pattern;
+    setIsDeletingPattern(false);
+    removeCustomPattern(id);
+    close(`/?category=${categoryId}`);
+    showToast(copy.edit.deletedPattern(name), {
+      label: copy.toast.undo,
+      run: () => {
+        replaceDocument(before);
+      },
+    });
   };
 
   return (
@@ -246,9 +358,7 @@ export function EditForm({
           >
             <X size={22} strokeWidth={1.8} aria-hidden="true" />
           </IconButton>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
-            {copy.edit.title(preset.name)}
-          </h1>
+          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">{title}</h1>
         </div>
         <Button variant="primary" className="mr-1.75 px-3.5" disabled={!canSave} onClick={save}>
           {copy.edit.save}
@@ -256,29 +366,49 @@ export function EditForm({
       </TopBar>
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
       <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypadIndex !== null && !usesNativeKeyboard && 'pb-60')}>
-        {/* 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる */}
-        {settings.showCueFigure ? (
-          <div className="flex w-full justify-center gap-6 pt-4.25">
-            <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
-            </div>
-            <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center pt-4.25">
-            <div className="-my-2.75 w-full max-w-60">
-              <TopFigure view={view} arrows={settings.showArrows ? preset.arrows : []} label={preset.name} />
-            </div>
-          </div>
+        {target.kind === 'preset' && <PresetFigure preset={target.preset} settings={settings} />}
+        {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
+        {isCustom && (
+          <>
+            <Field id="pattern-name" label={copy.edit.name}>
+              <input
+                id="pattern-name"
+                value={form.name}
+                autoComplete="off"
+                className={cn(INPUT_CLASS, 'h-11 px-3')}
+                onChange={(event) => {
+                  setForm((current) => ({ ...current, name: event.target.value }));
+                }}
+              />
+            </Field>
+            <Field id="pattern-category" label={copy.edit.category}>
+              <select
+                id="pattern-category"
+                value={form.categoryId}
+                className={cn(INPUT_CLASS, 'h-11 px-3')}
+                onChange={(event) => {
+                  setForm((current) => ({ ...current, categoryId: event.target.value }));
+                }}
+              >
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </>
         )}
         <Field id="recognition" label={copy.edit.recognition}>
           <TextArea
             ref={recognitionRef}
             id="recognition"
             value={form.recognition}
-            placeholder={copy.edit.recognitionHint(runs.length > 0 ? runs : [copy.edit.noRuns])}
+            placeholder={
+              target.kind === 'preset'
+                ? copy.edit.recognitionHint(runs.length > 0 ? runs : [copy.edit.noRuns])
+                : undefined
+            }
             onChange={(event) => {
               setForm((current) => ({ ...current, recognition: event.target.value }));
             }}
@@ -351,6 +481,18 @@ export function EditForm({
             </button>
           )}
         </div>
+        {target.kind === 'custom' && (
+          <div className="-ml-3 flex border-t border-line pt-2">
+            <Button
+              variant="textDanger"
+              onClick={() => {
+                setIsDeletingPattern(true);
+              }}
+            >
+              {copy.edit.deletePattern}
+            </Button>
+          </div>
+        )}
       </div>
       {keypadIndex !== null && !usesNativeKeyboard && <AlgKeypad onKey={pressKey} />}
       {pendingDelete !== null && (
@@ -373,12 +515,28 @@ export function EditForm({
         <ConfirmDialog
           title={copy.edit.discardTitle}
           actionLabel={copy.edit.discard}
-          onConfirm={close}
+          onConfirm={() => {
+            close();
+          }}
           onCancel={() => {
             setIsDiscarding(false);
           }}
         />
       )}
+      {isDeletingPattern && target.kind === 'custom' && (
+        <ConfirmDialog
+          title={copy.edit.deletePatternTitle(target.pattern.name)}
+          actionLabel={copy.edit.deletePatternAction}
+          onConfirm={deletePattern}
+          onCancel={() => {
+            setIsDeletingPattern(false);
+          }}
+        />
+      )}
     </>
   );
+}
+
+function presetName(target: EditTarget): string {
+  return target.kind === 'preset' ? target.preset.name : '';
 }

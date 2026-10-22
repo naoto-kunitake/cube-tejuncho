@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
@@ -12,6 +13,26 @@ beforeEach(() => {
   useDocumentStore.setState({ document: createEmptyDocument() });
 });
 
+afterEach(cleanup);
+
+function withCustomCategory() {
+  const document = createEmptyDocument();
+  document.categories = [{ id: 'c1', name: 'COLL' }];
+  document.settings.tabOrder = ['pll', 'c1'];
+  document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' }];
+  document.registrations = [
+    {
+      patternId: 'p1',
+      recognition: '',
+      mainAlg: { text: "R U R' U R U2 R'", mnemonic: '', fingering: '' },
+      altAlgs: [],
+      createdAt: '',
+      updatedAt: '',
+    },
+  ];
+  useDocumentStore.setState({ document });
+}
+
 describe('ListScreen', () => {
   it('PLL 21 種のタイルを描く', () => {
     render(
@@ -21,5 +42,20 @@ describe('ListScreen', () => {
     );
     expect(screen.getByRole('heading', { level: 1, name: copy.list.title })).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(21);
+  });
+
+  it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    expect(screen.getByRole('link', { name: 'Sune' })).toHaveAttribute('href', '/p/p1');
+    expect(screen.getByText("R U R' U R U2 R'")).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.list.addPattern })).toHaveAttribute('href', '/p/new?category=c1');
+    expect(screen.queryByText(/登録済み/)).not.toBeInTheDocument();
   });
 });

@@ -5,9 +5,14 @@ import { type AlgError, cleanAlgText, parseAlg } from '@/lib/alg/parse';
 // id は並べ替えや削除の取り消しで React が同じカードを追えるようにする印で、保存しない
 export type EditCard = AlgEntry & { id: number };
 export type EditForm = {
+  // 名前とカテゴリは自作だけが編集する。プリセットでは空のまま
+  name: string;
+  categoryId: string;
   recognition: string;
   cards: EditCard[];
 };
+
+export type PatternFields = Pick<EditForm, 'name' | 'categoryId'>;
 
 export const EMPTY_CARD: AlgEntry = { text: '', mnemonic: '', fingering: '' };
 
@@ -25,15 +30,19 @@ function trimCard(card: AlgEntry): AlgEntry {
   return { text: card.text.trim(), mnemonic: card.mnemonic.trim(), fingering: card.fingering.trim() };
 }
 
-export function formFrom(registration: Registration | undefined): EditForm {
+export function formFrom(registration: Registration | undefined, fields: PatternFields): EditForm {
   if (registration === undefined) {
-    return { recognition: '', cards: [newCard()] };
+    return { ...fields, recognition: '', cards: [newCard()] };
   }
-  return { recognition: registration.recognition, cards: [registration.mainAlg, ...registration.altAlgs].map(newCard) };
+  return {
+    ...fields,
+    recognition: registration.recognition,
+    cards: [registration.mainAlg, ...registration.altAlgs].map(newCard),
+  };
 }
 
-export function formFromEntries(recognition: string, entries: readonly AlgEntry[]): EditForm {
-  return { recognition, cards: entries.map(newCard) };
+export function formFromEntries(fields: PatternFields, recognition: string, entries: readonly AlgEntry[]): EditForm {
+  return { ...fields, recognition, cards: entries.map(newCard) };
 }
 
 export function entriesOf(cards: readonly EditCard[]): AlgEntry[] {
@@ -43,6 +52,8 @@ export function entriesOf(cards: readonly EditCard[]): AlgEntry[] {
 // 変更の有無を比べるための文字列。空のカードを足しただけなら変更とみなさない (保存しても何も残らない)
 export function formSnapshot(form: EditForm): string {
   return JSON.stringify({
+    name: form.name.trim(),
+    categoryId: form.categoryId,
     recognition: form.recognition.trim(),
     cards: form.cards.filter((card) => !isCardEmpty(card)).map(trimCard),
   });

@@ -4,6 +4,7 @@ import { createJSONStorage, persist, type StateStorage } from 'zustand/middlewar
 import {
   type AlgEntry,
   createEmptyDocument,
+  type CustomPattern,
   type Document,
   DOCUMENT_VERSION,
   DocumentSchema,
@@ -93,12 +94,21 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
   };
 }
 
+export type CustomPatternFields = Pick<CustomPattern, 'name' | 'categoryId'>;
+
 export type DocumentStore = {
   document: Document;
   loadIssue: LoadIssue | null;
   addRegistration: (patternId: string, mainAlg: AlgEntry) => void;
   saveRegistration: (patternId: string, data: RegistrationData) => void;
   removeRegistration: (patternId: string) => void;
+  // 返り値は新しい id
+  addCategory: (name: string) => string;
+  addCustomPattern: (fields: CustomPatternFields, data: RegistrationData | null) => string;
+  updateCustomPattern: (patternId: string, fields: CustomPatternFields) => void;
+  removeCustomPattern: (patternId: string) => void;
+  // 破壊的な操作の「元に戻す」。控えておいた文書を丸ごと戻す
+  replaceDocument: (document: Document) => void;
   setLastTab: (categoryId: string) => void;
   dismissLoadIssue: () => void;
 };
@@ -153,6 +163,60 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 registrations: state.document.registrations.filter((entry) => entry.patternId !== patternId),
               },
             }));
+            reportStorageIssue();
+          },
+          addCategory: (name) => {
+            const id = crypto.randomUUID();
+            set((state) => ({
+              document: {
+                ...state.document,
+                categories: [...state.document.categories, { id, name }],
+                settings: { ...state.document.settings, tabOrder: [...state.document.settings.tabOrder, id] },
+              },
+            }));
+            reportStorageIssue();
+            return id;
+          },
+          addCustomPattern: (fields, data) => {
+            const id = crypto.randomUUID();
+            set((state) => {
+              const now = new Date().toISOString();
+              const registration = data === null ? [] : [{ patternId: id, ...data, createdAt: now, updatedAt: now }];
+              return {
+                document: {
+                  ...state.document,
+                  patterns: [...state.document.patterns, { id, ...fields, createdAt: now, updatedAt: now }],
+                  registrations: [...state.document.registrations, ...registration],
+                },
+              };
+            });
+            reportStorageIssue();
+            return id;
+          },
+          updateCustomPattern: (patternId, fields) => {
+            set((state) => ({
+              document: {
+                ...state.document,
+                patterns: state.document.patterns.map((pattern) =>
+                  pattern.id === patternId ? { ...pattern, ...fields, updatedAt: new Date().toISOString() } : pattern,
+                ),
+              },
+            }));
+            reportStorageIssue();
+          },
+          removeCustomPattern: (patternId) => {
+            set((state) => ({
+              document: {
+                ...state.document,
+                patterns: state.document.patterns.filter((pattern) => pattern.id !== patternId),
+                registrations: state.document.registrations.filter((entry) => entry.patternId !== patternId),
+                pinned: state.document.pinned.filter((id) => id !== patternId),
+              },
+            }));
+            reportStorageIssue();
+          },
+          replaceDocument: (document) => {
+            set({ document });
             reportStorageIssue();
           },
           setLastTab: (categoryId) => {
