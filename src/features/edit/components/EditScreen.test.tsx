@@ -210,6 +210,38 @@ describe('EditScreen', () => {
     expect(draftStore.read('pll-ua')).toBeNull();
   });
 
+  it('手順の欄に入るとキーパッドが出て、キーで記号が入り、離れると閉じる', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
+    await user.click(input);
+    const keypad = screen.getByRole('group', { name: copy.a11y.keypad });
+    await user.click(within(keypad).getByRole('button', { name: 'R' }));
+    await user.click(within(keypad).getByRole('button', { name: 'U' }));
+    await user.click(within(keypad).getByRole('button', { name: "'" }));
+    expect(input).toHaveValue("R U'");
+    expect(input).toHaveFocus();
+    await user.click(within(keypad).getByRole('button', { name: copy.keypad.backspace }));
+    expect(input).toHaveValue('R U');
+    await user.click(within(keypad).getByRole('button', { name: copy.keypad.clear }));
+    expect(input).toHaveValue('');
+    await user.click(screen.getByLabelText(copy.edit.recognition));
+    expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
+  });
+
+  it('「キーボード」を押すとキーパッドが閉じて端末のキーボードで打てる', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.click(input);
+    expect(input).toHaveAttribute('inputmode', 'none');
+    await user.click(screen.getByRole('button', { name: copy.keypad.keyboard }));
+    expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
+    expect(input).not.toHaveAttribute('inputmode');
+    expect(input).toHaveFocus();
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderEdit('/p/nope/edit');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();
