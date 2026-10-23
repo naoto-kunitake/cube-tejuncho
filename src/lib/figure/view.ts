@@ -27,13 +27,41 @@ export type FigureView = {
   l: Side<FigureColor>;
 };
 
+// 3 面の図 (F2L): 上面・前面・右面の 9 マスずつ。各面を正面から見た向きで左上から行ごと (前面は上の行が上層、右面は左の列が前)
+export type CubeView = {
+  u: TopFace<StickerColor>;
+  f: TopFace<StickerColor>;
+  r: TopFace<StickerColor>;
+};
+// 右前スロットのペア (コーナーとエッジ) のステッカーの位置
+export type PairMask = {
+  u: TopFace<boolean>;
+  f: TopFace<boolean>;
+  r: TopFace<boolean>;
+};
+export type CubeFigureView = {
+  u: TopFace<FigureColor>;
+  f: TopFace<FigureColor>;
+  r: TopFace<FigureColor>;
+};
+
 function mapSide<T, U>(side: Side<T>, convert: (value: T) => U): Side<U> {
   return [convert(side[0]), convert(side[1]), convert(side[2])];
 }
 
-function mapFace<T, U>(face: TopFace<T>, convert: (value: T) => U): TopFace<U> {
+export function mapFace<T, U>(face: TopFace<T>, convert: (value: T, index: number) => U): TopFace<U> {
   const [a, b, c, d, e, f, g, h, i] = face;
-  return [convert(a), convert(b), convert(c), convert(d), convert(e), convert(f), convert(g), convert(h), convert(i)];
+  return [
+    convert(a, 0),
+    convert(b, 1),
+    convert(c, 2),
+    convert(d, 3),
+    convert(e, 4),
+    convert(f, 5),
+    convert(g, 6),
+    convert(h, 7),
+    convert(i, 8),
+  ];
 }
 
 export type ViewSettings = {
@@ -55,10 +83,10 @@ export function frontColorTurns(settings: ViewSettings): number {
   return Math.max(0, SIDE_SEQUENCE[settings.topColor].indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
 }
 
-export function recolorView(view: TopView, settings: ViewSettings): TopView {
+function recolorerFor(settings: ViewSettings): (color: StickerColor) => StickerColor {
   const sequence = SIDE_SEQUENCE[settings.topColor];
   const shift = frontColorTurns(settings);
-  const recolor = (color: StickerColor): StickerColor => {
+  return (color) => {
     const topped = settings.topColor === 'white' ? WHITE_TOP[color] : color;
     const index = sequence.indexOf(topped);
     if (index < 0) {
@@ -67,6 +95,10 @@ export function recolorView(view: TopView, settings: ViewSettings): TopView {
     // 前面の色の変更は全体の y 回転で、側面の色の巡回置換になる
     return sequence[(index + shift) % sequence.length] ?? topped;
   };
+}
+
+export function recolorView(view: TopView, settings: ViewSettings): TopView {
+  const recolor = recolorerFor(settings);
   return {
     u: mapFace(view.u, recolor),
     f: mapSide(view.f, recolor),
@@ -74,6 +106,20 @@ export function recolorView(view: TopView, settings: ViewSettings): TopView {
     b: mapSide(view.b, recolor),
     l: mapSide(view.l, recolor),
   };
+}
+
+export function recolorCubeView(view: CubeView, settings: ViewSettings): CubeView {
+  const recolor = recolorerFor(settings);
+  return { u: mapFace(view.u, recolor), f: mapFace(view.f, recolor), r: mapFace(view.r, recolor) };
+}
+
+const CENTER_INDEX = 4;
+
+// F2L の図: ペアのステッカーと中心 3 枚 (向きの手がかり) だけ色を残し、他は灰
+export function pairView(view: CubeView, pair: PairMask): CubeFigureView {
+  const keep = (face: TopFace<StickerColor>, mask: TopFace<boolean>): TopFace<FigureColor> =>
+    mapFace(face, (color, index) => (mask[index] === true || index === CENTER_INDEX ? color : 'N'));
+  return { u: keep(view.u, pair.u), f: keep(view.f, pair.f), r: keep(view.r, pair.r) };
 }
 
 // 判断の手がかり: 側面の揃っている塊 (両端が同色 = ヘッドライト、隣り同士が同色 = 2 連、3 つ同色 = 3 連) だけ色を残す

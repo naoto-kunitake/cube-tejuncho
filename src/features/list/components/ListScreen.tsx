@@ -8,10 +8,10 @@ import { categoryEntriesOf } from '@/data/categories';
 import { findRegistration, type Registration, type Settings } from '@/data/document';
 import { type PresetCategoryId, presetsOf } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
-import { recolorView } from '@/lib/figure/view';
 
 import { useCategory } from '../hooks/useCategory';
 import { groupByShape } from '../lib/group-by-shape';
+import { tileNameOf } from '../lib/tile-name';
 import { CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { PatternTile } from './PatternTile';
@@ -24,7 +24,7 @@ type PresetListProps = {
 
 function PresetList({ category, settings, registrations }: PresetListProps) {
   const presets = presetsOf(category);
-  const sections = groupByShape(category, presets, settings.sortOrder[category]);
+  const sections = groupByShape(category, presets, settings.sortOrder[category], settings.topColor);
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
   return (
@@ -48,10 +48,10 @@ function PresetList({ category, settings, registrations }: PresetListProps) {
               {section.presets.map((preset) => (
                 <PatternTile
                   key={preset.id}
-                  patternId={preset.id}
+                  preset={preset}
+                  settings={settings}
                   categoryLabel={copy.list.categories[category]}
-                  name={preset.name}
-                  view={recolorView(preset.view, settings)}
+                  name={tileNameOf(preset)}
                   isRegistered={registeredIds.has(preset.id)}
                 />
               ))}

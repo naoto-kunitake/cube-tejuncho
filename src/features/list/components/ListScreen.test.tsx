@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -55,6 +55,34 @@ describe('ListScreen', () => {
     expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(57);
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(15);
     expect(screen.getByText(copy.list.registeredCount(0, 57))).toBeInTheDocument();
+  });
+
+  it('F2L のタブには 41 種の 3 面の図が 6 の群で並び、見出しは「白」で書かれる', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.f2l }));
+    expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(41);
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(6);
+    expect(screen.getByRole('heading', { level: 2, name: /両方上面・白が上/ })).toBeInTheDocument();
+    expect(screen.getByText(copy.list.registeredCount(0, 41))).toBeInTheDocument();
+  });
+
+  it('OLL のタイルの見出しは番号だけで、読み上げ名にはカテゴリが付く', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.oll, '21', false) });
+    expect(tile).toHaveAttribute('href', '/p/oll-21');
+    expect(tile).toHaveTextContent(/^21$/);
+    expect(within(tile).getByRole('img', { name: '21' })).toBeInTheDocument();
   });
 
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {

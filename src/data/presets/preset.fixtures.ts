@@ -6,7 +6,7 @@ import { applyAlg, isSolved } from '@/lib/cube/kpuzzle';
 import { caseStartState, topViewOf } from '@/lib/cube/view';
 import type { TopView } from '@/lib/figure/view';
 
-// PLL / OLL のプリセットが共通で満たすこと。テストの名前 (1 テスト 1 事実) は呼ぶ側に置き、本体だけを共有する
+// プリセット (PLL / OLL / F2L) が共通で満たすこと。テストの名前 (1 テスト 1 事実) は呼ぶ側に置き、本体だけを共有する
 
 export function expectStandardAlgReadable(standardAlg: string): void {
   expect(parseAlg(standardAlg).ok).toBe(true);

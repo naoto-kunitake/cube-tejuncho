@@ -50,6 +50,13 @@ describe('DetailScreen', () => {
     expect(screen.queryByRole('img', { name: copy.a11y.cueFigure('OLL 21') })).not.toBeInTheDocument();
   });
 
+  it('F2L の詳細は 3 面の図 1 枚で、手がかりの図を出さない', () => {
+    renderDetail('/p/f2l-1');
+    expect(screen.getByRole('heading', { level: 1, name: 'F2L 1' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'F2L 1' }).querySelectorAll('polygon')).toHaveLength(27);
+    expect(screen.queryByRole('img', { name: copy.a11y.cueFigure('F2L 1') })).not.toBeInTheDocument();
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderDetail('/p/unknown');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();

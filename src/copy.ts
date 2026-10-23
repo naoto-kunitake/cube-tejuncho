@@ -1,8 +1,11 @@
 import type { PresetCategoryId } from '@/data/presets/catalog';
+import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
+import type { F2lDescription, WhiteFacing } from '@/lib/figure/describe-f2l';
+import type { TopColor } from '@/lib/figure/view';
 
 // 鍵の形を型にしておき、英語版を足すときは同じ Copy を満たす別ファイルを置く
 type Copy = {
@@ -12,6 +15,9 @@ type Copy = {
     registeredCount: (registered: number, total: number) => string;
     pllShapes: Record<PllShape, string>;
     ollShapes: Record<OllShape, string>;
+    // F2L の「白」はクロスの色。上面が白の設定ではクロスが黄になるので、表示のときに置き換える
+    crossColor: Record<TopColor, string>;
+    f2lShapes: Record<F2lShape, (cross: string) => string>;
     // 種類ごとでないときの見出し (PLL は標準順、OLL / F2L は番号順)
     standardOrder: Record<PresetCategoryId, string>;
     addPattern: string;
@@ -44,6 +50,7 @@ type Copy = {
     recognitionHint: (runs: string[]) => string;
     sideRun: (side: SideName, run: SideRun) => string;
     noRuns: string;
+    f2lRecognition: (description: F2lDescription, cross: string, shapeLabel: string) => string;
     mainAlg: string;
     altAlg: (number: number) => string;
     algPlaceholder: string;
@@ -136,6 +143,7 @@ type Copy = {
 
 const SIDE_NAMES: Record<SideName, string> = { back: '後ろ', front: '前', left: '左', right: '右' };
 const SIDE_RUNS: Record<SideRun, string> = { bar: '3連', headlights: 'ヘッドライト', pair: '2連' };
+const WHITE_FACING_LABEL: Record<WhiteFacing, string> = { down: '下', front: '前', right: '右' };
 
 export const copy = {
   list: {
@@ -166,6 +174,16 @@ export const copy = {
       smallL: '小L型',
       other: 'その他',
       dot: 'ドット',
+    },
+    crossColor: { yellow: '白', white: '黄' },
+    // 群はパーツの位置が最上位 (両方上面 → 片方スロット → 両方スロット)。用語は界隈のカタカナ語 (コーナー / エッジ / スロット)
+    f2lShapes: {
+      bothUpSameColor: () => '両方上面・色が同じ',
+      bothUpDifferentColor: () => '両方上面・色が違う',
+      bothUpWhiteUp: (cross) => `両方上面・${cross}が上`,
+      cornerInSlot: () => 'コーナーがスロット',
+      edgeInSlot: () => 'エッジがスロット',
+      bothInSlot: () => '両方スロット',
     },
     standardOrder: { pll: '標準順', oll: '番号順', f2l: '番号順' },
     addPattern: 'パターンを追加',
@@ -198,6 +216,18 @@ export const copy = {
     recognitionHint: (runs) => `例: ${runs.join('、')}`,
     sideRun: (side, run) => `${SIDE_NAMES[side]}に${SIDE_RUNS[run]}`,
     noRuns: '揃った塊なし',
+    f2lRecognition: (description, cross, shapeLabel) => {
+      switch (description.kind) {
+        case 'bothUp':
+          return shapeLabel;
+        case 'cornerInSlot':
+          return `コーナーがスロット、${cross}が${WHITE_FACING_LABEL[description.whiteFacing]}、エッジは上面`;
+        case 'edgeInSlot':
+          return `エッジがスロット、コーナーの${cross}が${description.isWhiteUp ? '上' : '横'}`;
+        case 'bothInSlot':
+          return `両方スロット、コーナーの${cross}が${WHITE_FACING_LABEL[description.whiteFacing]}`;
+      }
+    },
     mainAlg: 'メイン手順',
     altAlg: (number) => `手順 ${number}`,
     algPlaceholder: "例: R U R' U'",

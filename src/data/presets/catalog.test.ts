@@ -6,7 +6,7 @@ describe('hasPresets', () => {
   it('データがあるプリセットのカテゴリだけ true', () => {
     expect(hasPresets('pll')).toBe(true);
     expect(hasPresets('oll')).toBe(true);
-    expect(hasPresets('f2l')).toBe(false);
+    expect(hasPresets('f2l')).toBe(true);
   });
 
   it('利用者のカテゴリの id は false', () => {
