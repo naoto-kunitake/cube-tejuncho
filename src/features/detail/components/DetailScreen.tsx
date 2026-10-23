@@ -1,10 +1,10 @@
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { ChevronLeft, Pencil, Pin } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { PresetFigure } from '@/components/figures/PresetFigure';
 import { TopFigure } from '@/components/figures/TopFigure';
-import { IconLink } from '@/components/IconButton';
+import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { SectionHeading } from '@/components/SectionHeading';
 import { TopBar } from '@/components/TopBar';
@@ -14,6 +14,7 @@ import { findPattern, patternName } from '@/data/patterns';
 import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { cueView, recolorView } from '@/lib/figure/view';
+import { cn } from '@/lib/utils';
 
 import { AlgCard } from './AlgCard';
 import { StandardAlgCard } from './StandardAlgCard';
@@ -199,7 +200,10 @@ export function DetailScreen() {
   const patterns = useDocumentStore((state) => state.document.patterns);
   const settings = useDocumentStore((state) => state.document.settings);
   const registrations = useDocumentStore((state) => state.document.registrations);
+  const pinned = useDocumentStore((state) => state.document.pinned);
+  const togglePin = useDocumentStore((state) => state.togglePin);
   const ref = findPattern({ patterns }, id);
+  const isPinned = pinned.includes(id);
 
   return (
     <section aria-label={copy.a11y.detail} className="mx-auto flex w-full max-w-140 flex-col">
@@ -214,9 +218,22 @@ export function DetailScreen() {
           </h1>
         </div>
         {ref !== undefined && (
-          <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
-            <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
-          </IconLink>
+          <>
+            {/* aria-pressed のあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態は aria-pressed が伝える */}
+            <IconButton
+              label={copy.a11y.pin}
+              aria-pressed={isPinned}
+              className={cn(isPinned && 'text-accent')}
+              onClick={() => {
+                togglePin(id);
+              }}
+            >
+              <Pin size={22} strokeWidth={1.8} fill={isPinned ? 'currentColor' : 'none'} aria-hidden="true" />
+            </IconButton>
+            <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
+              <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
+            </IconLink>
+          </>
         )}
       </TopBar>
       {ref?.kind === 'preset' && <PatternDetail preset={ref.preset} />}

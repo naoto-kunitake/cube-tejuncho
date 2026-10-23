@@ -69,6 +69,17 @@ describe('DetailScreen', () => {
     expect(screen.queryByRole('img', { name: copy.a11y.cueFigure('F2L 1') })).not.toBeInTheDocument();
   });
 
+  it('ピンを押すとピン留めされ、もう一度押すと外れる', async () => {
+    renderDetail('/p/pll-ua');
+    const pin = screen.getByRole('button', { name: copy.a11y.pin });
+    expect(pin).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.click(pin);
+    expect(pin).toHaveAttribute('aria-pressed', 'true');
+    expect(useDocumentStore.getState().document.pinned).toEqual(['pll-ua']);
+    await userEvent.click(pin);
+    expect(useDocumentStore.getState().document.pinned).toEqual([]);
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderDetail('/p/unknown');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();

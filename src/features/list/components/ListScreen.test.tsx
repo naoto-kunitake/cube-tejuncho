@@ -33,6 +33,17 @@ function withCustomCategory() {
   useDocumentStore.setState({ document });
 }
 
+function withTwoCustomPatterns() {
+  const document = createEmptyDocument();
+  document.categories = [{ id: 'c1', name: 'COLL' }];
+  document.settings.tabOrder = ['pll', 'c1'];
+  document.patterns = [
+    { id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' },
+    { id: 'p2', categoryId: 'c1', name: 'Anti-Sune', createdAt: '', updatedAt: '' },
+  ];
+  useDocumentStore.setState({ document });
+}
+
 describe('ListScreen', () => {
   it('PLL 21 種のタイルを描く', () => {
     render(
@@ -153,6 +164,54 @@ describe('ListScreen', () => {
     const row = screen.getByRole('link', { name: 'Sune' });
     expect(within(row).getByText('U2')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
+  });
+
+  it('ピン留めしたパターンは先頭の「ピン留め」の見出しの下に並び、元の群からは消える', () => {
+    useDocumentStore.getState().togglePin('pll-h');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings[0]).toHaveTextContent(copy.list.pinned);
+    expect(headings[0]).toHaveTextContent('1');
+    expect(screen.getAllByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'H', false) })).toHaveLength(1);
+  });
+
+  it('自作のカテゴリはピン留めがあるときだけ「ピン留め」と「その他」に分かれ、追加の行は末尾', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    useDocumentStore.getState().togglePin('p1');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    expect(screen.getByRole('heading', { level: 2, name: new RegExp(copy.list.pinned) })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2, name: new RegExp(copy.list.others) })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
+  });
+
+  it('自作のカテゴリでピン留めと残りが両方あれば両方の見出しが出て、追加の行は「その他」の末尾', async () => {
+    const user = userEvent.setup();
+    withTwoCustomPatterns();
+    useDocumentStore.getState().togglePin('p1');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings.map((heading) => heading.textContent)).toEqual([`${copy.list.pinned}1`, `${copy.list.others}1`]);
+    const others = headings[1]?.closest('section');
+    if (!(others instanceof HTMLElement)) {
+      throw new Error('others section not found');
+    }
+    expect(within(others).getByRole('link', { name: 'Anti-Sune' })).toBeInTheDocument();
+    expect(within(others).getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
   });
 
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
