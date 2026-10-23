@@ -64,6 +64,16 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('EditScreen', () => {
+  it('F2L の編集画面は 3 面の図と判断のヒントを出す', () => {
+    renderEdit('/p/f2l-1/edit');
+    expect(screen.getByRole('img', { name: 'F2L 1' })).toBeInTheDocument();
+    const shapeLabel = copy.list.f2lShapes.bothUpSameColor();
+    expect(screen.getByLabelText(copy.edit.recognition)).toHaveAttribute(
+      'placeholder',
+      copy.edit.recognitionHint([shapeLabel]),
+    );
+  });
+
   it('判断と手順を書いて保存すると登録され、詳細に戻る', async () => {
     const user = userEvent.setup();
     renderEdit();

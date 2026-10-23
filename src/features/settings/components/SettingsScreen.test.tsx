@@ -54,7 +54,8 @@ describe('SettingsScreen', () => {
     renderSettings();
     expect(screen.getByText(copy.list.categories.pll)).toBeInTheDocument();
     expect(screen.getByText(copy.list.categories.oll)).toBeInTheDocument();
-    expect(screen.getAllByText(copy.settings.preset)).toHaveLength(2);
+    expect(screen.getByText(copy.list.categories.f2l)).toBeInTheDocument();
+    expect(screen.getAllByText(copy.settings.preset)).toHaveLength(3);
     expect(screen.getByRole('button', { name: copy.settings.addCategory })).toBeInTheDocument();
   });
 

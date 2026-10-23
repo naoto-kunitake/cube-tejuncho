@@ -24,7 +24,7 @@ type PresetListProps = {
 
 function PresetList({ category, settings, registrations }: PresetListProps) {
   const presets = presetsOf(category);
-  const sections = groupByShape(category, presets, settings.sortOrder[category]);
+  const sections = groupByShape(category, presets, settings.sortOrder[category], settings.topColor);
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
   return (

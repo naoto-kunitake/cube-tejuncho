@@ -3,15 +3,7 @@ import { cellPosition, FIGURE_LAYOUT, SIDE_FAR, SIDE_NEAR } from '@/lib/figure/l
 import type { FigureColor, FigureView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
-const COLOR_VARIABLE: Record<FigureColor, string> = {
-  Y: 'var(--sticker-yellow)',
-  W: 'var(--sticker-white)',
-  G: 'var(--sticker-green)',
-  B: 'var(--sticker-blue)',
-  R: 'var(--sticker-red)',
-  O: 'var(--sticker-orange)',
-  N: 'var(--sticker-none)',
-};
+import { STICKER_COLOR_VARIABLE } from './sticker-color';
 
 const { cell, sideThickness, cornerRadius, viewBox } = FIGURE_LAYOUT;
 
@@ -34,7 +26,7 @@ function Sticker({ x, y, width, height, color }: StickerProps) {
       height={height}
       rx={cornerRadius}
       style={{
-        fill: COLOR_VARIABLE[color],
+        fill: STICKER_COLOR_VARIABLE[color],
         stroke: 'var(--sticker-edge)',
         strokeOpacity: isWhite ? 0.6 : 0.3,
         strokeWidth: isWhite ? 0.9 : 0.6,

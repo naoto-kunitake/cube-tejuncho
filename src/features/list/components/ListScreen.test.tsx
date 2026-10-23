@@ -57,6 +57,20 @@ describe('ListScreen', () => {
     expect(screen.getByText(copy.list.registeredCount(0, 57))).toBeInTheDocument();
   });
 
+  it('F2L のタブには 41 種の 3 面の図が 6 の群で並び、見出しは「白」で書かれる', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.f2l }));
+    expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(41);
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(6);
+    expect(screen.getByRole('heading', { level: 2, name: /両方上面・白が上/ })).toBeInTheDocument();
+    expect(screen.getByText(copy.list.registeredCount(0, 41))).toBeInTheDocument();
+  });
+
   it('OLL のタイルの見出しは番号だけで、読み上げ名にはカテゴリが付く', async () => {
     const user = userEvent.setup();
     render(

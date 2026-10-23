@@ -18,6 +18,7 @@ import type { PatternRef } from '@/data/patterns';
 import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { describeSides } from '@/lib/figure/describe';
+import { describeF2l } from '@/lib/figure/describe-f2l';
 import { cueView, recolorView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
@@ -169,13 +170,24 @@ export function EditForm({
   // 自作は名前が必須
   const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
-  // 側面の揃い方の手がかりは PLL だけ (OLL は上面の向きで見分ける)
-  const runs =
-    target.kind === 'preset' && target.preset.category === 'pll'
-      ? describeSides(target.preset.view).map((entry) => copy.edit.sideRun(entry.side, entry.run))
-      : null;
-  const recognitionHint =
-    runs === null ? undefined : copy.edit.recognitionHint(runs.length > 0 ? runs : [copy.edit.noRuns]);
+  // 判断の文章の手がかり: PLL は側面の揃い方、F2L はパーツの位置と白の向き (OLL は上面の向きで見分けるので出さない)
+  const recognitionExamplesOf = (preset: Preset): string[] | null => {
+    switch (preset.category) {
+      case 'pll': {
+        const runs = describeSides(preset.view).map((entry) => copy.edit.sideRun(entry.side, entry.run));
+        return runs.length > 0 ? runs : [copy.edit.noRuns];
+      }
+      case 'f2l': {
+        const cross = copy.list.crossColor[settings.topColor];
+        const shapeLabel = copy.list.f2lShapes[preset.shape](cross);
+        return [copy.edit.f2lRecognition(describeF2l(preset.view, preset.pair), cross, shapeLabel)];
+      }
+      case 'oll':
+        return null;
+    }
+  };
+  const recognitionExamples = target.kind === 'preset' ? recognitionExamplesOf(target.preset) : null;
+  const recognitionHint = recognitionExamples === null ? undefined : copy.edit.recognitionHint(recognitionExamples);
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
   // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;

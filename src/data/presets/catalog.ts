@@ -1,28 +1,22 @@
+import { F2L_PRESETS, type F2lPreset } from './f2l';
 import { OLL_PRESETS, type OllPreset } from './oll';
 import { PLL_PRESETS, type PllPreset } from './pll';
 
 export const PRESET_CATEGORY_IDS = ['pll', 'oll', 'f2l'] as const;
 export type PresetCategoryId = (typeof PRESET_CATEGORY_IDS)[number];
 
-type PresetBase = Pick<PllPreset, 'id' | 'name' | 'standardAlg' | 'view'>;
-
-// 画面が扱うプリセット。どのカテゴリのものかを持ち、矢印と手がかりの図は PLL だけ。
-// F2L はデータがまだないので共通の部分だけ (足すときにそのカテゴリの型に置き換える)
+// 画面が扱うプリセット。どのカテゴリのものかを持つ。矢印と手がかりの図は PLL だけ、3 面の図は F2L だけ
 export type Preset =
-  (PllPreset & { category: 'pll' }) | (OllPreset & { category: 'oll' }) | (PresetBase & { category: 'f2l' });
+  (PllPreset & { category: 'pll' }) | (OllPreset & { category: 'oll' }) | (F2lPreset & { category: 'f2l' });
 
-function withCategory<T extends PresetBase, C extends PresetCategoryId>(
-  presets: readonly T[],
-  category: C,
-): (T & { category: C })[] {
+function withCategory<T, C extends PresetCategoryId>(presets: readonly T[], category: C): (T & { category: C })[] {
   return presets.map((preset) => ({ ...preset, category }));
 }
 
-// カテゴリごとのプリセット。F2L はまだない
 const CATALOG: Record<PresetCategoryId, readonly Preset[]> = {
   pll: withCategory(PLL_PRESETS, 'pll'),
   oll: withCategory(OLL_PRESETS, 'oll'),
-  f2l: [],
+  f2l: withCategory(F2L_PRESETS, 'f2l'),
 };
 
 export const ALL_PRESETS: readonly Preset[] = PRESET_CATEGORY_IDS.flatMap((category) => CATALOG[category]);
@@ -31,7 +25,7 @@ function isPresetCategoryId(id: string): id is PresetCategoryId {
   return PRESET_CATEGORY_IDS.some((entry) => entry === id);
 }
 
-// タブに出せるのは、プリセットがあるカテゴリだけ
+// タブに出せるのは、プリセットがあるカテゴリだけ (利用者のカテゴリの id は false)
 export function hasPresets(id: string): id is PresetCategoryId {
   return isPresetCategoryId(id) && CATALOG[id].length > 0;
 }
