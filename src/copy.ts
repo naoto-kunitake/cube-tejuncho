@@ -1,3 +1,4 @@
+import type { Settings } from '@/data/document';
 import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
@@ -5,7 +6,7 @@ import type { PllShape } from '@/data/presets/pll';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
 import type { F2lDescription, WhiteFacing } from '@/lib/figure/describe-f2l';
-import type { TopColor } from '@/lib/figure/view';
+import type { FrontColor, TopColor } from '@/lib/figure/view';
 
 // 鍵の形を型にしておき、英語版を足すときは同じ Copy を満たす別ファイルを置く
 type Copy = {
@@ -98,8 +99,23 @@ type Copy = {
     categoryNamePlaceholder: string;
     duplicateCategory: string;
     add: string;
+    list: string;
+    sortOrderOf: (category: string) => string;
+    byShape: string;
+    figure: string;
+    topColor: string;
+    topColors: Record<TopColor, string>;
+    frontColor: string;
+    frontColors: Record<FrontColor, string>;
+    showArrows: string;
+    showCueFigure: string;
+    playback: string;
+    playbackSpeed: string;
+    playbackSpeeds: Record<Settings['playbackSpeed'], string>;
+    greyUnrelated: string;
+    notation: string;
+    wideStyle: string;
     data: string;
-    dataHint: string;
     exportData: string;
     importData: string;
     importAdd: string;
@@ -299,8 +315,23 @@ export const copy = {
     categoryNamePlaceholder: '例: F2L、COLL、練習中',
     duplicateCategory: '同じ名前のカテゴリがあります',
     add: '追加',
+    list: '一覧',
+    sortOrderOf: (category) => `${category} の並び順`,
+    byShape: '種類ごと',
+    figure: '図',
+    topColor: '上面の色',
+    topColors: { yellow: '黄', white: '白' },
+    frontColor: '前面の色',
+    frontColors: { green: '緑', red: '赤', blue: '青', orange: '橙' },
+    showArrows: '入れ替えの矢印',
+    showCueFigure: '判断の手がかり',
+    playback: '再生',
+    playbackSpeed: '速度',
+    playbackSpeeds: { slow: '遅い', normal: '標準', fast: '速い' },
+    greyUnrelated: '関係ないパーツを灰色に',
+    notation: '表記',
+    wideStyle: '2層回しの表記',
     data: 'データ',
-    dataHint: '書き出したファイルがバックアップになります',
     exportData: '書き出す',
     importData: '読み込む',
     importAdd: '追加',

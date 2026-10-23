@@ -69,7 +69,7 @@ export type ViewSettings = {
   frontColor: FrontColor;
 };
 
-const FRONT_COLOR_LETTER: Record<FrontColor, StickerColor> = { green: 'G', red: 'R', blue: 'B', orange: 'O' };
+export const FRONT_COLOR_LETTER: Record<FrontColor, StickerColor> = { green: 'G', red: 'R', blue: 'B', orange: 'O' };
 
 // 白上は x2 で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
 const WHITE_TOP: Record<StickerColor, StickerColor> = { Y: 'W', W: 'Y', R: 'O', O: 'R', G: 'G', B: 'B' };
@@ -122,7 +122,7 @@ export function pairView(view: CubeView, pair: PairMask): CubeFigureView {
   return { u: keep(view.u, pair.u), f: keep(view.f, pair.f), r: keep(view.r, pair.r) };
 }
 
-const TOP_LETTER: Record<TopColor, StickerColor> = { yellow: 'Y', white: 'W' };
+export const TOP_LETTER: Record<TopColor, StickerColor> = { yellow: 'Y', white: 'W' };
 
 // OLL の図: 上面の色 (黄、白上の設定なら白) のステッカーだけ色を残し、他は灰。見分けるのは「上面の色がどこにあるか」だけ
 export function orientationView(view: TopView, topColor: TopColor): FigureView {

@@ -102,6 +102,16 @@ describe('createDocumentStore', () => {
     expect(createDocumentStore(storage).getState().document.pinned).toEqual(['pll-h']);
   });
 
+  it('設定の部分更新は渡した鍵だけ置き換え、読み直しても残る', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().updateSettings({ topColor: 'white', playbackSpeed: 'fast' });
+    const reloaded = createDocumentStore(storage).getState().document.settings;
+    expect(reloaded.topColor).toBe('white');
+    expect(reloaded.playbackSpeed).toBe('fast');
+    expect(reloaded.frontColor).toBe('green');
+  });
+
   it('一覧の表示を切り替えると設定に残り、読み直しても残る', () => {
     const storage = persistedStorage();
     createDocumentStore(storage).getState().setListView('list');

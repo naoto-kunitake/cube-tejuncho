@@ -52,6 +52,15 @@
   --hover-ground: #e6e6e6;
   --press-ground: #cccccc;
 
+  /* セグメント: 溝 (gray-50) の上に白い錠剤 + 薄い影 (iOS の流儀)。スイッチのオフのトラックは gray-420 (3:1) */
+  --segment-track: #f2f2f2;
+  --segment-selected: #ffffff;
+  --segment-hover: #e6e6e6;
+  --segment-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 0 0 0.5px rgb(0 0 0 / 0.04);
+  --switch-track: #949494;
+  /* 色の点 (上面・前面の色の選択肢) の縁。白の点が白い錠剤に溶けないように */
+  --dot-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.3);
+
   /* 図の色。図は SVG のインライン style からこの変数を参照する */
   --sticker-yellow: #ffd400;
   --sticker-white: #ffffff;
@@ -113,6 +122,11 @@
   --hover-ground: #333333;
   --press-ground: #4d4d4d;
 
+  /* セグメントの溝は地 (カードより暗い)、選択は 600 + 影、hover 800 (iOS のダークのセグメントと同じ) */
+  --segment-track: #1a1a1a;
+  --segment-selected: #666666;
+  --segment-hover: #333333;
+
   --sticker-none: #666666;
 }
 
@@ -154,6 +168,17 @@
   --color-press: var(--press);
   --color-hover-ground: var(--hover-ground);
   --color-press-ground: var(--press-ground);
+  --color-segment-track: var(--segment-track);
+  --color-segment-selected: var(--segment-selected);
+  --color-segment-hover: var(--segment-hover);
+  --color-switch-track: var(--switch-track);
+  --color-sticker-yellow: var(--sticker-yellow);
+  --color-sticker-white: var(--sticker-white);
+  --color-sticker-green: var(--sticker-green);
+  --color-sticker-blue: var(--sticker-blue);
+  --color-sticker-red: var(--sticker-red);
+  --color-sticker-orange: var(--sticker-orange);
+  --color-sticker-none: var(--sticker-none);
 
   /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す。
      input は型スケールの text-input (16) と衝突するので割り当てず、部品側で line-strong を使う */
@@ -198,10 +223,15 @@
   --radius-xl: 16px;
   --radius-sheet: 22px;
 
+  /* 狭い幅 (359px 以下): 設定の見出しと選択肢が 1 行に入らない行は選択肢を下の行へ (max-xs:) */
+  --breakpoint-xs: 22.5rem;
+
   --shadow-*: initial;
   --shadow-1: var(--elevation-1);
   --shadow-2: var(--elevation-2);
   --shadow-3: var(--elevation-3);
   --shadow-4: var(--elevation-4);
   --shadow-5: var(--elevation-5);
+  --shadow-segment: var(--segment-shadow);
+  --shadow-dot: var(--dot-shadow);
 }

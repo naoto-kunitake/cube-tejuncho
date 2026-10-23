@@ -1,5 +1,16 @@
 import type { FigureColor } from '@/lib/figure/view';
 
+// 図 (SVG) 以外で図の色を使うとき (設定の色の点) のクラス
+export const STICKER_DOT_CLASS: Record<FigureColor, string> = {
+  Y: 'bg-sticker-yellow',
+  W: 'bg-sticker-white',
+  G: 'bg-sticker-green',
+  B: 'bg-sticker-blue',
+  R: 'bg-sticker-red',
+  O: 'bg-sticker-orange',
+  N: 'bg-sticker-none',
+};
+
 // 図の色はトークンの変数で指定する (SVG の fill 属性に変数を書くと Safari で透明になるので style で)
 export const STICKER_COLOR_VARIABLE: Record<FigureColor, string> = {
   Y: 'var(--sticker-yellow)',

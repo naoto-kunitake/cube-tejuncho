@@ -16,15 +16,15 @@ import { cn } from '@/lib/utils';
 import { CategorySheet } from './CategorySheet';
 import { ImportSheet } from './ImportSheet';
 import { NoticeDialog } from './NoticeDialog';
+import { OptionSections } from './OptionSections';
+import { SETTING_ROW_CLASS } from './SettingRow';
 
-const ROW_CLASS =
-  'flex min-h-13 w-full items-center justify-between gap-3 border-t border-line px-4 text-left text-body text-ink first:border-t-0';
-const ROW_BUTTON_CLASS = cn(ROW_CLASS, 'pressable hover:bg-hover active:bg-press');
-
+const ROW_BUTTON_CLASS = cn(SETTING_ROW_CLASS, 'pressable hover:bg-hover active:bg-press');
 export function SettingsScreen() {
   const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
   const addCategory = useDocumentStore((state) => state.addCategory);
+  const updateSettings = useDocumentStore((state) => state.updateSettings);
   const importDocument = useDocumentStore((state) => state.importDocument);
   const replaceDocument = useDocumentStore((state) => state.replaceDocument);
   const showToast = useToastStore((state) => state.show);
@@ -85,7 +85,7 @@ export function SettingsScreen() {
           <SectionHeading>{copy.settings.categories}</SectionHeading>
           <div className="overflow-hidden rounded-md border border-line bg-surface">
             {categories.map((category) => (
-              <div key={category.id} className={ROW_CLASS}>
+              <div key={category.id} className={SETTING_ROW_CLASS}>
                 <span className="min-w-0 truncate">{category.label}</span>
                 <span className="text-label whitespace-nowrap text-muted tabular-nums">
                   {category.kind === 'preset'
@@ -108,6 +108,7 @@ export function SettingsScreen() {
             </button>
           </div>
         </section>
+        <OptionSections settings={document.settings} onChange={updateSettings} />
         <section className="flex flex-col gap-2">
           <SectionHeading>{copy.settings.data}</SectionHeading>
           <div className="overflow-hidden rounded-md border border-line bg-surface">
@@ -130,7 +131,6 @@ export function SettingsScreen() {
               {copy.settings.importData}
             </button>
           </div>
-          <p className="text-label text-muted">{copy.settings.dataHint}</p>
         </section>
       </div>
       {isAddingCategory && (

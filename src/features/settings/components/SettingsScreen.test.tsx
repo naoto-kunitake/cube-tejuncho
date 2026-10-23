@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -57,6 +57,30 @@ describe('SettingsScreen', () => {
     expect(screen.getByText(copy.list.categories.f2l)).toBeInTheDocument();
     expect(screen.getAllByText(copy.settings.preset)).toHaveLength(3);
     expect(screen.getByRole('button', { name: copy.settings.addCategory })).toBeInTheDocument();
+  });
+
+  it('並び順のセグメントを押すと、そのカテゴリの並び順だけ変わる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const group = screen.getByRole('group', { name: copy.settings.sortOrderOf(copy.list.categories.pll) });
+    await user.click(within(group).getByRole('button', { name: copy.list.standardOrder.pll }));
+    const { sortOrder } = useDocumentStore.getState().document.settings;
+    expect(sortOrder).toEqual({ pll: 'standard', oll: 'shape', f2l: 'shape' });
+  });
+
+  it('上面の色を白にすると設定が変わる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const group = screen.getByRole('group', { name: copy.settings.topColor });
+    await user.click(within(group).getByRole('button', { name: copy.settings.topColors.white }));
+    expect(useDocumentStore.getState().document.settings.topColor).toBe('white');
+  });
+
+  it('スイッチで入れ替えの矢印をオフにできる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    await user.click(screen.getByRole('switch', { name: copy.settings.showArrows }));
+    expect(useDocumentStore.getState().document.settings.showArrows).toBe(false);
   });
 
   it('カテゴリを追加すると文書に入り、そのカテゴリの一覧へ移る', async () => {
