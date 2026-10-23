@@ -1,11 +1,12 @@
 import { LayoutGrid, List, Settings as SettingsIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { IconButton, IconLink } from '@/components/IconButton';
 import { SectionHeading } from '@/components/SectionHeading';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
-import { findRegistration, type Registration, type Settings } from '@/data/document';
+import { type CustomPattern, findRegistration, type Registration, type Settings } from '@/data/document';
 import { type PresetCategoryId, presetsOf } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { cn } from '@/lib/utils';
@@ -17,22 +18,42 @@ import { CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { PatternTile } from './PatternTile';
 
+type TileSectionProps = {
+  label: string;
+  count: number;
+  listView: Settings['listView'];
+  children: ReactNode;
+};
+
+// 見出し + 格子。群の間は 24 (設定の区画と同じ)、見出しとタイルの間は 8
+function TileSection({ label, count, listView, children }: TileSectionProps) {
+  return (
+    <section className="flex flex-col gap-2">
+      <SectionHeading trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
+        {label}
+      </SectionHeading>
+      <div className={cn('grid gap-2', listView === 'list' ? 'grid-list-rows' : 'grid-tiles')}>{children}</div>
+    </section>
+  );
+}
+
 type PresetListProps = {
   category: PresetCategoryId;
   settings: Settings;
   registrations: readonly Registration[];
+  pinnedIds: ReadonlySet<string>;
 };
 
-function PresetList({ category, settings, registrations }: PresetListProps) {
+function PresetList({ category, settings, registrations, pinnedIds }: PresetListProps) {
   const presets = presetsOf(category);
   const sections = groupByShape(presets, {
     category,
     sortOrder: settings.sortOrder[category],
     topColor: settings.topColor,
+    pinnedIds,
   });
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
-  const gridClass = settings.listView === 'list' ? 'grid-list-rows' : 'grid-tiles';
   return (
     <>
       <p
@@ -41,29 +62,26 @@ function PresetList({ category, settings, registrations }: PresetListProps) {
       >
         {copy.list.registeredCount(registeredCount, presets.length)}
       </p>
-      {/* 群の間は 24 (設定の区画と同じ)。見出しとタイルの間は 8 */}
       <div className="flex flex-col gap-6">
         {sections.map((section) => (
-          <section key={section.label} className="flex flex-col gap-2">
-            <SectionHeading
-              trailing={<span className="font-normal tracking-normal tabular-nums">{section.presets.length}</span>}
-            >
-              {section.label}
-            </SectionHeading>
-            <div className={cn('grid gap-2', gridClass)}>
-              {section.presets.map((preset) => (
-                <PatternTile
-                  key={preset.id}
-                  preset={preset}
-                  settings={settings}
-                  categoryLabel={copy.list.categories[category]}
-                  name={tileNameOf(preset)}
-                  isRegistered={registeredIds.has(preset.id)}
-                  mainAlg={findRegistration(registrations, preset.id)?.mainAlg.text ?? ''}
-                />
-              ))}
-            </div>
-          </section>
+          <TileSection
+            key={section.label}
+            label={section.label}
+            count={section.presets.length}
+            listView={settings.listView}
+          >
+            {section.presets.map((preset) => (
+              <PatternTile
+                key={preset.id}
+                preset={preset}
+                settings={settings}
+                categoryLabel={copy.list.categories[category]}
+                name={tileNameOf(preset)}
+                isRegistered={registeredIds.has(preset.id)}
+                mainAlg={findRegistration(registrations, preset.id)?.mainAlg.text ?? ''}
+              />
+            ))}
+          </TileSection>
         ))}
       </div>
     </>
@@ -74,30 +92,53 @@ type CustomListProps = {
   categoryId: string;
   settings: Settings;
   registrations: readonly Registration[];
+  pinnedIds: ReadonlySet<string>;
 };
 
-// 利用者のカテゴリ: 登録の進み具合も群分けもなく、自作のタイルを作った順に並べ、末尾に追加のタイル
-function CustomList({ categoryId, settings, registrations }: CustomListProps) {
+// 利用者のカテゴリ: 登録の進み具合も群分けもなく、自作のタイルを作った順に並べ、末尾に追加のタイル。
+// 並び方の概念がないので、ピン留めがあるときだけ「ピン留め」と「その他」で区切る (Keep と同じ)
+function CustomList({ categoryId, settings, registrations, pinnedIds }: CustomListProps) {
   const patterns = useDocumentStore((state) => state.document.patterns);
   const own = patterns.filter((pattern) => pattern.categoryId === categoryId);
+  const pinned = own.filter((pattern) => pinnedIds.has(pattern.id));
+  const rest = own.filter((pattern) => !pinnedIds.has(pattern.id));
+  const tileOf = (pattern: CustomPattern) => (
+    <CustomTile
+      key={pattern.id}
+      patternId={pattern.id}
+      name={pattern.name}
+      mainAlg={findRegistration(registrations, pattern.id)?.mainAlg.text ?? ''}
+      settings={settings}
+    />
+  );
+  const addTile = <AddPatternTile categoryId={categoryId} listView={settings.listView} />;
+  if (pinned.length === 0) {
+    return (
+      <div className={cn('mt-1 grid gap-2', settings.listView === 'list' ? 'grid-list-rows' : 'grid-tiles')}>
+        {rest.map(tileOf)}
+        {addTile}
+      </div>
+    );
+  }
   return (
-    <div className={cn('mt-1 grid gap-2', settings.listView === 'list' ? 'grid-list-rows' : 'grid-tiles')}>
-      {own.map((pattern) => (
-        <CustomTile
-          key={pattern.id}
-          patternId={pattern.id}
-          name={pattern.name}
-          mainAlg={findRegistration(registrations, pattern.id)?.mainAlg.text ?? ''}
-          settings={settings}
-        />
-      ))}
-      <AddPatternTile categoryId={categoryId} listView={settings.listView} />
+    <div className="mt-1 flex flex-col gap-6">
+      <TileSection label={copy.list.pinned} count={pinned.length} listView={settings.listView}>
+        {pinned.map(tileOf)}
+        {rest.length === 0 && addTile}
+      </TileSection>
+      {rest.length > 0 && (
+        <TileSection label={copy.list.others} count={rest.length} listView={settings.listView}>
+          {rest.map(tileOf)}
+          {addTile}
+        </TileSection>
+      )}
     </div>
   );
 }
 
 export function ListScreen() {
   const document = useDocumentStore((state) => state.document);
+  const pinnedIds = new Set(document.pinned);
   const setListView = useDocumentStore((state) => state.setListView);
   const isList = document.settings.listView === 'list';
   const entries = categoryEntriesOf(document);
@@ -132,12 +173,18 @@ export function ListScreen() {
       <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
       <div className="flex flex-col gap-4 px-4 pb-6">
         {selected?.kind === 'custom' ? (
-          <CustomList categoryId={selected.id} settings={document.settings} registrations={document.registrations} />
+          <CustomList
+            categoryId={selected.id}
+            settings={document.settings}
+            registrations={document.registrations}
+            pinnedIds={pinnedIds}
+          />
         ) : (
           <PresetList
             category={selected?.kind === 'preset' ? selected.id : 'pll'}
             settings={document.settings}
             registrations={document.registrations}
+            pinnedIds={pinnedIds}
           />
         )}
       </div>

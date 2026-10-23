@@ -114,6 +114,7 @@ export type DocumentStore = {
   replaceDocument: (document: Document) => void;
   setLastTab: (categoryId: string) => void;
   setListView: (listView: Settings['listView']) => void;
+  togglePin: (patternId: string) => void;
   dismissLoadIssue: () => void;
 };
 
@@ -231,6 +232,16 @@ export function createDocumentStore(storage: KeyValueStorage) {
             set((state) => ({
               document: { ...state.document, settings: { ...state.document.settings, lastTab: categoryId } },
             }));
+            reportStorageIssue();
+          },
+          togglePin: (patternId) => {
+            set((state) => {
+              const isPinned = state.document.pinned.includes(patternId);
+              const pinned = isPinned
+                ? state.document.pinned.filter((id) => id !== patternId)
+                : [...state.document.pinned, patternId];
+              return { document: { ...state.document, pinned } };
+            });
             reportStorageIssue();
           },
           setListView: (listView) => {

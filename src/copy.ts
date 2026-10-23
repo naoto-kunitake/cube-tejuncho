@@ -22,6 +22,8 @@ type Copy = {
     standardOrder: Record<PresetCategoryId, string>;
     addPattern: string;
     noAlg: string;
+    pinned: string;
+    others: string;
   };
   detail: {
     notFound: string;
@@ -125,6 +127,7 @@ type Copy = {
     backToList: string;
     edit: string;
     editPattern: (name: string) => string;
+    pin: string;
     closeEdit: string;
     keypad: string;
     categorySheet: string;
@@ -190,6 +193,8 @@ export const copy = {
     standardOrder: { pll: '標準順', oll: '番号順', f2l: '番号順' },
     addPattern: 'パターンを追加',
     noAlg: '手順なし',
+    pinned: 'ピン留め',
+    others: 'その他',
   },
   detail: {
     notFound: 'パターンが見つかりません',
@@ -317,6 +322,7 @@ export const copy = {
     backToList: '一覧へ戻る',
     edit: '編集',
     editPattern: (name) => `${name} を編集`,
+    pin: 'ピン留め',
     closeEdit: '閉じる',
     keypad: '手順キーパッド',
     categorySheet: 'カテゴリ',

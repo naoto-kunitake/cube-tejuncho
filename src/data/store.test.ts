@@ -75,6 +75,16 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
+  it('ピン留めは押すたびに付いたり外れたりし、読み直しても残る', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().togglePin('pll-ua');
+    store.getState().togglePin('pll-h');
+    store.getState().togglePin('pll-ua');
+    expect(store.getState().document.pinned).toEqual(['pll-h']);
+    expect(createDocumentStore(storage).getState().document.pinned).toEqual(['pll-h']);
+  });
+
   it('一覧の表示を切り替えると設定に残り、読み直しても残る', () => {
     const storage = persistedStorage();
     createDocumentStore(storage).getState().setListView('list');
