@@ -120,6 +120,8 @@ type Copy = {
     detail: string;
     categoryTabs: string;
     openSettings: string;
+    switchToList: string;
+    switchToGrid: string;
     backToList: string;
     edit: string;
     editPattern: (name: string) => string;
@@ -310,6 +312,8 @@ export const copy = {
     detail: '詳細',
     categoryTabs: 'カテゴリ',
     openSettings: '設定',
+    switchToList: 'リスト表示にする',
+    switchToGrid: 'グリッド表示にする',
     backToList: '一覧へ戻る',
     edit: '編集',
     editPattern: (name) => `${name} を編集`,

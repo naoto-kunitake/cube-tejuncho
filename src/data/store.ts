@@ -9,6 +9,7 @@ import {
   DOCUMENT_VERSION,
   DocumentSchema,
   type RegistrationData,
+  type Settings,
 } from './document';
 import { applyImport, type ImportMode } from './import-data';
 import { migrateDocument } from './migrate';
@@ -112,6 +113,7 @@ export type DocumentStore = {
   // 破壊的な操作の「元に戻す」。控えておいた文書を丸ごと戻す
   replaceDocument: (document: Document) => void;
   setLastTab: (categoryId: string) => void;
+  setListView: (listView: Settings['listView']) => void;
   dismissLoadIssue: () => void;
 };
 
@@ -229,6 +231,10 @@ export function createDocumentStore(storage: KeyValueStorage) {
             set((state) => ({
               document: { ...state.document, settings: { ...state.document.settings, lastTab: categoryId } },
             }));
+            reportStorageIssue();
+          },
+          setListView: (listView) => {
+            set((state) => ({ document: { ...state.document, settings: { ...state.document.settings, listView } } }));
             reportStorageIssue();
           },
           dismissLoadIssue: () => {
