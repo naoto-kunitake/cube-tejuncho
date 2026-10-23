@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cueView, recolorView, type TopView } from './view';
+import { cueView, pairView, recolorCubeView, recolorView, type TopView } from './view';
 
 const UA: TopView = {
   u: ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'],
@@ -64,5 +64,43 @@ describe('cueView', () => {
 
   it('上面には手を加えない', () => {
     expect(cueView(UA).u).toEqual(UA.u);
+  });
+});
+
+describe('recolorCubeView', () => {
+  const view = {
+    u: ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'R'],
+    f: ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W'],
+    r: ['O', 'O', 'O', 'O', 'O', 'O', 'Y', 'O', 'O'],
+  } as const;
+
+  it('白上では黄↔白と赤↔橙を入れ替える', () => {
+    const recolored = recolorCubeView(view, { topColor: 'white', frontColor: 'green' });
+    expect(recolored.u[0]).toBe('W');
+    expect(recolored.u[8]).toBe('O');
+    expect(recolored.f[8]).toBe('Y');
+    expect(recolored.r[0]).toBe('R');
+  });
+
+  it('前面を赤にすると側面の色が 1 つ巡回する', () => {
+    const recolored = recolorCubeView(view, { topColor: 'yellow', frontColor: 'red' });
+    expect(recolored.f[0]).toBe('R');
+    expect(recolored.r[0]).toBe('G');
+  });
+});
+
+describe('pairView', () => {
+  it('ペアのステッカーと中心だけ色を残し、他は灰', () => {
+    const view = {
+      u: ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'R'],
+      f: ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W'],
+      r: ['O', 'O', 'O', 'O', 'O', 'O', 'Y', 'O', 'O'],
+    } as const;
+    const none = [false, false, false, false, false, false, false, false, false] as const;
+    const last = [false, false, false, false, false, false, false, false, true] as const;
+    const figure = pairView(view, { u: last, f: last, r: none });
+    expect(figure.u).toEqual(['N', 'N', 'N', 'N', 'Y', 'N', 'N', 'N', 'R']);
+    expect(figure.f).toEqual(['N', 'N', 'N', 'N', 'G', 'N', 'N', 'N', 'W']);
+    expect(figure.r).toEqual(['N', 'N', 'N', 'N', 'O', 'N', 'N', 'N', 'N']);
   });
 });
