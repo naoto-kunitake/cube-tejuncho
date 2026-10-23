@@ -7,10 +7,12 @@ import type { Settings } from '@/data/document';
 import { PRESET_CATEGORY_IDS } from '@/data/presets/catalog';
 import { WIDE_STYLES } from '@/lib/alg/format';
 import { FRONT_COLOR_LETTER, FRONT_COLORS, TOP_COLORS, TOP_LETTER } from '@/lib/figure/view';
+import { APPEARANCES } from '@/lib/theme/color';
 
 import { Segmented } from './Segmented';
 import { SettingRow } from './SettingRow';
 import { Switch } from './Switch';
+import { ThemeColorPicker } from './ThemeColorPicker';
 
 const PLAYBACK_SPEEDS = ['slow', 'normal', 'fast'] as const;
 
@@ -34,7 +36,7 @@ type OptionSectionsProps = {
   onChange: (patch: Partial<Settings>) => void;
 };
 
-// 一覧の並び順 / 図 / 再生 / 表記 の 4 区画。選択肢はセグメント、on / off はスイッチ
+// 一覧の並び順 / 図 / 再生 / 表記 / 外観 の 5 区画。選択肢はセグメント、on / off はスイッチ、テーマ色は色見本
 export function OptionSections({ settings, onChange }: OptionSectionsProps) {
   return (
     <>
@@ -133,6 +135,31 @@ export function OptionSections({ settings, onChange }: OptionSectionsProps) {
             value={settings.wideStyle}
             onChange={(wideStyle) => {
               onChange({ wideStyle });
+            }}
+          />
+        </SettingRow>
+      </SettingsSection>
+      <SettingsSection title={copy.settings.appearance}>
+        {/* 色見本は 5 列 × 2 段で横に収まらないので、この行だけ見出しの下に積む (上 12 / 下 16) */}
+        <div className="flex flex-col gap-3 border-t border-line px-4 pt-3 pb-4 text-body text-ink first:border-t-0">
+          <span aria-hidden="true">{copy.settings.themeColor}</span>
+          <ThemeColorPicker
+            value={settings.themeColor}
+            onChange={(themeColor) => {
+              onChange({ themeColor });
+            }}
+          />
+        </div>
+        <SettingRow label={copy.settings.appearanceMode} wrapsOnNarrow>
+          <Segmented
+            label={copy.settings.appearanceMode}
+            options={APPEARANCES.map((appearance) => ({
+              value: appearance,
+              label: copy.settings.appearances[appearance],
+            }))}
+            value={settings.appearance}
+            onChange={(appearance) => {
+              onChange({ appearance });
             }}
           />
         </SettingRow>

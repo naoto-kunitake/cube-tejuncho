@@ -179,6 +179,15 @@
   --color-sticker-red: var(--sticker-red);
   --color-sticker-orange: var(--sticker-orange);
   --color-sticker-none: var(--sticker-none);
+  /* テーマ色の見本 (Material Design 2 の 8 色)。保存する値は lib/theme/palette.ts に同じ hex がある */
+  --color-theme-red: #d32f2f;
+  --color-theme-orange: #f57c00;
+  --color-theme-yellow: #fdd835;
+  --color-theme-green: #43a047;
+  --color-theme-teal: #00796b;
+  --color-theme-blue: #1976d2;
+  --color-theme-purple: #8e24aa;
+  --color-theme-pink: #d81b60;
 
   /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す。
      input は型スケールの text-input (16) と衝突するので割り当てず、部品側で line-strong を使う */

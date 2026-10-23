@@ -7,6 +7,8 @@ import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
 import type { F2lDescription, WhiteFacing } from '@/lib/figure/describe-f2l';
 import type { FrontColor, TopColor } from '@/lib/figure/view';
+import type { Appearance } from '@/lib/theme/color';
+import type { ThemePresetId } from '@/lib/theme/palette';
 
 // 鍵の形を型にしておき、英語版を足すときは同じ Copy を満たす別ファイルを置く
 type Copy = {
@@ -115,6 +117,12 @@ type Copy = {
     greyUnrelated: string;
     notation: string;
     wideStyle: string;
+    appearance: string;
+    themeColor: string;
+    themeColors: Record<ThemePresetId, string>;
+    customColor: string;
+    appearanceMode: string;
+    appearances: Record<Appearance, string>;
     data: string;
     exportData: string;
     importData: string;
@@ -331,6 +339,23 @@ export const copy = {
     greyUnrelated: '関係ないパーツを灰色に',
     notation: '表記',
     wideStyle: '2層回しの表記',
+    appearance: '外観',
+    themeColor: 'テーマ色',
+    themeColors: {
+      ink: '墨',
+      red: '赤',
+      orange: '橙',
+      yellow: '黄',
+      green: '緑',
+      teal: '青緑',
+      blue: '青',
+      purple: '紫',
+      pink: '桃',
+    },
+    customColor: '自分で選ぶ',
+    // iOS の設定と同じ語。「自動」は端末のダークモードに追従する意味 (「システム」は 360 幅で収まらない)
+    appearanceMode: '外観モード',
+    appearances: { auto: '自動', light: 'ライト', dark: 'ダーク' },
     data: 'データ',
     exportData: '書き出す',
     importData: '読み込む',

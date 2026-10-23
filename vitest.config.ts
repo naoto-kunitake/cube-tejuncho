@@ -9,6 +9,8 @@ export default mergeConfig(
       environment: 'jsdom',
       include: ['src/**/*.test.{ts,tsx}'],
       setupFiles: ['./vitest.setup.ts'],
+      // tokens.css は ?raw で文字列として読むテストがある (既定では CSS を空にする)
+      css: { include: [/tokens\.css/] },
     },
   }),
 );

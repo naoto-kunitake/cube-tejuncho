@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -81,6 +81,39 @@ describe('SettingsScreen', () => {
     renderSettings();
     await user.click(screen.getByRole('switch', { name: copy.settings.showArrows }));
     expect(useDocumentStore.getState().document.settings.showArrows).toBe(false);
+  });
+
+  it('テーマ色の見本を選ぶと設定に色が入り、墨に戻せる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const group = screen.getByRole('radiogroup', { name: copy.settings.themeColor });
+    await user.click(within(group).getByRole('radio', { name: copy.settings.themeColors.red }));
+    expect(useDocumentStore.getState().document.settings.themeColor).toBe('#d32f2f');
+    expect(within(group).getByRole('radio', { name: copy.settings.themeColors.red })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await user.click(within(group).getByRole('radio', { name: copy.settings.themeColors.ink }));
+    expect(useDocumentStore.getState().document.settings.themeColor).toBe('ink');
+  });
+
+  it('自分で選んだ色は見本にない色として設定に入る', () => {
+    renderSettings();
+    const input = document.querySelector('input[type="color"]');
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('color input not found');
+    }
+    fireEvent.change(input, { target: { value: '#123456' } });
+    expect(useDocumentStore.getState().document.settings.themeColor).toBe('#123456');
+    expect(screen.getByRole('radio', { name: copy.settings.customColor })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('外観モードをダークにすると設定が変わる', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    const group = screen.getByRole('group', { name: copy.settings.appearanceMode });
+    await user.click(within(group).getByRole('button', { name: copy.settings.appearances.dark }));
+    expect(useDocumentStore.getState().document.settings.appearance).toBe('dark');
   });
 
   it('カテゴリを追加すると文書に入り、そのカテゴリの一覧へ移る', async () => {
