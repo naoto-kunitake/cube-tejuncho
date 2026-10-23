@@ -122,6 +122,21 @@ export function pairView(view: CubeView, pair: PairMask): CubeFigureView {
   return { u: keep(view.u, pair.u), f: keep(view.f, pair.f), r: keep(view.r, pair.r) };
 }
 
+const TOP_LETTER: Record<TopColor, StickerColor> = { yellow: 'Y', white: 'W' };
+
+// OLL の図: 上面の色 (黄、白上の設定なら白) のステッカーだけ色を残し、他は灰。見分けるのは「上面の色がどこにあるか」だけ
+export function orientationView(view: TopView, topColor: TopColor): FigureView {
+  const top = TOP_LETTER[topColor];
+  const keep = (color: StickerColor): FigureColor => (color === top ? color : 'N');
+  return {
+    u: mapFace(view.u, keep),
+    f: mapSide(view.f, keep),
+    r: mapSide(view.r, keep),
+    b: mapSide(view.b, keep),
+    l: mapSide(view.l, keep),
+  };
+}
+
 // 判断の手がかり: 側面の揃っている塊 (両端が同色 = ヘッドライト、隣り同士が同色 = 2 連、3 つ同色 = 3 連) だけ色を残す
 function keepBlocks(side: Side<StickerColor>): Side<FigureColor> {
   const [a, b, c] = side;

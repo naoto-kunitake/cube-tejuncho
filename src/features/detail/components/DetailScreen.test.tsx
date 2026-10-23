@@ -48,6 +48,13 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('img', { name: 'Ua' }).querySelectorAll('path').length).toBeGreaterThan(0);
   });
 
+  it('OLL の図は上面の色のステッカーだけ色があり、他は灰', () => {
+    renderDetail('/p/oll-21');
+    const stickers = [...screen.getByRole('img', { name: 'OLL 21' }).querySelectorAll('rect')];
+    expect(stickers).toHaveLength(21);
+    expect(stickers.filter((rect) => rect.style.fill === 'var(--sticker-none)')).toHaveLength(12);
+  });
+
   it('OLL の詳細には手がかりの図を出さない', () => {
     renderDetail('/p/oll-21');
     expect(screen.getByRole('heading', { level: 1, name: 'OLL 21' })).toBeInTheDocument();

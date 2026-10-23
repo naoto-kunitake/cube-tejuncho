@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cueView, pairView, recolorCubeView, recolorView, type TopView } from './view';
+import { cueView, orientationView, pairView, recolorCubeView, recolorView, type TopView } from './view';
 
 const UA: TopView = {
   u: ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'],
@@ -102,5 +102,29 @@ describe('pairView', () => {
     expect(figure.u).toEqual(['N', 'N', 'N', 'N', 'Y', 'N', 'N', 'N', 'R']);
     expect(figure.f).toEqual(['N', 'N', 'N', 'N', 'G', 'N', 'N', 'N', 'W']);
     expect(figure.r).toEqual(['N', 'N', 'N', 'N', 'O', 'N', 'N', 'N', 'N']);
+  });
+});
+
+describe('orientationView', () => {
+  const OLL_27: TopView = {
+    u: ['Y', 'Y', 'B', 'Y', 'Y', 'Y', 'Y', 'Y', 'G'],
+    f: ['Y', 'G', 'O'],
+    r: ['Y', 'O', 'B'],
+    b: ['Y', 'B', 'R'],
+    l: ['R', 'R', 'G'],
+  };
+
+  it('黄上では黄のステッカーだけ残し、他は灰', () => {
+    const figure = orientationView(OLL_27, 'yellow');
+    expect(figure.u).toEqual(['Y', 'Y', 'N', 'Y', 'Y', 'Y', 'Y', 'Y', 'N']);
+    expect(figure.f).toEqual(['Y', 'N', 'N']);
+    expect(figure.l).toEqual(['N', 'N', 'N']);
+  });
+
+  it('白上では白のステッカーだけ残す', () => {
+    const recolored = recolorView(OLL_27, { topColor: 'white', frontColor: 'green' });
+    const figure = orientationView(recolored, 'white');
+    expect(figure.u.filter((color) => color === 'W')).toHaveLength(7);
+    expect(figure.u.filter((color) => color === 'N')).toHaveLength(2);
   });
 });
