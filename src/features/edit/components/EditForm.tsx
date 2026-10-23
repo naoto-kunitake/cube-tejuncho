@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 import { Button } from '@/components/Button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
+import { PresetFigure } from '@/components/figures/PresetFigure';
 import { TopFigure } from '@/components/figures/TopFigure';
 import { IconButton } from '@/components/IconButton';
 import { useToastStore } from '@/components/toast/toast-store';
@@ -86,24 +87,22 @@ function draftIdOf(target: EditTarget): string {
   }
 }
 
-type PresetFigureProps = {
+type EditFigureProps = {
   preset: Preset;
   settings: Settings;
 };
 
 // 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる。
-// 矢印と手がかりは PLL だけ
-function PresetFigure({ preset, settings }: PresetFigureProps) {
-  const view = recolorView(preset.view, settings);
-  const arrows = preset.category === 'pll' && settings.showArrows ? preset.arrows : [];
+// 手がかりは PLL だけ
+function EditFigure({ preset, settings }: EditFigureProps) {
   if (preset.category === 'pll' && settings.showCueFigure) {
     return (
       <div className="flex w-full justify-center gap-6 pt-4.25">
         <div className="-m-1.75 w-38 flex-none">
-          <TopFigure view={view} arrows={arrows} label={preset.name} />
+          <PresetFigure preset={preset} settings={settings} />
         </div>
         <div className="-m-1.75 w-38 flex-none">
-          <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
+          <TopFigure view={cueView(recolorView(preset.view, settings))} label={copy.a11y.cueFigure(preset.name)} />
         </div>
       </div>
     );
@@ -111,7 +110,7 @@ function PresetFigure({ preset, settings }: PresetFigureProps) {
   return (
     <div className="flex justify-center pt-4.25">
       <div className="-my-2.75 w-full max-w-60">
-        <TopFigure view={view} arrows={arrows} label={preset.name} />
+        <PresetFigure preset={preset} settings={settings} />
       </div>
     </div>
   );
@@ -371,7 +370,7 @@ export function EditForm({
       </TopBar>
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
       <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypadIndex !== null && !usesNativeKeyboard && 'pb-60')}>
-        {target.kind === 'preset' && <PresetFigure preset={target.preset} settings={settings} />}
+        {target.kind === 'preset' && <EditFigure preset={target.preset} settings={settings} />}
         {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
         {isCustom && (
           <>

@@ -8,7 +8,6 @@ import { categoryEntriesOf } from '@/data/categories';
 import { findRegistration, type Registration, type Settings } from '@/data/document';
 import { type PresetCategoryId, presetsOf } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
-import { recolorView } from '@/lib/figure/view';
 
 import { useCategory } from '../hooks/useCategory';
 import { groupByShape } from '../lib/group-by-shape';
@@ -49,10 +48,10 @@ function PresetList({ category, settings, registrations }: PresetListProps) {
               {section.presets.map((preset) => (
                 <PatternTile
                   key={preset.id}
-                  patternId={preset.id}
+                  preset={preset}
+                  settings={settings}
                   categoryLabel={copy.list.categories[category]}
                   name={tileNameOf(preset)}
-                  view={recolorView(preset.view, settings)}
                   isRegistered={registeredIds.has(preset.id)}
                 />
               ))}

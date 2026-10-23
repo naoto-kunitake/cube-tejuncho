@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -68,6 +68,7 @@ describe('ListScreen', () => {
     const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.oll, '21', false) });
     expect(tile).toHaveAttribute('href', '/p/oll-21');
     expect(tile).toHaveTextContent(/^21$/);
+    expect(within(tile).getByRole('img', { name: '21' })).toBeInTheDocument();
   });
 
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {

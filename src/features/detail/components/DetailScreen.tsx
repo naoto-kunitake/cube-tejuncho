@@ -2,6 +2,7 @@ import { ChevronLeft, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
+import { PresetFigure } from '@/components/figures/PresetFigure';
 import { TopFigure } from '@/components/figures/TopFigure';
 import { IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
@@ -30,10 +31,6 @@ function PatternDetail({ preset }: PatternDetailProps) {
   const registrations = useDocumentStore((state) => state.document.registrations);
   const addRegistration = useDocumentStore((state) => state.addRegistration);
   const registration = findRegistration(registrations, preset.id);
-  const view = recolorView(preset.view, settings);
-  // 入れ替えの矢印と手がかりの図は PLL だけ (OLL は上面の向きで見分ける)
-  const arrows = preset.category === 'pll' && settings.showArrows ? preset.arrows : [];
-  const hasCueFigure = preset.category === 'pll' && settings.showCueFigure;
   const editPath = `/p/${preset.id}/edit`;
   // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
   const [playingAlg, setPlayingAlg] = useState<string | null>(null);
@@ -44,18 +41,19 @@ function PatternDetail({ preset }: PatternDetailProps) {
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {/* SVG は viewBox 86 のうち外側 4 (4.65%) が空き。負の余白で打ち消し、ステッカーの外周をカードの余白 16 に揃える。
             2 枚: ステッカー幅 138 × 2 + 間 24 = カード内側 300 → SVG 幅 152、負の余白 7。1 枚: 240 → 11 */}
-        {hasCueFigure ? (
+        {/* 手がかりの図は PLL だけ (OLL は上面の向きで見分ける) */}
+        {preset.category === 'pll' && settings.showCueFigure ? (
           <div className="flex w-full justify-center gap-6">
             <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={view} arrows={arrows} label={preset.name} />
+              <PresetFigure preset={preset} settings={settings} />
             </div>
             <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={cueView(view)} label={copy.a11y.cueFigure(preset.name)} />
+              <TopFigure view={cueView(recolorView(preset.view, settings))} label={copy.a11y.cueFigure(preset.name)} />
             </div>
           </div>
         ) : (
           <div className="-my-2.75 w-full max-w-60">
-            <TopFigure view={view} arrows={arrows} label={preset.name} />
+            <PresetFigure preset={preset} settings={settings} />
           </div>
         )}
         {registration !== undefined && registration.recognition !== '' && (
