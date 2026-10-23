@@ -115,6 +115,8 @@ export type DocumentStore = {
   replaceDocument: (document: Document) => void;
   setLastTab: (categoryId: string) => void;
   setListView: (listView: Settings['listView']) => void;
+  // 設定画面の項目 (並び順・図・再生・表記・外観) の更新。渡した鍵だけ置き換える
+  updateSettings: (patch: Partial<Settings>) => void;
   togglePin: (patternId: string) => void;
   // そのカテゴリの未登録のプリセット全部に基本手順をメイン手順として入れる。返り値は入れた件数
   registerStandardAlgs: (category: PresetCategoryId) => number;
@@ -137,6 +139,11 @@ export function createDocumentStore(storage: KeyValueStorage) {
           if (issue !== null) {
             set({ loadIssue: issue });
           }
+        };
+        // 設定の差し替えは 1 か所に。名前のある action (setLastTab など) はここに委ねる
+        const updateSettings = (patch: Partial<Settings>) => {
+          set((state) => ({ document: { ...state.document, settings: { ...state.document.settings, ...patch } } }));
+          reportStorageIssue();
         };
         return {
           document: createEmptyDocument(),
@@ -233,10 +240,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           setLastTab: (categoryId) => {
-            set((state) => ({
-              document: { ...state.document, settings: { ...state.document.settings, lastTab: categoryId } },
-            }));
-            reportStorageIssue();
+            updateSettings({ lastTab: categoryId });
           },
           togglePin: (patternId) => {
             set((state) => {
@@ -284,9 +288,9 @@ export function createDocumentStore(storage: KeyValueStorage) {
             });
             reportStorageIssue();
           },
+          updateSettings,
           setListView: (listView) => {
-            set((state) => ({ document: { ...state.document, settings: { ...state.document.settings, listView } } }));
-            reportStorageIssue();
+            updateSettings({ listView });
           },
           dismissLoadIssue: () => {
             set({ loadIssue: null });
