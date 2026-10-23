@@ -24,6 +24,11 @@ type Copy = {
     noAlg: string;
     pinned: string;
     others: string;
+    emptyTitle: string;
+    emptyHint: string;
+    registerAll: string;
+    registeredAll: (count: number) => string;
+    dismissBanner: string;
   };
   detail: {
     notFound: string;
@@ -121,6 +126,7 @@ type Copy = {
     list: string;
     detail: string;
     categoryTabs: string;
+    firstRun: string;
     openSettings: string;
     switchToList: string;
     switchToGrid: string;
@@ -195,6 +201,11 @@ export const copy = {
     noAlg: '手順なし',
     pinned: 'ピン留め',
     others: 'その他',
+    emptyTitle: '登録された手順はありません',
+    emptyHint: 'パターンを開くと登録できます',
+    registerAll: '基本手順を一括登録',
+    registeredAll: (count) => `${count}件を登録しました`,
+    dismissBanner: '閉じる',
   },
   detail: {
     notFound: 'パターンが見つかりません',
@@ -316,6 +327,7 @@ export const copy = {
     list: '一覧',
     detail: '詳細',
     categoryTabs: 'カテゴリ',
+    firstRun: '案内',
     openSettings: '設定',
     switchToList: 'リスト表示にする',
     switchToGrid: 'グリッド表示にする',

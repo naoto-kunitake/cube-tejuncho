@@ -13,6 +13,7 @@ import {
 } from './document';
 import { applyImport, type ImportMode } from './import-data';
 import { migrateDocument } from './migrate';
+import { type PresetCategoryId, presetsOf } from './presets/catalog';
 import { createStorage, type KeyValueStorage } from './storage';
 
 export const DOCUMENT_KEY = 'cube-tejuncho:doc';
@@ -115,6 +116,9 @@ export type DocumentStore = {
   setLastTab: (categoryId: string) => void;
   setListView: (listView: Settings['listView']) => void;
   togglePin: (patternId: string) => void;
+  // そのカテゴリの未登録のプリセット全部に基本手順をメイン手順として入れる。返り値は入れた件数
+  registerStandardAlgs: (category: PresetCategoryId) => number;
+  dismissBanner: (category: PresetCategoryId) => void;
   dismissLoadIssue: () => void;
 };
 
@@ -241,6 +245,42 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 ? state.document.pinned.filter((id) => id !== patternId)
                 : [...state.document.pinned, patternId];
               return { document: { ...state.document, pinned } };
+            });
+            reportStorageIssue();
+          },
+          registerStandardAlgs: (category) => {
+            const now = new Date().toISOString();
+            let addedCount = 0;
+            set((state) => {
+              const registeredIds = new Set(state.document.registrations.map((entry) => entry.patternId));
+              const added = presetsOf(category)
+                .filter((preset) => !registeredIds.has(preset.id))
+                .map((preset) => ({
+                  patternId: preset.id,
+                  recognition: '',
+                  mainAlg: { text: preset.standardAlg, mnemonic: '', fingering: '' },
+                  altAlgs: [],
+                  createdAt: now,
+                  updatedAt: now,
+                }));
+              addedCount = added.length;
+              return { document: { ...state.document, registrations: [...state.document.registrations, ...added] } };
+            });
+            reportStorageIssue();
+            return addedCount;
+          },
+          dismissBanner: (category) => {
+            set((state) => {
+              const { dismissedBanners } = state.document.settings;
+              if (dismissedBanners.includes(category)) {
+                return state;
+              }
+              return {
+                document: {
+                  ...state.document,
+                  settings: { ...state.document.settings, dismissedBanners: [...dismissedBanners, category] },
+                },
+              };
             });
             reportStorageIssue();
           },

@@ -75,6 +75,23 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
+  it('一括登録は未登録のプリセットだけに基本手順を入れ、入れた件数を返す', () => {
+    const store = createDocumentStore(persistedStorage());
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    expect(store.getState().registerStandardAlgs('pll')).toBe(20);
+    expect(store.getState().document.registrations).toHaveLength(21);
+    expect(store.getState().document.registrations[0]?.mainAlg).toEqual(UA_ALG);
+    expect(store.getState().registerStandardAlgs('pll')).toBe(0);
+  });
+
+  it('案内を閉じたタブは設定に残り、同じタブを 2 回閉じても 1 つ', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().dismissBanner('pll');
+    store.getState().dismissBanner('pll');
+    expect(createDocumentStore(storage).getState().document.settings.dismissedBanners).toEqual(['pll']);
+  });
+
   it('ピン留めは押すたびに付いたり外れたりし、読み直しても残る', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);
