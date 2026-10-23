@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { IconButton, IconLink } from '@/components/IconButton';
 import { SectionHeading } from '@/components/SectionHeading';
+import { useToastStore } from '@/components/toast/toast-store';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
@@ -16,6 +17,7 @@ import { groupByShape } from '../lib/group-by-shape';
 import { tileNameOf } from '../lib/tile-name';
 import { CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
+import { FirstRunBanner } from './FirstRunBanner';
 import { PatternTile } from './PatternTile';
 
 type TileSectionProps = {
@@ -45,6 +47,10 @@ type PresetListProps = {
 };
 
 function PresetList({ category, settings, registrations, pinnedIds }: PresetListProps) {
+  const registerStandardAlgs = useDocumentStore((state) => state.registerStandardAlgs);
+  const dismissBanner = useDocumentStore((state) => state.dismissBanner);
+  const replaceDocument = useDocumentStore((state) => state.replaceDocument);
+  const showToast = useToastStore((state) => state.show);
   const presets = presetsOf(category);
   const sections = groupByShape(presets, {
     category,
@@ -54,6 +60,19 @@ function PresetList({ category, settings, registrations, pinnedIds }: PresetList
   });
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
+  // 案内はタブごとに閉じる (行動 = そのタブの一括登録なので、文脈ごと)。1 件でも登録があれば出さない
+  const showsBanner = registeredCount === 0 && !settings.dismissedBanners.includes(category);
+  // 一括登録は取り消せるので確認は出さない
+  const registerAll = () => {
+    const before = useDocumentStore.getState().document;
+    const count = registerStandardAlgs(category);
+    showToast(copy.list.registeredAll(count), {
+      label: copy.toast.undo,
+      run: () => {
+        replaceDocument(before);
+      },
+    });
+  };
   return (
     <>
       <p
@@ -62,6 +81,14 @@ function PresetList({ category, settings, registrations, pinnedIds }: PresetList
       >
         {copy.list.registeredCount(registeredCount, presets.length)}
       </p>
+      {showsBanner && (
+        <FirstRunBanner
+          onDismiss={() => {
+            dismissBanner(category);
+          }}
+          onRegisterAll={registerAll}
+        />
+      )}
       <div className="flex flex-col gap-6">
         {sections.map((section) => (
           <TileSection

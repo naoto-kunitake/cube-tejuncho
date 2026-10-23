@@ -7,7 +7,7 @@ import { PILL_TAP_AREA_CLASS, TEXT_PILL_TAP_AREA_CLASS } from './tap-area';
 
 // ピル型のボタン。見た目 36、押せる範囲は疑似要素で 44。
 // primary = 画面の主役 (保存、この手順を使う)、danger = 確認の実行、quiet = 枠だけ (メインにする)、
-// text / textDanger = 文字だけ (自分で登録、削除)
+// text / textDanger / textMuted = 文字だけ (自分で登録、削除、案内の閉じる)
 export const buttonVariants = cva(
   'inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-full pressable disabled:cursor-not-allowed',
   {
@@ -32,6 +32,10 @@ export const buttonVariants = cva(
         textDanger: cn(
           TEXT_PILL_TAP_AREA_CLASS,
           'px-3 text-small font-medium text-danger hover:bg-danger-tint active:bg-danger-tint',
+        ),
+        textMuted: cn(
+          TEXT_PILL_TAP_AREA_CLASS,
+          'px-3 text-small font-medium text-muted hover:bg-hover active:bg-press',
         ),
       },
     },

@@ -3,6 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
@@ -11,6 +12,7 @@ import { ListScreen } from './ListScreen';
 
 beforeEach(() => {
   useDocumentStore.setState({ document: createEmptyDocument() });
+  useToastStore.getState().dismiss();
 });
 
 afterEach(cleanup);
@@ -212,6 +214,54 @@ describe('ListScreen', () => {
     }
     expect(within(others).getByRole('link', { name: 'Anti-Sune' })).toBeInTheDocument();
     expect(within(others).getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
+  });
+
+  it('登録が 0 件のタブには案内が出る', () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('region', { name: copy.a11y.firstRun })).toHaveTextContent(copy.list.emptyTitle);
+  });
+
+  it('1 件でも登録があれば案内は出ない', () => {
+    useDocumentStore.getState().addRegistration('pll-ua', { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' });
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('region', { name: copy.a11y.firstRun })).not.toBeInTheDocument();
+  });
+
+  it('案内を閉じるとそのタブだけ消え、他のタブでは出る', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('button', { name: copy.list.dismissBanner }));
+    expect(screen.queryByRole('region', { name: copy.a11y.firstRun })).not.toBeInTheDocument();
+    expect(useDocumentStore.getState().document.settings.dismissedBanners).toEqual(['pll']);
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    expect(screen.getByRole('region', { name: copy.a11y.firstRun })).toBeInTheDocument();
+  });
+
+  it('基本手順を一括登録すると、そのタブの全件が登録され、トーストの元に戻すで戻る', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('button', { name: copy.list.registerAll }));
+    expect(useDocumentStore.getState().document.registrations).toHaveLength(21);
+    expect(screen.getByText(copy.list.registeredCount(21, 21))).toBeInTheDocument();
+    expect(useToastStore.getState().toast?.text).toBe(copy.list.registeredAll(21));
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document.registrations).toHaveLength(0);
   });
 
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
