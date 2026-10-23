@@ -43,6 +43,11 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('dialog', { name: copy.a11y.playerSheet })).toBeInTheDocument();
   });
 
+  it('PLL の詳細の図には入れ替えの矢印を描く', () => {
+    renderDetail('/p/pll-ua');
+    expect(screen.getByRole('img', { name: 'Ua' }).querySelectorAll('path').length).toBeGreaterThan(0);
+  });
+
   it('OLL の詳細には手がかりの図を出さない', () => {
     renderDetail('/p/oll-21');
     expect(screen.getByRole('heading', { level: 1, name: 'OLL 21' })).toBeInTheDocument();

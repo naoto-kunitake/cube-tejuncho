@@ -85,6 +85,16 @@ describe('ListScreen', () => {
     expect(within(tile).getByRole('img', { name: '21' })).toBeInTheDocument();
   });
 
+  it('一覧の図には入れ替えの矢印を描かない', () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', false) });
+    expect(within(tile).getByRole('img', { name: 'Ua' }).querySelector('path')).toBeNull();
+  });
+
   it('右上のボタンでリスト表示に切り替わり、登録済みの行にだけ手順が出る', async () => {
     const user = userEvent.setup();
     useDocumentStore.getState().addRegistration('pll-ua', { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' });

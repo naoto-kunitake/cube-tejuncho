@@ -45,7 +45,7 @@ function PatternDetail({ preset }: PatternDetailProps) {
         {preset.category === 'pll' && settings.showCueFigure ? (
           <div className="flex w-full justify-center gap-6">
             <div className="-m-1.75 w-38 flex-none">
-              <PresetFigure preset={preset} settings={settings} />
+              <PresetFigure preset={preset} settings={settings} canShowArrows />
             </div>
             <div className="-m-1.75 w-38 flex-none">
               <TopFigure view={cueView(recolorView(preset.view, settings))} label={copy.a11y.cueFigure(preset.name)} />
@@ -53,7 +53,7 @@ function PatternDetail({ preset }: PatternDetailProps) {
           </div>
         ) : (
           <div className="-my-2.75 w-full max-w-60">
-            <PresetFigure preset={preset} settings={settings} />
+            <PresetFigure preset={preset} settings={settings} canShowArrows />
           </div>
         )}
         {registration !== undefined && registration.recognition !== '' && (
