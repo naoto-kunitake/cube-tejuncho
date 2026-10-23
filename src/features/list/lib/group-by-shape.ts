@@ -1,4 +1,5 @@
 import { copy } from '@/copy';
+import type { Settings } from '@/data/document';
 import type { Preset, PresetCategoryId } from '@/data/presets/catalog';
 import { F2L_SHAPE_ORDER } from '@/data/presets/f2l';
 import { OLL_SHAPE_ORDER } from '@/data/presets/oll';
@@ -24,12 +25,14 @@ function shapeHeadingsOf(category: PresetCategoryId, topColor: TopColor): readon
   }
 }
 
-export function groupByShape(
-  category: PresetCategoryId,
-  presets: readonly Preset[],
-  sortOrder: 'shape' | 'standard',
-  topColor: TopColor,
-): ShapeSection[] {
+export type GroupingOptions = {
+  category: PresetCategoryId;
+  sortOrder: Settings['sortOrder'][PresetCategoryId];
+  topColor: TopColor;
+};
+
+export function groupByShape(presets: readonly Preset[], options: GroupingOptions): ShapeSection[] {
+  const { category, sortOrder, topColor } = options;
   if (sortOrder === 'standard') {
     return [{ label: copy.list.standardOrder[category], presets }];
   }

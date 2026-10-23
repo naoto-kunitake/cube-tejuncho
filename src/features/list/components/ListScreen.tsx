@@ -25,7 +25,11 @@ type PresetListProps = {
 
 function PresetList({ category, settings, registrations }: PresetListProps) {
   const presets = presetsOf(category);
-  const sections = groupByShape(category, presets, settings.sortOrder[category], settings.topColor);
+  const sections = groupByShape(presets, {
+    category,
+    sortOrder: settings.sortOrder[category],
+    topColor: settings.topColor,
+  });
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
   const gridClass = settings.listView === 'list' ? 'grid-list-rows' : 'grid-tiles';

@@ -55,36 +55,43 @@ const PRESETS = [presetOf('T', 'headlights1'), presetOf('H', 'headlights4'), pre
 
 describe('groupByShape', () => {
   it('種類ごとでは形の並び順に見出しを作り、その中は元の順を保つ', () => {
-    const sections = groupByShape('pll', PRESETS, 'shape', 'yellow');
+    const sections = groupByShape(PRESETS, { category: 'pll', sortOrder: 'shape', topColor: 'yellow' });
     expect(sections.map((section) => section.presets.map((preset) => preset.name))).toEqual([['H'], ['T', 'Aa']]);
   });
 
   it('該当するパターンがない形の見出しは出さない', () => {
-    expect(groupByShape('pll', PRESETS, 'shape', 'yellow')).toHaveLength(2);
+    expect(groupByShape(PRESETS, { category: 'pll', sortOrder: 'shape', topColor: 'yellow' })).toHaveLength(2);
   });
 
   it('標準順では 1 つの見出しにまとまる', () => {
-    const sections = groupByShape('pll', PRESETS, 'standard', 'yellow');
+    const sections = groupByShape(PRESETS, { category: 'pll', sortOrder: 'standard', topColor: 'yellow' });
     expect(sections).toHaveLength(1);
     expect(sections[0]?.presets).toEqual(PRESETS);
   });
 
   it('OLL は OLL の形の表で分ける', () => {
     const presets = [ollPresetOf('1', 'dot'), ollPresetOf('21', 'cross')];
-    expect(groupByShape('oll', presets, 'shape', 'yellow').map((section) => section.label)).toEqual([
-      copy.list.ollShapes.cross,
-      copy.list.ollShapes.dot,
-    ]);
+    expect(
+      groupByShape(presets, { category: 'oll', sortOrder: 'shape', topColor: 'yellow' }).map(
+        (section) => section.label,
+      ),
+    ).toEqual([copy.list.ollShapes.cross, copy.list.ollShapes.dot]);
   });
 
   it('OLL の種類ごとでない見出しは番号順', () => {
     const presets = [ollPresetOf('1', 'dot'), ollPresetOf('21', 'cross')];
-    expect(groupByShape('oll', presets, 'standard', 'yellow')[0]?.label).toBe(copy.list.standardOrder.oll);
+    expect(groupByShape(presets, { category: 'oll', sortOrder: 'standard', topColor: 'yellow' })[0]?.label).toBe(
+      copy.list.standardOrder.oll,
+    );
   });
 
   it('F2L の「白が上」の見出しは、上面が白の設定では「黄が上」になる', () => {
     const presets = [f2lPresetOf('17', 'bothUpWhiteUp')];
-    expect(groupByShape('f2l', presets, 'shape', 'yellow')[0]?.label).toBe('両方上面・白が上');
-    expect(groupByShape('f2l', presets, 'shape', 'white')[0]?.label).toBe('両方上面・黄が上');
+    expect(groupByShape(presets, { category: 'f2l', sortOrder: 'shape', topColor: 'yellow' })[0]?.label).toBe(
+      '両方上面・白が上',
+    );
+    expect(groupByShape(presets, { category: 'f2l', sortOrder: 'shape', topColor: 'white' })[0]?.label).toBe(
+      '両方上面・黄が上',
+    );
   });
 });
