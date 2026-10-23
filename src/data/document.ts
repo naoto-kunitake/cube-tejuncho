@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { WIDE_STYLES } from '@/lib/alg/format';
 import { FRONT_COLORS, TOP_COLORS } from '@/lib/figure/view';
+import { type HexColor, isHexColor } from '@/lib/theme/color';
 
 import { PRESET_CATEGORY_IDS } from './presets/catalog';
 
@@ -51,8 +52,11 @@ const SettingsSchema = z.object({
   greyUnrelated: z.boolean(),
   playbackSpeed: z.enum(['slow', 'normal', 'fast']),
   wideStyle: z.enum(WIDE_STYLES),
-  // 'ink' は墨 (ダークでは白)。それ以外は #RRGGBB
-  themeColor: z.union([z.literal('ink'), z.string().regex(/^#[0-9a-fA-F]{6}$/)]),
+  // 'ink' は墨 (ダークでは白)。それ以外は #rrggbb (型は lib/theme の HexColor に揃える)
+  themeColor: z.union([
+    z.literal('ink'),
+    z.custom<HexColor>((value) => typeof value === 'string' && isHexColor(value)),
+  ]),
   appearance: z.enum(['auto', 'light', 'dark']),
   sortOrder: z.object({ pll: SortOrderSchema, oll: SortOrderSchema, f2l: SortOrderSchema }),
   listView: z.enum(['grid', 'list']),
