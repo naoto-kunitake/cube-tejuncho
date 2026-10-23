@@ -53,6 +53,14 @@
   }
 }
 
+/* 一覧のリスト表示の行。狭い幅は 1 列、広い幅は行の幅 (340px) で列数を決める */
+@utility grid-list-rows {
+  grid-template-columns: minmax(0, 1fr);
+  @variant md {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  }
+}
+
 /* 手順の文字: 1 動き (M2、U') を 1 語として折り返す。塊 (括弧) の中も同じ間隔。
    gap の縦は行間、横は字間に近い役割なので、4 刻みの余白の規則の対象外 (カードの中 12 と同じ決めた例外) */
 @utility alg-wrap {

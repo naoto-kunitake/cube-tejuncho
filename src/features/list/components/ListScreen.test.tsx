@@ -85,6 +85,76 @@ describe('ListScreen', () => {
     expect(within(tile).getByRole('img', { name: '21' })).toBeInTheDocument();
   });
 
+  it('一覧の図には入れ替えの矢印を描かない', () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', false) });
+    expect(within(tile).getByRole('img', { name: 'Ua' }).querySelector('path')).toBeNull();
+  });
+
+  it('右上のボタンでリスト表示に切り替わり、登録済みの行にだけ手順が出る', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' });
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('button', { name: copy.a11y.switchToList }));
+    expect(useDocumentStore.getState().document.settings.listView).toBe('list');
+    const row = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    expect(within(row).getByText('U2')).toBeInTheDocument();
+    const unregistered = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ub', false) });
+    expect(within(unregistered).queryByText('U2')).not.toBeInTheDocument();
+  });
+
+  it('リスト表示でもう一度押すとグリッドに戻る', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().setListView('list');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('button', { name: copy.a11y.switchToGrid }));
+    expect(useDocumentStore.getState().document.settings.listView).toBe('grid');
+    expect(screen.getByRole('button', { name: copy.a11y.switchToList })).toBeInTheDocument();
+  });
+
+  it('登録済みでも手順が空の行は「手順なし」と出す', () => {
+    useDocumentStore.getState().saveRegistration('pll-ua', {
+      recognition: '前に3連',
+      mainAlg: { text: '', mnemonic: '', fingering: '' },
+      altAlgs: [],
+    });
+    useDocumentStore.getState().setListView('list');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const row = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    expect(within(row).getByText(copy.list.noAlg)).toBeInTheDocument();
+  });
+
+  it('利用者のカテゴリのリスト表示は名前と手順の行で、追加の行が末尾にある', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    useDocumentStore.getState().setListView('list');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    const row = screen.getByRole('link', { name: 'Sune' });
+    expect(within(row).getByText('U2')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
+  });
+
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
     const user = userEvent.setup();
     withCustomCategory();

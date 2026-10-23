@@ -75,6 +75,12 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
+  it('一覧の表示を切り替えると設定に残り、読み直しても残る', () => {
+    const storage = persistedStorage();
+    createDocumentStore(storage).getState().setListView('list');
+    expect(createDocumentStore(storage).getState().document.settings.listView).toBe('list');
+  });
+
   it('選んだタブは設定に残り、読み直しても残る', () => {
     const storage = persistedStorage();
     createDocumentStore(storage).getState().setLastTab('oll');

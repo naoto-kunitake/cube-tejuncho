@@ -1,5 +1,5 @@
 #!/bin/bash
-# PreToolUse (Bash) フック。`gh pr create` の本文が雛形の必須の見出し (目的・変更・チェックリスト) を持つかを確かめ、
+# PreToolUse (Bash) フック。`gh pr create` の本文が雛形の必須の見出し (目的・変更) を持つかを確かめ、
 # なければ exit 2 で止める。本文は `--body-file - <<'EOF'` の HEREDOC からだけ読む。それ以外の渡し方は止める。
 set -euo pipefail
 
@@ -34,8 +34,8 @@ if [[ -z "$BODY" ]]; then
 fi
 
 MISSING=()
-# チェックリストは項目がなくても見出しを置き「特になし」と書く (抜けなのか意図なのかを持ち主が見分けられるように)
-for section in "目的" "変更" "チェックリスト"; do
+# チェックリストは持ち主が実機で確かめることがあるときだけ (なければ見出しごと省く)
+for section in "目的" "変更"; do
   if ! grep -qE "^##[[:space:]]+${section}[[:space:]]*$" <<< "$BODY"; then
     MISSING+=("## ${section}")
   fi
