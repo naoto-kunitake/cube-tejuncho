@@ -99,7 +99,6 @@ type Copy = {
     duplicateCategory: string;
     add: string;
     data: string;
-    dataHint: string;
     exportData: string;
     importData: string;
     importAdd: string;
@@ -300,7 +299,6 @@ export const copy = {
     duplicateCategory: '同じ名前のカテゴリがあります',
     add: '追加',
     data: 'データ',
-    dataHint: '書き出したファイルがバックアップになります',
     exportData: '書き出す',
     importData: '読み込む',
     importAdd: '追加',

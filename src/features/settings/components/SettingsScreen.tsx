@@ -130,7 +130,6 @@ export function SettingsScreen() {
               {copy.settings.importData}
             </button>
           </div>
-          <p className="text-label text-muted">{copy.settings.dataHint}</p>
         </section>
       </div>
       {isAddingCategory && (
