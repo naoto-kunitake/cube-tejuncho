@@ -94,6 +94,19 @@
   }
 }
 
+/* 「自分で選ぶ」の見本の虹の輪 */
+@utility bg-rainbow {
+  background: conic-gradient(
+    var(--color-theme-red),
+    var(--color-theme-yellow),
+    var(--color-theme-green),
+    var(--color-theme-blue),
+    var(--color-theme-purple),
+    var(--color-theme-pink),
+    var(--color-theme-red)
+  );
+}
+
 /* 押せる部品の遷移 (モックと同じ値)。動きを減らす設定では付けない */
 @utility pressable {
   @media (prefers-reduced-motion: no-preference) {

@@ -38,7 +38,8 @@ export function onColorOf(hex: HexColor): HexColor {
   return inkContrast >= whiteContrast ? INK : WHITE;
 }
 
-export type Appearance = 'auto' | 'light' | 'dark';
+export const APPEARANCES = ['auto', 'light', 'dark'] as const;
+export type Appearance = (typeof APPEARANCES)[number];
 export type ResolvedAppearance = 'light' | 'dark';
 
 // 自動は端末のダークモードに追従する
