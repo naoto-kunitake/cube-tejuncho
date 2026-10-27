@@ -84,6 +84,46 @@ describe('createDocumentStore', () => {
     expect(store.getState().registerStandardAlgs('pll')).toBe(0);
   });
 
+  it('プリセットのカテゴリの登録を消すと、その登録とピン留めだけ消え、件数を返す', () => {
+    const store = createDocumentStore(persistedStorage());
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addRegistration('pll-ub', UA_ALG);
+    store.getState().addRegistration('oll-21', UA_ALG);
+    store.getState().togglePin('pll-ua');
+    store.getState().togglePin('oll-21');
+    expect(store.getState().clearRegistrations(['pll'])).toBe(2);
+    const { registrations, pinned } = store.getState().document;
+    expect(registrations.map((entry) => entry.patternId)).toEqual(['oll-21']);
+    expect(pinned).toEqual(['oll-21']);
+  });
+
+  it('自作のカテゴリの登録を消すと、中のパターンごと消えてカテゴリ自体は残る', () => {
+    const store = createDocumentStore(persistedStorage());
+    const categoryId = store.getState().addCategory('COLL');
+    const withAlg = store
+      .getState()
+      .addCustomPattern({ name: 'a', categoryId }, { recognition: '', mainAlg: UA_ALG, altAlgs: [] });
+    store.getState().addCustomPattern({ name: 'b', categoryId }, null);
+    store.getState().togglePin(withAlg);
+    expect(store.getState().clearRegistrations([categoryId])).toBe(2);
+    const { categories, patterns, registrations, pinned } = store.getState().document;
+    expect(categories).toEqual([{ id: categoryId, name: 'COLL' }]);
+    expect(patterns).toEqual([]);
+    expect(registrations).toEqual([]);
+    expect(pinned).toEqual([]);
+  });
+
+  it('初期状態に戻すと空の文書になり、読み直しても空のまま', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addCategory('COLL');
+    store.getState().updateSettings({ topColor: 'white' });
+    store.getState().resetDocument();
+    expect(store.getState().document).toEqual(createEmptyDocument());
+    expect(createDocumentStore(storage).getState().document).toEqual(createEmptyDocument());
+  });
+
   it('案内を閉じたタブは設定に残り、同じタブを 2 回閉じても 1 つ', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);

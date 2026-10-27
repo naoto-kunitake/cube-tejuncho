@@ -19,7 +19,7 @@ export const buttonVariants = cva(
         ),
         danger: cn(
           PILL_TAP_AREA_CLASS,
-          'gap-2 border border-danger bg-danger px-4 text-body font-bold text-on-danger hover:border-danger-hover hover:bg-danger-hover active:scale-98 active:border-danger-active active:bg-danger-active',
+          'gap-2 border border-danger bg-danger px-4 text-body font-bold text-on-danger hover:border-danger-hover hover:bg-danger-hover active:scale-98 active:border-danger-active active:bg-danger-active disabled:border-disabled disabled:bg-disabled disabled:text-on-disabled disabled:opacity-45',
         ),
         quiet: cn(
           PILL_TAP_AREA_CLASS,

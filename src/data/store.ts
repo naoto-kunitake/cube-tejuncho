@@ -13,7 +13,7 @@ import {
 } from './document';
 import { applyImport, type ImportMode } from './import-data';
 import { migrateDocument } from './migrate';
-import { type PresetCategoryId, presetsOf } from './presets/catalog';
+import { hasPresets, type PresetCategoryId, presetsOf } from './presets/catalog';
 import { createStorage, type KeyValueStorage } from './storage';
 
 export const DOCUMENT_KEY = 'cube-tejuncho:doc';
@@ -125,6 +125,11 @@ export type DocumentStore = {
   togglePin: (patternId: string) => void;
   // そのカテゴリの未登録のプリセット全部に基本手順をメイン手順として入れる。返り値は入れた件数
   registerStandardAlgs: (category: PresetCategoryId) => number;
+  // カテゴリ単位で登録を消す。プリセットは登録とピン留め、自作は中のパターンごと (カテゴリ自体と設定は残す)。
+  // 返り値は消した件数 (プリセットの登録 + 自作のパターン)
+  clearRegistrations: (categoryIds: readonly string[]) => number;
+  // 登録・自作・カテゴリ・設定をすべて既定に戻す
+  resetDocument: () => void;
   dismissBanner: (category: PresetCategoryId) => void;
   dismissLoadIssue: () => void;
 };
@@ -328,6 +333,38 @@ export function createDocumentStore(storage: KeyValueStorage) {
             });
             reportStorageIssue();
             return addedCount;
+          },
+          clearRegistrations: (categoryIds) => {
+            let removedCount = 0;
+            set((state) => {
+              const { document } = state;
+              const presetIds = new Set(
+                categoryIds.filter(hasPresets).flatMap((category) => presetsOf(category).map((preset) => preset.id)),
+              );
+              const customIds = new Set(
+                document.patterns
+                  .filter((pattern) => categoryIds.includes(pattern.categoryId))
+                  .map((pattern) => pattern.id),
+              );
+              const isRemoved = (patternId: string) => presetIds.has(patternId) || customIds.has(patternId);
+              // 登録のない自作パターンも消えるので、自作はパターンの数で数える
+              removedCount =
+                document.registrations.filter((entry) => presetIds.has(entry.patternId)).length + customIds.size;
+              return {
+                document: {
+                  ...document,
+                  patterns: document.patterns.filter((pattern) => !customIds.has(pattern.id)),
+                  registrations: document.registrations.filter((entry) => !isRemoved(entry.patternId)),
+                  pinned: document.pinned.filter((id) => !isRemoved(id)),
+                },
+              };
+            });
+            reportStorageIssue();
+            return removedCount;
+          },
+          resetDocument: () => {
+            set({ document: createEmptyDocument() });
+            reportStorageIssue();
           },
           dismissBanner: (category) => {
             set((state) => {
