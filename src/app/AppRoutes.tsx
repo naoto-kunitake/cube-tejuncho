@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router';
 
+import { LicensesScreen, PrivacyScreen } from '@/features/about';
 import { DetailScreen } from '@/features/detail';
 import { EditScreen } from '@/features/edit';
 import { ListScreen } from '@/features/list';
@@ -15,6 +16,8 @@ export function AppRoutes() {
       <Route path="/p/:id/edit" element={<EditScreen />} />
       <Route path="/settings" element={<SettingsScreen />} />
       <Route path="/notation" element={<NotationScreen />} />
+      <Route path="/licenses" element={<LicensesScreen />} />
+      <Route path="/privacy" element={<PrivacyScreen />} />
     </Routes>
   );
 }
