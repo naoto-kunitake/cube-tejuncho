@@ -107,6 +107,11 @@ export type DocumentStore = {
   removeRegistration: (patternId: string) => void;
   // 返り値は新しい id
   addCategory: (name: string) => string;
+  renameCategory: (categoryId: string, name: string) => void;
+  // カテゴリと、その中の自作パターン (登録・ピン留めも) をまとめて消す
+  removeCategory: (categoryId: string) => void;
+  // タブの並びの中で、そのカテゴリを toIndex の位置へ動かす (範囲外は端に収める)
+  moveCategory: (categoryId: string, toIndex: number) => void;
   addCustomPattern: (fields: CustomPatternFields, data: RegistrationData | null) => string;
   updateCustomPattern: (patternId: string, fields: CustomPatternFields) => void;
   removeCustomPattern: (patternId: string) => void;
@@ -192,6 +197,57 @@ export function createDocumentStore(storage: KeyValueStorage) {
             }));
             reportStorageIssue();
             return id;
+          },
+          renameCategory: (categoryId, name) => {
+            set((state) => ({
+              document: {
+                ...state.document,
+                categories: state.document.categories.map((category) =>
+                  category.id === categoryId ? { ...category, name } : category,
+                ),
+              },
+            }));
+            reportStorageIssue();
+          },
+          removeCategory: (categoryId) => {
+            set((state) => {
+              const { document } = state;
+              // プリセットの id も tabOrder に並ぶので、実在する自作カテゴリ以外では何も触らない
+              if (!document.categories.some((category) => category.id === categoryId)) {
+                return state;
+              }
+              const removedPatternIds = new Set(
+                document.patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
+              );
+              // lastTab は一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
+              return {
+                document: {
+                  ...document,
+                  categories: document.categories.filter((category) => category.id !== categoryId),
+                  patterns: document.patterns.filter((pattern) => !removedPatternIds.has(pattern.id)),
+                  registrations: document.registrations.filter((entry) => !removedPatternIds.has(entry.patternId)),
+                  pinned: document.pinned.filter((id) => !removedPatternIds.has(id)),
+                  settings: {
+                    ...document.settings,
+                    tabOrder: document.settings.tabOrder.filter((id) => id !== categoryId),
+                  },
+                },
+              };
+            });
+            reportStorageIssue();
+          },
+          moveCategory: (categoryId, toIndex) => {
+            set((state) => {
+              const { tabOrder } = state.document.settings;
+              if (!tabOrder.includes(categoryId)) {
+                return state;
+              }
+              const others = tabOrder.filter((id) => id !== categoryId);
+              const index = Math.min(Math.max(toIndex, 0), others.length);
+              const moved = [...others.slice(0, index), categoryId, ...others.slice(index)];
+              return { document: { ...state.document, settings: { ...state.document.settings, tabOrder: moved } } };
+            });
+            reportStorageIssue();
           },
           addCustomPattern: (fields, data) => {
             const id = crypto.randomUUID();
