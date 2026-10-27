@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { Button } from '@/components/Button';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
@@ -35,6 +35,7 @@ export function AlgEditCard({
   onMakeMain,
   onDelete,
 }: AlgEditCardProps) {
+  const location = useLocation();
   const isMain = index === 0;
   const error = algErrorOf(card.text);
   // 検証は欄を離れたときと保存時 (打鍵ごとに赤くしない)。保存済みの手順が読めないときは開いた時点で示す。直した瞬間に消す
@@ -94,7 +95,7 @@ export function AlgEditCard({
       {shownError !== null && (
         <p id={errorId} className="-mt-1.5 text-label leading-normal text-danger">
           {copy.edit.algError(shownError)}{' '}
-          <Link to="/notation" className="font-bold underline underline-offset-2">
+          <Link to="/notation" state={{ from: location.pathname }} className="font-bold underline underline-offset-2">
             {copy.edit.seeNotation}
           </Link>
         </p>

@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Toast } from '@/components/toast/Toast';
@@ -29,6 +29,12 @@ const REGISTRATION = {
   updatedAt: '2026-10-22T00:00:00.000Z',
 };
 
+// 回転記号の画面は別の feature なので、受け取る state だけを映す探針を置く
+function LocationStateProbe() {
+  const location = useLocation();
+  return <p>{JSON.stringify(location.state)}</p>;
+}
+
 function renderEdit(path = '/p/pll-ua/edit', state?: unknown) {
   const url = new URL(path, 'http://localhost');
   return render(
@@ -38,6 +44,7 @@ function renderEdit(path = '/p/pll-ua/edit', state?: unknown) {
         <Route path="/p/new" element={<EditScreen />} />
         <Route path="/p/:id" element={<p>detail</p>} />
         <Route path="/p/:id/edit" element={<EditScreen />} />
+        <Route path="/notation" element={<LocationStateProbe />} />
       </Routes>
       <Toast />
     </MemoryRouter>,
@@ -87,6 +94,15 @@ describe('EditScreen', () => {
       altAlgs: [],
     });
     expect(screen.getByText('detail')).toBeInTheDocument();
+  });
+
+  it('読めない記法の「回転記号を見る」は、戻り先に編集画面を添えて開く', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    await user.type(screen.getByLabelText(copy.edit.mainAlg), 'R Q');
+    await user.tab();
+    await user.click(screen.getByRole('link', { name: copy.edit.seeNotation }));
+    expect(screen.getByText(JSON.stringify({ from: '/p/pll-ua/edit' }))).toBeInTheDocument();
   });
 
   it('読めない記法は欄を離れたときに赤く示し、保存できない', async () => {

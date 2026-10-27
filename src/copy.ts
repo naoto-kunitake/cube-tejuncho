@@ -1,14 +1,19 @@
 import type { Settings } from '@/data/document';
+import type { NotationRowId, NotationSectionId } from '@/data/notation';
 import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
+import type { WideStyle } from '@/lib/alg/format';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
 import type { F2lDescription, WhiteFacing } from '@/lib/figure/describe-f2l';
 import type { FrontColor, TopColor } from '@/lib/figure/view';
 import type { Appearance } from '@/lib/theme/color';
 import type { ThemePresetId } from '@/lib/theme/palette';
+
+// 回転記号の行: 主 (説明) + 副 (小さい行)。satisfies で絞られた型を画面で広げ直すために公開する
+export type NotationRowText = { description: string; sub?: string };
 
 // 鍵の形を型にしておき、英語版を足すときは同じ Copy を満たす別ファイルを置く
 type Copy = {
@@ -126,6 +131,7 @@ type Copy = {
     wideStyle: string;
     appearance: string;
     themeColor: string;
+    openNotation: string;
     themeColors: Record<ThemePresetId, string>;
     customColor: string;
     appearanceMode: string;
@@ -162,6 +168,10 @@ type Copy = {
   };
   notation: {
     title: string;
+    sections: Record<NotationSectionId, string>;
+    // 区画の説明 (ない区画は空)。2 層回しはもう一方の書き方を併記する
+    leads: Record<NotationSectionId, (otherWideStyle: WideStyle) => string>;
+    rows: Record<NotationRowId, NotationRowText>;
   };
   player: {
     loading: string;
@@ -178,6 +188,7 @@ type Copy = {
     switchToList: string;
     switchToGrid: string;
     backToList: string;
+    back: string;
     edit: string;
     editPattern: (name: string) => string;
     pin: string;
@@ -196,6 +207,8 @@ type Copy = {
     cueFigure: (name: string) => string;
     playerSheet: string;
     closeSheet: string;
+    playMove: (symbol: string) => string;
+    moveFigure: (symbol: string) => string;
     play: string;
     pause: string;
     toStart: string;
@@ -378,6 +391,7 @@ export const copy = {
     wideStyle: '2層回しの表記',
     appearance: '外観',
     themeColor: 'テーマ色',
+    openNotation: '回転記号',
     themeColors: {
       ink: '墨',
       red: '赤',
@@ -425,6 +439,47 @@ export const copy = {
   },
   notation: {
     title: '回転記号',
+    sections: {
+      face: '面の回転',
+      direction: '向きと回数',
+      slice: '中層',
+      wide: '2層回し',
+      rotation: '持ち替え',
+      group: '括弧',
+    },
+    leads: {
+      // 向きの誤解が最も多いので「正面から見て」を必ず添える
+      face: () => 'その面を正面から見て時計回りに90°',
+      direction: () => '',
+      slice: () => '',
+      wide: (otherWideStyle) => `面と隣の層を一緒に回す (${otherWideStyle} とも書く)`,
+      rotation: () => 'キューブ全体を回す',
+      group: () => '',
+    },
+    // 2 つの情報は句点で繋がず、主 (説明) + 副 (小さい行) に分ける
+    rows: {
+      R: { description: '右面' },
+      L: { description: '左面' },
+      U: { description: '上面' },
+      D: { description: '下面' },
+      F: { description: '前面' },
+      B: { description: '後面' },
+      prime: { description: '反時計回りに90°' },
+      double: { description: '180°' },
+      M: { description: '左右の間', sub: 'L と同じ向き' },
+      E: { description: '上下の間', sub: 'D と同じ向き' },
+      S: { description: '前後の間', sub: 'F と同じ向き' },
+      wideR: { description: 'R と隣の層' },
+      wideL: { description: 'L と隣の層' },
+      wideU: { description: 'U と隣の層' },
+      wideD: { description: 'D と隣の層' },
+      wideF: { description: 'F と隣の層' },
+      wideB: { description: 'B と隣の層' },
+      x: { description: 'R と同じ向き' },
+      y: { description: 'U と同じ向き' },
+      z: { description: 'F と同じ向き' },
+      group: { description: '区切り', sub: '回し方は変わらない' },
+    },
   },
   player: {
     loading: '読み込み中…',
@@ -441,6 +496,7 @@ export const copy = {
     switchToList: 'リスト表示にする',
     switchToGrid: 'グリッド表示にする',
     backToList: '一覧へ戻る',
+    back: '戻る',
     edit: '編集',
     editPattern: (name) => `${name} を編集`,
     pin: 'ピン留め',
@@ -459,6 +515,8 @@ export const copy = {
     cueFigure: (name) => `${name} の判断の手がかり`,
     playerSheet: '手順の再生',
     closeSheet: '閉じる',
+    playMove: (symbol) => `${symbol} を再生`,
+    moveFigure: (symbol) => `${symbol} で動く層`,
     play: '再生',
     pause: '一時停止',
     toStart: '最初へ',
