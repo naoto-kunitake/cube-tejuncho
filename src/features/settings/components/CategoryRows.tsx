@@ -2,6 +2,7 @@ import { Menu } from 'lucide-react';
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useState } from 'react';
 
 import { copy } from '@/copy';
+import type { CategoryEntry } from '@/data/categories';
 import { cn } from '@/lib/utils';
 
 import { shiftOf, targetIndexOf } from '../lib/reorder';
@@ -9,11 +10,13 @@ import { SETTING_ROW_CLASS } from './SettingRow';
 
 const REORDER_HINT_ID = 'category-reorder-hint';
 
-export type CategoryRow = { id: string; label: string; detail: string };
+export type CategoryRow = { id: string; kind: CategoryEntry['kind']; label: string; detail: string };
 
 type CategoryRowsProps = {
   categories: readonly CategoryRow[];
   onMove: (id: string, toIndex: number) => void;
+  // 自作の行の本文を押したとき (プリセットの行は押せない)
+  onOpen: (id: string) => void;
   // 並べ替えの対象にならない末尾の行 (カテゴリを追加)
   children: ReactNode;
 };
@@ -22,7 +25,7 @@ type Drag = { index: number; startY: number; deltaY: number; rowHeight: number }
 
 // 右端のハンドルを押して上下に動かすと行が入れ替わる (ハンドルは常時表示。項目が少ない設定画面では編集モードを挟まない)。
 // 持ち上げた行は影 + 2% 拡大で浮かせ、ほかの行は空いた隙間へ滑る。離すとタブの順に反映する。キーボードはハンドルで上下キー
-export function CategoryRows({ categories, onMove, children }: CategoryRowsProps) {
+export function CategoryRows({ categories, onMove, onOpen, children }: CategoryRowsProps) {
   const [drag, setDrag] = useState<Drag | null>(null);
   // 動かした結果を読み上げる (フォーカスは同じハンドルに残るので、位置の変化が音声では伝わらない)
   const [announcement, setAnnouncement] = useState('');
@@ -92,12 +95,30 @@ export function CategoryRows({ categories, onMove, children }: CategoryRowsProps
               style={style}
               className={cn(
                 SETTING_ROW_CLASS,
+                // 押せるのは本文のボタンだが、hover / 押下の色は行全体に付ける (ハンドルの下まで続く。:active は祖先にも効く)
+                category.kind === 'custom' && 'pressable hover:bg-hover active:bg-press',
                 isLifted && 'relative z-10 rounded-md border-t-transparent bg-surface shadow-3',
                 drag !== null && !isLifted && 'transition-transform duration-150 motion-reduce:transition-none',
               )}
             >
-              <span className="min-w-0 flex-1 truncate">{category.label}</span>
-              <span className="text-label whitespace-nowrap text-muted tabular-nums">{category.detail}</span>
+              {category.kind === 'custom' ? (
+                <button
+                  type="button"
+                  className="flex min-w-0 flex-1 items-center justify-between gap-3 self-stretch text-left"
+                  onClick={() => {
+                    onOpen(category.id);
+                  }}
+                >
+                  <span className="min-w-0 truncate">{category.label}</span>
+                  {/* 読み上げ名を「COLL 0件」と区切る空白 (flex の項目にはならない) */}{' '}
+                  <span className="text-label whitespace-nowrap text-muted tabular-nums">{category.detail}</span>
+                </button>
+              ) : (
+                <>
+                  <span className="min-w-0 flex-1 truncate">{category.label}</span>
+                  <span className="text-label whitespace-nowrap text-muted tabular-nums">{category.detail}</span>
+                </>
+              )}
               <button
                 type="button"
                 aria-label={copy.a11y.reorderHandle(category.label)}

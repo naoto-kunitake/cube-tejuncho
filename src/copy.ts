@@ -97,10 +97,17 @@ type Copy = {
     patternCount: (count: number) => string;
     addCategory: string;
     newCategoryTitle: string;
+    editCategoryTitle: string;
     categoryName: string;
     categoryNamePlaceholder: string;
     duplicateCategory: string;
     add: string;
+    save: string;
+    deleteCategory: string;
+    deleteCategoryTitle: (name: string) => string;
+    deleteCategoryBody: (count: number) => string;
+    deleteCategoryAction: string;
+    deletedCategory: (name: string) => string;
     list: string;
     sortOrderOf: (category: string) => string;
     byShape: string;
@@ -322,10 +329,18 @@ export const copy = {
     patternCount: (count) => `${count}件`,
     addCategory: 'カテゴリを追加',
     newCategoryTitle: '新しいカテゴリ',
+    editCategoryTitle: 'カテゴリを編集',
     categoryName: '名前',
     categoryNamePlaceholder: '例: F2L、COLL、練習中',
     duplicateCategory: '同じ名前のカテゴリがあります',
     add: '追加',
+    save: '保存',
+    deleteCategory: 'このカテゴリを削除',
+    deleteCategoryTitle: (name) => `「${name}」を削除`,
+    // 中身が消える事実は自明でないので、件数つきの本文を出す
+    deleteCategoryBody: (count) => `中のパターン${count}件も削除されます。`,
+    deleteCategoryAction: '削除',
+    deletedCategory: (name) => `「${name}」を削除しました`,
     list: '一覧',
     sortOrderOf: (category) => `${category} の並び順`,
     byShape: '種類ごと',
