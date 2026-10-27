@@ -222,6 +222,11 @@ describe('SettingsScreen', () => {
     expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
   });
 
+  it('表記の区画に回転記号の画面へのリンクがある', () => {
+    renderSettings();
+    expect(screen.getByRole('link', { name: copy.settings.openNotation })).toHaveAttribute('href', '/notation');
+  });
+
   it('データの区画に書き出すと読み込むの行がある', () => {
     renderSettings();
     expect(screen.getByRole('button', { name: copy.settings.exportData })).toBeInTheDocument();

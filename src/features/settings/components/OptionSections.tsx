@@ -1,4 +1,6 @@
+import { ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Link } from 'react-router';
 
 import { STICKER_DOT_CLASS } from '@/components/figures/sticker-color';
 import { SectionHeading } from '@/components/SectionHeading';
@@ -10,7 +12,7 @@ import { FRONT_COLOR_LETTER, FRONT_COLORS, TOP_COLORS, TOP_LETTER } from '@/lib/
 import { APPEARANCES } from '@/lib/theme/color';
 
 import { Segmented } from './Segmented';
-import { SettingRow } from './SettingRow';
+import { ROW_BUTTON_CLASS, SettingRow } from './SettingRow';
 import { Switch } from './Switch';
 import { ThemeColorPicker } from './ThemeColorPicker';
 
@@ -128,6 +130,11 @@ export function OptionSections({ settings, onChange }: OptionSectionsProps) {
         </SettingRow>
       </SettingsSection>
       <SettingsSection title={copy.settings.notation}>
+        {/* 山形は別画面へ進む行だけ (シートや即時の操作の行には付けない) */}
+        <Link to="/notation" state={{ from: '/settings' }} className={ROW_BUTTON_CLASS}>
+          <span>{copy.settings.openNotation}</span>
+          <ChevronRight size={20} strokeWidth={1.8} aria-hidden="true" className="-mr-0.5 text-muted" />
+        </Link>
         <SettingRow label={copy.settings.wideStyle} wrapsOnNarrow>
           <Segmented
             label={copy.settings.wideStyle}
