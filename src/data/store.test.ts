@@ -92,6 +92,56 @@ describe('createDocumentStore', () => {
     expect(createDocumentStore(storage).getState().document.settings.dismissedBanners).toEqual(['pll']);
   });
 
+  it('カテゴリの名前を変えると、id はそのままで名前だけ替わる', () => {
+    const store = createDocumentStore(persistedStorage());
+    const id = store.getState().addCategory('COLL');
+    store.getState().renameCategory(id, 'ZBLL');
+    expect(store.getState().document.categories).toEqual([{ id, name: 'ZBLL' }]);
+  });
+
+  it('カテゴリを消すと、中の自作パターンとその登録・ピン留め・タブも消える', () => {
+    const store = createDocumentStore(persistedStorage());
+    const categoryId = store.getState().addCategory('COLL');
+    const patternId = store
+      .getState()
+      .addCustomPattern({ name: 'a', categoryId }, { recognition: '', mainAlg: UA_ALG, altAlgs: [] });
+    store.getState().togglePin(patternId);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().removeCategory(categoryId);
+    const { document } = store.getState();
+    expect(document.categories).toEqual([]);
+    expect(document.patterns).toEqual([]);
+    expect(document.registrations.map((entry) => entry.patternId)).toEqual(['pll-ua']);
+    expect(document.pinned).toEqual([]);
+    expect(document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+  });
+
+  it('ないカテゴリ (プリセットの id を含む) を消そうとしても何も変わらない', () => {
+    const store = createDocumentStore(persistedStorage());
+    const before = store.getState().document;
+    store.getState().removeCategory('pll');
+    store.getState().removeCategory('gone');
+    expect(store.getState().document).toEqual(before);
+  });
+
+  it('カテゴリを動かすとタブの並びが変わり、読み直しても残る', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().moveCategory('f2l', 0);
+    expect(store.getState().document.settings.tabOrder).toEqual(['f2l', 'pll', 'oll']);
+    expect(createDocumentStore(storage).getState().document.settings.tabOrder).toEqual(['f2l', 'pll', 'oll']);
+  });
+
+  it('カテゴリを範囲の外へ動かすと端で止まり、並びにない id は何も変えない', () => {
+    const store = createDocumentStore(persistedStorage());
+    store.getState().moveCategory('pll', 10);
+    expect(store.getState().document.settings.tabOrder).toEqual(['oll', 'f2l', 'pll']);
+    store.getState().moveCategory('pll', -1);
+    expect(store.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+    store.getState().moveCategory('gone', 1);
+    expect(store.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+  });
+
   it('ピン留めは押すたびに付いたり外れたりし、読み直しても残る', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);

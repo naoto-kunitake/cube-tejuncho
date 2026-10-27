@@ -1,40 +1,28 @@
-import { ChevronLeft, Plus } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
 
 import { IconLink } from '@/components/IconButton';
 import { SectionHeading } from '@/components/SectionHeading';
 import { useToastStore } from '@/components/toast/toast-store';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
-import { categoryEntriesOf } from '@/data/categories';
 import { createExportFile, exportDateOf, saveFile } from '@/data/export-data';
 import { importData, type ImportMode } from '@/data/import-data';
 import { useDocumentStore } from '@/data/store';
-import { cn } from '@/lib/utils';
 
-import { CategorySheet } from './CategorySheet';
+import { CategorySection } from './CategorySection';
 import { ImportSheet } from './ImportSheet';
 import { NoticeDialog } from './NoticeDialog';
 import { OptionSections } from './OptionSections';
-import { SETTING_ROW_CLASS } from './SettingRow';
-
-const ROW_BUTTON_CLASS = cn(SETTING_ROW_CLASS, 'pressable hover:bg-hover active:bg-press');
+import { ROW_BUTTON_CLASS } from './SettingRow';
 export function SettingsScreen() {
-  const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
-  const addCategory = useDocumentStore((state) => state.addCategory);
   const updateSettings = useDocumentStore((state) => state.updateSettings);
   const importDocument = useDocumentStore((state) => state.importDocument);
   const replaceDocument = useDocumentStore((state) => state.replaceDocument);
   const showToast = useToastStore((state) => state.show);
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [hasImportFailed, setHasImportFailed] = useState(false);
-  const categories = categoryEntriesOf(document).map((category) => ({
-    ...category,
-    label: category.kind === 'preset' ? copy.list.categories[category.id] : category.name,
-  }));
 
   const exportDocument = async () => {
     const file = createExportFile(document, copy.settings.exportFileName(exportDateOf(new Date())));
@@ -81,33 +69,7 @@ export function SettingsScreen() {
         </div>
       </TopBar>
       <div className="flex flex-col gap-6 px-4 pt-2 pb-6">
-        <section className="flex flex-col gap-2">
-          <SectionHeading>{copy.settings.categories}</SectionHeading>
-          <div className="overflow-hidden rounded-md border border-line bg-surface">
-            {categories.map((category) => (
-              <div key={category.id} className={SETTING_ROW_CLASS}>
-                <span className="min-w-0 truncate">{category.label}</span>
-                <span className="text-label whitespace-nowrap text-muted tabular-nums">
-                  {category.kind === 'preset'
-                    ? copy.settings.preset
-                    : copy.settings.patternCount(category.patternCount)}
-                </span>
-              </div>
-            ))}
-            <button
-              type="button"
-              className={ROW_BUTTON_CLASS}
-              onClick={() => {
-                setIsAddingCategory(true);
-              }}
-            >
-              <span className="inline-flex items-center gap-2">
-                <Plus size={20} strokeWidth={2} aria-hidden="true" />
-                {copy.settings.addCategory}
-              </span>
-            </button>
-          </div>
-        </section>
+        <CategorySection />
         <OptionSections settings={document.settings} onChange={updateSettings} />
         <section className="flex flex-col gap-2">
           <SectionHeading>{copy.settings.data}</SectionHeading>
@@ -133,20 +95,6 @@ export function SettingsScreen() {
           </div>
         </section>
       </div>
-      {isAddingCategory && (
-        <CategorySheet
-          existingNames={categories.map((category) => category.label)}
-          onAdd={(name) => {
-            const id = addCategory(name);
-            setIsAddingCategory(false);
-            // 足したカテゴリの一覧へ (空のタブに「パターンを追加」が出る)
-            void navigate(`/?category=${id}`);
-          }}
-          onClose={() => {
-            setIsAddingCategory(false);
-          }}
-        />
-      )}
       {isImporting && (
         <ImportSheet
           onChoose={(file, mode) => {

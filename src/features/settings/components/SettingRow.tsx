@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 
 export const SETTING_ROW_CLASS =
   'flex min-h-13 w-full items-center justify-between gap-3 border-t border-line px-4 text-left text-body text-ink first:border-t-0';
+// 押せる行 (書き出す / 読み込む / カテゴリを追加)
+export const ROW_BUTTON_CLASS = cn(SETTING_ROW_CLASS, 'pressable hover:bg-hover active:bg-press');
 
 type SettingRowProps = {
   label: string;

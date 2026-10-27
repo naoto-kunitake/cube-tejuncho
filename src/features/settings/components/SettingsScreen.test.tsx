@@ -140,6 +140,88 @@ describe('SettingsScreen', () => {
     expect(screen.getByRole('button', { name: copy.settings.add })).toBeDisabled();
   });
 
+  it('自作のカテゴリの行を押すとシートが開き、名前を変えて保存できる', async () => {
+    const user = userEvent.setup();
+    const id = useDocumentStore.getState().addCategory('COLL');
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: `COLL ${copy.settings.patternCount(0)}` }));
+    const input = screen.getByLabelText(copy.settings.categoryName);
+    expect(input).toHaveValue('COLL');
+    const save = screen.getByRole('button', { name: copy.settings.save });
+    expect(save).toBeDisabled();
+    await user.clear(input);
+    await user.type(input, 'ZBLL');
+    await user.click(save);
+    expect(useDocumentStore.getState().document.categories).toEqual([{ id, name: 'ZBLL' }]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('プリセットの行は押せない', () => {
+    renderSettings();
+    expect(screen.queryByRole('button', { name: `${copy.list.categories.pll} ${copy.settings.preset}` })).toBeNull();
+  });
+
+  it('カテゴリの削除は件数つきで確認し、中のパターンごと消え、元に戻せる', async () => {
+    const user = userEvent.setup();
+    const categoryId = useDocumentStore.getState().addCategory('COLL');
+    useDocumentStore.getState().addCustomPattern({ name: 'a', categoryId }, null);
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: `COLL ${copy.settings.patternCount(1)}` }));
+    await user.click(screen.getByRole('button', { name: copy.settings.deleteCategory }));
+    const dialog = screen.getByRole('alertdialog', { name: copy.settings.deleteCategoryTitle('COLL') });
+    expect(within(dialog).getByText(copy.settings.deleteCategoryBody(1))).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: copy.settings.deleteCategoryAction }));
+    const { categories, patterns, settings } = useDocumentStore.getState().document;
+    expect(categories).toEqual([]);
+    expect(patterns).toEqual([]);
+    expect(settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(useToastStore.getState().toast?.text).toBe(copy.settings.deletedCategory('COLL'));
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
+  it('パターンが0件のカテゴリの削除は本文なしで確認する', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addCategory('COLL');
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: `COLL ${copy.settings.patternCount(0)}` }));
+    await user.click(screen.getByRole('button', { name: copy.settings.deleteCategory }));
+    const dialog = screen.getByRole('alertdialog', { name: copy.settings.deleteCategoryTitle('COLL') });
+    expect(within(dialog).queryByText(copy.settings.deleteCategoryBody(0))).not.toBeInTheDocument();
+  });
+
+  it('ハンドルで上キーを押すと、そのカテゴリが 1 つ上に動く', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.f2l) }).focus();
+    await user.keyboard('{ArrowUp}');
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['pll', 'f2l', 'oll']);
+  });
+
+  it('ハンドルをドラッグして離すと、動かした先の位置にカテゴリが入る', () => {
+    // jsdom は大きさを持たないので、行の高さ 52 を足す
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(52);
+    renderSettings();
+    const handle = screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.pll) });
+    fireEvent.pointerDown(handle, { clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 110, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientY: 110, pointerId: 1 });
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['oll', 'f2l', 'pll']);
+    expect(screen.getByText(copy.a11y.reorderMoved(copy.list.categories.pll, 3, 3))).toBeInTheDocument();
+  });
+
+  it('ドラッグが中断されたら並びは変わらない', () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(52);
+    renderSettings();
+    const handle = screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.pll) });
+    fireEvent.pointerDown(handle, { clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 110, pointerId: 1 });
+    fireEvent.pointerCancel(handle, { clientY: 110, pointerId: 1 });
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+  });
+
   it('データの区画に書き出すと読み込むの行がある', () => {
     renderSettings();
     expect(screen.getByRole('button', { name: copy.settings.exportData })).toBeInTheDocument();

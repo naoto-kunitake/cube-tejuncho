@@ -14,3 +14,6 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
   this.removeAttribute('open');
   this.dispatchEvent(new Event('close'));
 };
+
+// jsdom はポインタの捕捉も実装していない (ドラッグの部品が pointerdown で呼ぶ)
+HTMLElement.prototype.setPointerCapture = () => undefined;
