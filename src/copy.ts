@@ -147,6 +147,18 @@ type Copy = {
     unregisteredCount: (count: number) => string;
     register: string;
     registeredAll: (count: number) => string;
+    clearRegistrations: string;
+    registeredCount: (count: number) => string;
+    // 「登録 N件」(プリセット) と並べるので、区画の patternCount (「N件」だけ) とは別に接頭の語を付ける
+    patternCountWithLabel: (count: number) => string;
+    clear: string;
+    clearTitle: (names: readonly string[]) => string;
+    clearBody: (count: number) => string;
+    cleared: (count: number) => string;
+    reset: string;
+    resetBody: string;
+    resetAction: string;
+    resetDone: string;
   };
   notation: {
     title: string;
@@ -178,6 +190,7 @@ type Copy = {
     importSheet: string;
     importMode: string;
     registerAllSheet: string;
+    clearSheet: string;
     pickCategories: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
     cueFigure: (name: string) => string;
@@ -397,6 +410,18 @@ export const copy = {
     unregisteredCount: (count) => `未登録 ${count}件`,
     register: '登録',
     registeredAll: (count) => `${count}件を登録しました`,
+    clearRegistrations: '登録を消す',
+    registeredCount: (count) => `登録 ${count}件`,
+    patternCountWithLabel: (count) => `パターン ${count}件`,
+    clear: '消す',
+    clearTitle: (names) => `${names.join('・')} の登録を消す`,
+    // 「手順・判断・メモ」は登録の内訳で自明なので数だけ
+    clearBody: (count) => `${count}件を消します。`,
+    cleared: (count) => `${count}件を消しました`,
+    reset: '初期状態に戻す',
+    resetBody: '登録、自作のパターンとカテゴリ、設定をすべて消します。',
+    resetAction: '消す',
+    resetDone: '初期状態に戻しました',
   },
   notation: {
     title: '回転記号',
@@ -428,6 +453,7 @@ export const copy = {
     importSheet: '読み込む',
     importMode: '読み込み方',
     registerAllSheet: '基本手順を一括登録',
+    clearSheet: '登録を消す',
     pickCategories: 'カテゴリ',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
     cueFigure: (name) => `${name} の判断の手がかり`,

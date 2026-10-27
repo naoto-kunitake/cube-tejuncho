@@ -248,6 +248,53 @@ describe('SettingsScreen', () => {
     expect(useDocumentStore.getState().document).toEqual(before);
   });
 
+  it('登録を消すはカテゴリを選び、件数つきで確認してから消え、元に戻せる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    const categoryId = useDocumentStore.getState().addCategory('COLL');
+    useDocumentStore.getState().addCustomPattern({ name: 'a', categoryId }, null);
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: copy.settings.clearRegistrations }));
+    expect(screen.getByRole('checkbox', { name: new RegExp(`^${copy.list.categories.oll}`) })).toBeDisabled();
+    expect(screen.getByText(copy.settings.registeredCount(1))).toBeInTheDocument();
+    expect(screen.getByText(copy.settings.patternCountWithLabel(1))).toBeInTheDocument();
+    const clear = screen.getByRole('button', { name: copy.settings.clear });
+    expect(clear).toBeDisabled();
+    await user.click(screen.getByRole('checkbox', { name: new RegExp(`^${copy.list.categories.pll}`) }));
+    await user.click(screen.getByRole('checkbox', { name: /^COLL/ }));
+    await user.click(clear);
+    const dialog = screen.getByRole('alertdialog', {
+      name: copy.settings.clearTitle([copy.list.categories.pll, 'COLL']),
+    });
+    expect(within(dialog).getByText(copy.settings.clearBody(2))).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: copy.settings.clear }));
+    const { registrations, patterns, categories } = useDocumentStore.getState().document;
+    expect(registrations).toEqual([]);
+    expect(patterns).toEqual([]);
+    expect(categories).toHaveLength(1);
+    expect(useToastStore.getState().toast?.text).toBe(copy.settings.cleared(2));
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
+  it('初期状態に戻すは確認のうえ空の文書にして一覧へ戻り、元に戻せる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
+    useDocumentStore.getState().updateSettings({ topColor: 'white' });
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: copy.settings.reset }));
+    const dialog = screen.getByRole('alertdialog', { name: copy.settings.reset });
+    expect(within(dialog).getByText(copy.settings.resetBody)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: copy.settings.resetAction }));
+    expect(useDocumentStore.getState().document).toEqual(createEmptyDocument());
+    expect(screen.getByText('list')).toBeInTheDocument();
+    expect(useToastStore.getState().toast?.text).toBe(copy.settings.resetDone);
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
   it('書き出すと文書そのものの JSON がファイルになり、件数とファイル名を知らせる', async () => {
     const user = userEvent.setup();
     useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
