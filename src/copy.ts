@@ -143,6 +143,10 @@ type Copy = {
     imported: (count: number) => string;
     importFailedTitle: string;
     importFailedBody: string;
+    registerAll: string;
+    unregisteredCount: (count: number) => string;
+    register: string;
+    registeredAll: (count: number) => string;
   };
   notation: {
     title: string;
@@ -173,6 +177,8 @@ type Copy = {
     reorderMoved: (name: string, position: number, count: number) => string;
     importSheet: string;
     importMode: string;
+    registerAllSheet: string;
+    pickCategories: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
     cueFigure: (name: string) => string;
     playerSheet: string;
@@ -387,6 +393,10 @@ export const copy = {
     imported: (count) => `${count}件を読み込みました`,
     importFailedTitle: '読み込めませんでした',
     importFailedBody: 'このアプリで書き出したファイルを選んでください。',
+    registerAll: '基本手順を一括登録',
+    unregisteredCount: (count) => `未登録 ${count}件`,
+    register: '登録',
+    registeredAll: (count) => `${count}件を登録しました`,
   },
   notation: {
     title: '回転記号',
@@ -417,6 +427,8 @@ export const copy = {
     reorderMoved: (name, position, count) => `${name} は ${position}/${count}番目`,
     importSheet: '読み込む',
     importMode: '読み込み方',
+    registerAllSheet: '基本手順を一括登録',
+    pickCategories: 'カテゴリ',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
     cueFigure: (name) => `${name} の判断の手がかり`,
     playerSheet: '手順の再生',

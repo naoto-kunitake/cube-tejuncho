@@ -228,6 +228,26 @@ describe('SettingsScreen', () => {
     expect(screen.getByRole('button', { name: copy.settings.importData })).toBeInTheDocument();
   });
 
+  it('一括登録のシートは未登録のあるカテゴリが最初から全部チェックされ、登録すると基本手順が入り、元に戻せる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().registerStandardAlgs('oll');
+    const before = useDocumentStore.getState().document;
+    renderSettings();
+    await user.click(screen.getByRole('button', { name: copy.settings.registerAll }));
+    const pll = screen.getByRole('checkbox', { name: new RegExp(`^${copy.list.categories.pll}`) });
+    const oll = screen.getByRole('checkbox', { name: new RegExp(`^${copy.list.categories.oll}`) });
+    expect(pll).toBeChecked();
+    expect(oll).toBeDisabled();
+    expect(oll).not.toBeChecked();
+    expect(screen.getByText(copy.settings.unregisteredCount(21))).toBeInTheDocument();
+    expect(screen.getByText(copy.settings.unregisteredCount(0))).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: copy.settings.register }));
+    expect(useDocumentStore.getState().document.registrations).toHaveLength(57 + 21 + 41);
+    expect(useToastStore.getState().toast?.text).toBe(copy.settings.registeredAll(21 + 41));
+    useToastStore.getState().toast?.action?.run();
+    expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
   it('書き出すと文書そのものの JSON がファイルになり、件数とファイル名を知らせる', async () => {
     const user = userEvent.setup();
     useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
