@@ -7,14 +7,16 @@ import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
 import { useDocumentStore } from '@/data/store';
 
+import { CategoryRows } from './CategoryRows';
 import { CategorySheet } from './CategorySheet';
-import { ROW_BUTTON_CLASS, SETTING_ROW_CLASS } from './SettingRow';
+import { ROW_BUTTON_CLASS } from './SettingRow';
 
 // 設定のカテゴリの区画。タブの並び順で全カテゴリを行に出し、末尾に「カテゴリを追加」
 export function CategorySection() {
   const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
   const addCategory = useDocumentStore((state) => state.addCategory);
+  const moveCategory = useDocumentStore((state) => state.moveCategory);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const categories = categoryEntriesOf(document).map((category) => ({
     ...category,
@@ -24,15 +26,14 @@ export function CategorySection() {
   return (
     <section className="flex flex-col gap-2">
       <SectionHeading>{copy.settings.categories}</SectionHeading>
-      <div className="overflow-hidden rounded-md border border-line bg-surface">
-        {categories.map((category) => (
-          <div key={category.id} className={SETTING_ROW_CLASS}>
-            <span className="min-w-0 truncate">{category.label}</span>
-            <span className="text-label whitespace-nowrap text-muted tabular-nums">
-              {category.kind === 'preset' ? copy.settings.preset : copy.settings.patternCount(category.patternCount)}
-            </span>
-          </div>
-        ))}
+      <CategoryRows
+        categories={categories.map((category) => ({
+          id: category.id,
+          label: category.label,
+          detail: category.kind === 'preset' ? copy.settings.preset : copy.settings.patternCount(category.patternCount),
+        }))}
+        onMove={moveCategory}
+      >
         <button
           type="button"
           className={ROW_BUTTON_CLASS}
@@ -45,7 +46,7 @@ export function CategorySection() {
             {copy.settings.addCategory}
           </span>
         </button>
-      </div>
+      </CategoryRows>
       {isAddingCategory && (
         <CategorySheet
           existingNames={categories.map((category) => category.label)}

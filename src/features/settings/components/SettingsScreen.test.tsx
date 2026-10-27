@@ -140,6 +140,36 @@ describe('SettingsScreen', () => {
     expect(screen.getByRole('button', { name: copy.settings.add })).toBeDisabled();
   });
 
+  it('ハンドルで上キーを押すと、そのカテゴリが 1 つ上に動く', async () => {
+    const user = userEvent.setup();
+    renderSettings();
+    screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.f2l) }).focus();
+    await user.keyboard('{ArrowUp}');
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['pll', 'f2l', 'oll']);
+  });
+
+  it('ハンドルをドラッグして離すと、動かした先の位置にカテゴリが入る', () => {
+    // jsdom は大きさを持たないので、行の高さ 52 を足す
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(52);
+    renderSettings();
+    const handle = screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.pll) });
+    fireEvent.pointerDown(handle, { clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 110, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientY: 110, pointerId: 1 });
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['oll', 'f2l', 'pll']);
+    expect(screen.getByText(copy.a11y.reorderMoved(copy.list.categories.pll, 3, 3))).toBeInTheDocument();
+  });
+
+  it('ドラッグが中断されたら並びは変わらない', () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(52);
+    renderSettings();
+    const handle = screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.pll) });
+    fireEvent.pointerDown(handle, { clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientY: 110, pointerId: 1 });
+    fireEvent.pointerCancel(handle, { clientY: 110, pointerId: 1 });
+    expect(useDocumentStore.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+  });
+
   it('データの区画に書き出すと読み込むの行がある', () => {
     renderSettings();
     expect(screen.getByRole('button', { name: copy.settings.exportData })).toBeInTheDocument();

@@ -161,6 +161,9 @@ type Copy = {
     closeEdit: string;
     keypad: string;
     categorySheet: string;
+    reorderHandle: (name: string) => string;
+    reorderHint: string;
+    reorderMoved: (name: string, position: number, count: number) => string;
     importSheet: string;
     importMode: string;
     tile: (category: string, name: string, isRegistered: boolean) => string;
@@ -394,6 +397,9 @@ export const copy = {
     closeEdit: '閉じる',
     keypad: '手順キーパッド',
     categorySheet: 'カテゴリ',
+    reorderHandle: (name) => `${name} を並べ替え`,
+    reorderHint: '上下の矢印キーで動かす',
+    reorderMoved: (name, position, count) => `${name} は ${position}/${count}番目`,
     importSheet: '読み込む',
     importMode: '読み込み方',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
