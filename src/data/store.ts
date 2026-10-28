@@ -99,6 +99,10 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
 
 export type CustomPatternFields = Pick<CustomPattern, 'name' | 'categoryId'>;
 
+// 閉じた案内の id。プリセットのタブの初回の案内はカテゴリ id、iOS の「ホーム画面に追加」の案内は固定の id
+export const HOME_SCREEN_BANNER = 'homeScreen';
+export type BannerId = PresetCategoryId | typeof HOME_SCREEN_BANNER;
+
 export type DocumentStore = {
   document: Document;
   loadIssue: LoadIssue | null;
@@ -130,7 +134,7 @@ export type DocumentStore = {
   clearRegistrations: (categoryIds: readonly string[]) => number;
   // 登録・自作・カテゴリ・設定をすべて既定に戻す
   resetDocument: () => void;
-  dismissBanner: (category: PresetCategoryId) => void;
+  dismissBanner: (banner: BannerId) => void;
   dismissLoadIssue: () => void;
 };
 
@@ -366,16 +370,16 @@ export function createDocumentStore(storage: KeyValueStorage) {
             set({ document: createEmptyDocument() });
             reportStorageIssue();
           },
-          dismissBanner: (category) => {
+          dismissBanner: (banner) => {
             set((state) => {
               const { dismissedBanners } = state.document.settings;
-              if (dismissedBanners.includes(category)) {
+              if (dismissedBanners.includes(banner)) {
                 return state;
               }
               return {
                 document: {
                   ...state.document,
-                  settings: { ...state.document.settings, dismissedBanners: [...dismissedBanners, category] },
+                  settings: { ...state.document.settings, dismissedBanners: [...dismissedBanners, banner] },
                 },
               };
             });
