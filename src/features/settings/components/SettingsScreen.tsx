@@ -5,6 +5,7 @@ import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { useDocumentStore } from '@/data/store';
 
+import { AboutSection } from './AboutSection';
 import { CategorySection } from './CategorySection';
 import { DataSection } from './DataSection';
 import { OptionSections } from './OptionSections';
@@ -29,6 +30,7 @@ export function SettingsScreen() {
         <CategorySection />
         <OptionSections settings={document.settings} onChange={updateSettings} />
         <DataSection />
+        <AboutSection />
       </div>
     </section>
   );

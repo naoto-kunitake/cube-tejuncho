@@ -1,3 +1,4 @@
+import type { CreditId } from '@/data/credits';
 import type { Settings } from '@/data/document';
 import type { NotationRowId, NotationSectionId } from '@/data/notation';
 import type { PresetCategoryId } from '@/data/presets/catalog';
@@ -165,6 +166,20 @@ type Copy = {
     resetBody: string;
     resetAction: string;
     resetDone: string;
+  };
+  about: {
+    title: string;
+    version: string;
+    licenses: string;
+    privacy: string;
+    credits: Record<CreditId, string>;
+    // 問い合わせの節だけ、文中に外部リンクを持つ段落がある
+    privacySections: readonly {
+      title: string;
+      body: readonly string[];
+      linkParagraph?: { before: string; label: string; href: string; after: string };
+    }[];
+    privacyUpdated: string;
   };
   notation: {
     title: string;
@@ -436,6 +451,37 @@ export const copy = {
     resetBody: '登録、自作のパターンとカテゴリ、設定をすべて消します。',
     resetAction: '消す',
     resetDone: '初期状態に戻しました',
+  },
+  about: {
+    title: 'このアプリについて',
+    version: 'バージョン',
+    licenses: 'ライセンス',
+    privacy: 'プライバシーポリシー',
+    credits: { cubing: 'cubing.js', jetbrainsMono: 'JetBrains Mono' },
+    // 文書なので句点あり。一般公開の版を最小の形で書き、事実 (計測・問い合わせ先・配信元) が変わったときだけ改定する
+    privacySections: [
+      { title: '運営者', body: ['naoto-kunitake'] },
+      {
+        title: '集める情報',
+        body: [
+          'このアプリは、利用者の個人情報を集めません。アクセス解析や広告の仕組み、Cookieは使いません。',
+          '登録した手順などのデータは、お使いの端末のブラウザの中にだけ保存され、外部には送信されません。設定からいつでも消せます。',
+        ],
+      },
+      { title: '通信', body: ['アプリを配信するサーバーが、接続の記録 (IPアドレスなど) を残すことがあります。'] },
+      {
+        title: '問い合わせ',
+        body: [],
+        linkParagraph: {
+          before: 'GitHubのリポジトリの',
+          label: 'Issues',
+          href: 'https://github.com/naoto-kunitake/cube-tejuncho/issues',
+          after: 'で受け付けます。',
+        },
+      },
+      { title: '変更', body: ['この方針を変えるときは、この画面で知らせます。'] },
+    ],
+    privacyUpdated: '2026年10月28日 制定',
   },
   notation: {
     title: '回転記号',

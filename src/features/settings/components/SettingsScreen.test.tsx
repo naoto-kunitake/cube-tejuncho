@@ -7,6 +7,7 @@ import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
+import { APP_VERSION } from '@/lib/app-version';
 
 import { SettingsScreen } from './SettingsScreen';
 
@@ -225,6 +226,15 @@ describe('SettingsScreen', () => {
   it('表記の区画に回転記号の画面へのリンクがある', () => {
     renderSettings();
     expect(screen.getByRole('link', { name: copy.settings.openNotation })).toHaveAttribute('href', '/notation');
+  });
+
+  it('このアプリについての区画にバージョンと、ライセンス・プライバシーポリシーへのリンクがある', () => {
+    renderSettings();
+    expect(screen.getByText(copy.about.version)).toBeInTheDocument();
+    expect(screen.getByText(APP_VERSION)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: APP_VERSION })).toBeNull();
+    expect(screen.getByRole('link', { name: copy.about.licenses })).toHaveAttribute('href', '/licenses');
+    expect(screen.getByRole('link', { name: copy.about.privacy })).toHaveAttribute('href', '/privacy');
   });
 
   it('データの区画に書き出すと読み込むの行がある', () => {
