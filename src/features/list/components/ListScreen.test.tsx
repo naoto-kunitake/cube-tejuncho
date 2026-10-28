@@ -1,12 +1,12 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
-import { useDocumentStore } from '@/data/store';
+import { HOME_SCREEN_BANNER, useDocumentStore } from '@/data/store';
 
 import { ListScreen } from './ListScreen';
 
@@ -277,5 +277,51 @@ describe('ListScreen', () => {
     expect(screen.getByText("R U R' U R U2 R'")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toHaveAttribute('href', '/p/new?category=c1');
     expect(screen.queryByText(/登録済み/)).not.toBeInTheDocument();
+  });
+});
+
+describe('ホーム画面の案内', () => {
+  const IPHONE =
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1';
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('iPhone のブラウザで登録があると案内が出て、閉じると設定に残って消える', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(IPHONE);
+    useDocumentStore.getState().registerStandardAlgs('pll');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const banner = screen.getByRole('region', { name: copy.a11y.homeScreenHint });
+    expect(within(banner).getByText(copy.list.homeScreenTitle)).toBeInTheDocument();
+    await user.click(within(banner).getByRole('button', { name: copy.list.dismissBanner }));
+    expect(useDocumentStore.getState().document.settings.dismissedBanners).toContain(HOME_SCREEN_BANNER);
+    expect(screen.queryByRole('region', { name: copy.a11y.homeScreenHint })).toBeNull();
+  });
+
+  it('登録が 1 件もないうちは、iPhone でも案内を出さない (初回の案内と重ねない)', () => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(IPHONE);
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('region', { name: copy.a11y.homeScreenHint })).toBeNull();
+    expect(screen.getByRole('region', { name: copy.a11y.firstRun })).toBeInTheDocument();
+  });
+
+  it('iPhone 以外では案内を出さない', () => {
+    useDocumentStore.getState().registerStandardAlgs('pll');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('region', { name: copy.a11y.homeScreenHint })).toBeNull();
   });
 });

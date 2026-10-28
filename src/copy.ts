@@ -38,6 +38,8 @@ type Copy = {
     registerAll: string;
     registeredAll: (count: number) => string;
     dismissBanner: string;
+    homeScreenTitle: string;
+    homeScreenHint: string;
   };
   detail: {
     notFound: string;
@@ -199,6 +201,7 @@ type Copy = {
     detail: string;
     categoryTabs: string;
     firstRun: string;
+    homeScreenHint: string;
     openSettings: string;
     switchToList: string;
     switchToGrid: string;
@@ -287,6 +290,9 @@ export const copy = {
     registerAll: '基本手順を一括登録',
     registeredAll: (count) => `${count}件を登録しました`,
     dismissBanner: '閉じる',
+    // iOS の Safari は 7 日間使われないサイトのデータを消すことがある。ホーム画面に追加すれば対象外
+    homeScreenTitle: 'ホーム画面に追加しておくとデータが消えません',
+    homeScreenHint: '共有ボタンから「ホーム画面に追加」を選ぶ',
   },
   detail: {
     notFound: 'パターンが見つかりません',
@@ -538,6 +544,7 @@ export const copy = {
     detail: '詳細',
     categoryTabs: 'カテゴリ',
     firstRun: '案内',
+    homeScreenHint: 'ホーム画面の案内',
     openSettings: '設定',
     switchToList: 'リスト表示にする',
     switchToGrid: 'グリッド表示にする',

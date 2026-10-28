@@ -17,3 +17,19 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
 
 // jsdom はポインタの捕捉も実装していない (ドラッグの部品が pointerdown で呼ぶ)
 HTMLElement.prototype.setPointerCapture = () => undefined;
+
+// jsdom は matchMedia も実装していない (ホーム画面の案内が display-mode を見る)。常に不一致を返す
+Object.defineProperty(window, 'matchMedia', {
+  configurable: true,
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => false,
+  }),
+});

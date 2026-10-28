@@ -9,15 +9,17 @@ import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
 import { type CustomPattern, findRegistration, type Registration, type Settings } from '@/data/document';
 import { type PresetCategoryId, presetsOf } from '@/data/presets/catalog';
-import { useDocumentStore } from '@/data/store';
+import { HOME_SCREEN_BANNER, useDocumentStore } from '@/data/store';
 import { cn } from '@/lib/utils';
 
 import { useCategory } from '../hooks/useCategory';
 import { groupByShape } from '../lib/group-by-shape';
+import { homeScreenEnvironmentOf, isHomeScreenHintNeeded } from '../lib/home-screen-hint';
 import { tileNameOf } from '../lib/tile-name';
 import { CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { FirstRunBanner } from './FirstRunBanner';
+import { HomeScreenBanner } from './HomeScreenBanner';
 import { PatternTile } from './PatternTile';
 
 type TileSectionProps = {
@@ -167,7 +169,14 @@ export function ListScreen() {
   const document = useDocumentStore((state) => state.document);
   const pinnedIds = new Set(document.pinned);
   const setListView = useDocumentStore((state) => state.setListView);
+  const dismissBanner = useDocumentStore((state) => state.dismissBanner);
   const isList = document.settings.listView === 'list';
+  // iOS でまだホーム画面に追加していないときに一度だけ出す案内 (閉じると設定に残る)。
+  // 守るデータがないうちは出さない (初回は登録の案内だけが出て、2 枚の案内が重ならない)
+  const showsHomeScreenBanner =
+    document.registrations.length > 0 &&
+    isHomeScreenHintNeeded(homeScreenEnvironmentOf(window)) &&
+    !document.settings.dismissedBanners.includes(HOME_SCREEN_BANNER);
   const entries = categoryEntriesOf(document);
   const categories = entries.map((entry) => ({
     id: entry.id,
@@ -199,6 +208,13 @@ export function ListScreen() {
       </TopBar>
       <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
       <div className="flex flex-col gap-4 px-4 pb-6">
+        {showsHomeScreenBanner && (
+          <HomeScreenBanner
+            onDismiss={() => {
+              dismissBanner(HOME_SCREEN_BANNER);
+            }}
+          />
+        )}
         {selected?.kind === 'custom' ? (
           <CustomList
             categoryId={selected.id}
