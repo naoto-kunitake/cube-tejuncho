@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 仮のアイコン: 地の色の上に、上面図の 3×3 (黄) を置く。持ち主の決定で差し替える -->
+  <rect width="512" height="512" fill="#f2f0ea"/>
+  <g transform="translate(96 96)">
+    <rect width="320" height="320" rx="48" fill="#1a1a1a"/>
+    <g fill="#ffd400">
+      <rect x="28" y="28" width="80" height="80" rx="14"/><rect x="120" y="28" width="80" height="80" rx="14"/><rect x="212" y="28" width="80" height="80" rx="14"/>
+      <rect x="28" y="120" width="80" height="80" rx="14"/><rect x="120" y="120" width="80" height="80" rx="14"/><rect x="212" y="120" width="80" height="80" rx="14"/>
+      <rect x="28" y="212" width="80" height="80" rx="14"/><rect x="120" y="212" width="80" height="80" rx="14"/><rect x="212" y="212" width="80" height="80" rx="14"/>
+    </g>
+  </g>
+</svg>
