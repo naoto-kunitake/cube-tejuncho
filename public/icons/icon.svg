@@ -1,12 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- 仮のアイコン: 地の色の上に、上面図の 3×3 (黄) を置く。持ち主の決定で差し替える -->
-  <rect width="512" height="512" fill="#f2f0ea"/>
-  <g transform="translate(96 96)">
-    <rect width="320" height="320" rx="48" fill="#1a1a1a"/>
-    <g fill="#ffd400">
-      <rect x="28" y="28" width="80" height="80" rx="14"/><rect x="120" y="28" width="80" height="80" rx="14"/><rect x="212" y="28" width="80" height="80" rx="14"/>
-      <rect x="28" y="120" width="80" height="80" rx="14"/><rect x="120" y="120" width="80" height="80" rx="14"/><rect x="212" y="120" width="80" height="80" rx="14"/>
-      <rect x="28" y="212" width="80" height="80" rx="14"/><rect x="120" y="212" width="80" height="80" rx="14"/><rect x="212" y="212" width="80" height="80" rx="14"/>
-    </g>
+  <!-- アプリのアイコン: 墨の地に 3 面の立方体 (上 黄・前 緑・右 橙 = アプリの図の基準の向き)。
+       角丸は OS が切るので四角いっぱいに描く。立方体の見た目の中心を画面の中央に置き、円形の切り抜きでも角が欠けない大きさ (1.12 倍) -->
+  <rect width="512" height="512" fill="#1a1a1a"/>
+  <g transform="translate(256 229) scale(1.12)" stroke="#1a1a1a" stroke-width="9" stroke-linejoin="round">
+    <g fill="#ffd400"><polygon points="0,-156 52,-126 0,-96 -52,-126"/><polygon points="52,-126 104,-96 52,-66 0,-96"/><polygon points="104,-96 156,-66 104,-36 52,-66"/><polygon points="-52,-126 0,-96 -52,-66 -104,-96"/><polygon points="0,-96 52,-66 0,-36 -52,-66"/><polygon points="52,-66 104,-36 52,-6 0,-36"/><polygon points="-104,-96 -52,-66 -104,-36 -156,-66"/><polygon points="-52,-66 0,-36 -52,-6 -104,-36"/><polygon points="0,-36 52,-6 0,24 -52,-6"/></g><g fill="#00a651"><polygon points="-156,-66 -104,-36 -104,24 -156,-6"/><polygon points="-104,-36 -52,-6 -52,54 -104,24"/><polygon points="-52,-6 0,24 0,84 -52,54"/><polygon points="-156,-6 -104,24 -104,84 -156,54"/><polygon points="-104,24 -52,54 -52,114 -104,84"/><polygon points="-52,54 0,84 0,144 -52,114"/><polygon points="-156,54 -104,84 -104,144 -156,114"/><polygon points="-104,84 -52,114 -52,174 -104,144"/><polygon points="-52,114 0,144 0,204 -52,174"/></g><g fill="#ff6d00"><polygon points="0,24 52,-6 52,54 0,84"/><polygon points="52,-6 104,-36 104,24 52,54"/><polygon points="104,-36 156,-66 156,-6 104,24"/><polygon points="0,84 52,54 52,114 0,144"/><polygon points="52,54 104,24 104,84 52,114"/><polygon points="104,24 156,-6 156,54 104,84"/><polygon points="0,144 52,114 52,174 0,204"/><polygon points="52,114 104,84 104,144 52,174"/><polygon points="104,84 156,54 156,114 104,144"/></g>
   </g>
 </svg>
