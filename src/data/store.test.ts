@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createEmptyDocument } from './document';
 import { createMemoryStorage, type KeyValueStorage } from './storage';
-import { createDocumentStore, DOCUMENT_KEY } from './store';
+import { createDocumentStore, DOCUMENT_KEY, HOME_SCREEN_BANNER } from './store';
 
 const UA_ALG = { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' };
 
@@ -180,6 +180,17 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
     store.getState().moveCategory('gone', 1);
     expect(store.getState().document.settings.tabOrder).toEqual(['pll', 'oll', 'f2l']);
+  });
+
+  it('ホーム画面の案内を閉じると設定に残り、タブの案内とは別に数えられる', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().dismissBanner(HOME_SCREEN_BANNER);
+    store.getState().dismissBanner('pll');
+    expect(createDocumentStore(storage).getState().document.settings.dismissedBanners).toEqual([
+      HOME_SCREEN_BANNER,
+      'pll',
+    ]);
   });
 
   it('ピン留めは押すたびに付いたり外れたりし、読み直しても残る', () => {

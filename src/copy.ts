@@ -38,6 +38,8 @@ type Copy = {
     registerAll: string;
     registeredAll: (count: number) => string;
     dismissBanner: string;
+    homeScreenTitle: string;
+    homeScreenHint: string;
   };
   detail: {
     notFound: string;
@@ -199,6 +201,7 @@ type Copy = {
     detail: string;
     categoryTabs: string;
     firstRun: string;
+    homeScreenHint: string;
     openSettings: string;
     switchToList: string;
     switchToGrid: string;
@@ -287,6 +290,9 @@ export const copy = {
     registerAll: '基本手順を一括登録',
     registeredAll: (count) => `${count}件を登録しました`,
     dismissBanner: '閉じる',
+    // iOS の Safari は 7 日間使われないサイトのデータを消すことがある。ホーム画面に追加すれば対象外
+    homeScreenTitle: 'ホーム画面に追加しておくとデータが消えません',
+    homeScreenHint: '共有ボタンから「ホーム画面に追加」を選ぶ',
   },
   detail: {
     notFound: 'パターンが見つかりません',
@@ -302,7 +308,7 @@ export const copy = {
     fingering: '指使い',
   },
   edit: {
-    title: (name) => `${name} を編集`,
+    title: (name) => `${name}を編集`,
     newTitle: '新しいパターン',
     save: '保存',
     name: '名前',
@@ -350,12 +356,12 @@ export const copy = {
     },
     seeNotation: '回転記号を見る',
     deleteMainAlgTitle: 'メイン手順を削除',
-    deleteAltAlgTitle: (number) => `手順 ${number} を削除`,
+    deleteAltAlgTitle: (number) => `手順 ${number}を削除`,
     deletedAlg: '手順を削除しました',
     discardTitle: '変更を破棄',
     discard: '破棄',
     restoredDraft: '書きかけを復元しました',
-    removedRegistration: (name) => `${name} の登録を消しました`,
+    removedRegistration: (name) => `${name}の登録を消しました`,
   },
   keypad: {
     backspace: '削除',
@@ -389,7 +395,7 @@ export const copy = {
     deleteCategoryAction: '削除',
     deletedCategory: (name) => `「${name}」を削除しました`,
     list: '一覧',
-    sortOrderOf: (category) => `${category} の並び順`,
+    sortOrderOf: (category) => `${category}の並び順`,
     byShape: '種類ごと',
     figure: '図',
     topColor: '上面の色',
@@ -443,7 +449,7 @@ export const copy = {
     registeredCount: (count) => `登録 ${count}件`,
     patternCountWithLabel: (count) => `パターン ${count}件`,
     clear: '消す',
-    clearTitle: (names) => `${names.join('・')} の登録を消す`,
+    clearTitle: (names) => `${names.join('・')}の登録を消す`,
     // 「手順・判断・メモ」は登録の内訳で自明なので数だけ
     clearBody: (count) => `${count}件を消します。`,
     cleared: (count) => `${count}件を消しました`,
@@ -498,7 +504,7 @@ export const copy = {
       face: () => 'その面を正面から見て時計回りに90°',
       direction: () => '',
       slice: () => '',
-      wide: (otherWideStyle) => `面と隣の層を一緒に回す (${otherWideStyle} とも書く)`,
+      wide: (otherWideStyle) => `面と隣の層を一緒に回す (${otherWideStyle}とも書く)`,
       rotation: () => 'キューブ全体を回す',
       group: () => '',
     },
@@ -512,18 +518,18 @@ export const copy = {
       B: { description: '後面' },
       prime: { description: '反時計回りに90°' },
       double: { description: '180°' },
-      M: { description: '左右の間', sub: 'L と同じ向き' },
-      E: { description: '上下の間', sub: 'D と同じ向き' },
-      S: { description: '前後の間', sub: 'F と同じ向き' },
-      wideR: { description: 'R と隣の層' },
-      wideL: { description: 'L と隣の層' },
-      wideU: { description: 'U と隣の層' },
-      wideD: { description: 'D と隣の層' },
-      wideF: { description: 'F と隣の層' },
-      wideB: { description: 'B と隣の層' },
-      x: { description: 'R と同じ向き' },
-      y: { description: 'U と同じ向き' },
-      z: { description: 'F と同じ向き' },
+      M: { description: '左右の間', sub: 'Lと同じ向き' },
+      E: { description: '上下の間', sub: 'Dと同じ向き' },
+      S: { description: '前後の間', sub: 'Fと同じ向き' },
+      wideR: { description: 'Rと隣の層' },
+      wideL: { description: 'Lと隣の層' },
+      wideU: { description: 'Uと隣の層' },
+      wideD: { description: 'Dと隣の層' },
+      wideF: { description: 'Fと隣の層' },
+      wideB: { description: 'Bと隣の層' },
+      x: { description: 'Rと同じ向き' },
+      y: { description: 'Uと同じ向き' },
+      z: { description: 'Fと同じ向き' },
       group: { description: '区切り', sub: '回し方は変わらない' },
     },
   },
@@ -538,31 +544,32 @@ export const copy = {
     detail: '詳細',
     categoryTabs: 'カテゴリ',
     firstRun: '案内',
+    homeScreenHint: 'ホーム画面の案内',
     openSettings: '設定',
     switchToList: 'リスト表示にする',
     switchToGrid: 'グリッド表示にする',
     backToList: '一覧へ戻る',
     back: '戻る',
     edit: '編集',
-    editPattern: (name) => `${name} を編集`,
+    editPattern: (name) => `${name}を編集`,
     pin: 'ピン留め',
     closeEdit: '閉じる',
     keypad: '手順キーパッド',
     categorySheet: 'カテゴリ',
-    reorderHandle: (name) => `${name} を並べ替え`,
+    reorderHandle: (name) => `${name}を並べ替え`,
     reorderHint: '上下の矢印キーで動かす',
-    reorderMoved: (name, position, count) => `${name} は ${position}/${count}番目`,
+    reorderMoved: (name, position, count) => `${name}は${position}/${count}番目`,
     importSheet: '読み込む',
     importMode: '読み込み方',
     registerAllSheet: '基本手順を一括登録',
     clearSheet: '登録を消す',
     pickCategories: 'カテゴリ',
     tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
-    cueFigure: (name) => `${name} の判断の手がかり`,
+    cueFigure: (name) => `${name}の判断の手がかり`,
     playerSheet: '手順の再生',
     closeSheet: '閉じる',
-    playMove: (symbol) => `${symbol} を再生`,
-    moveFigure: (symbol) => `${symbol} で動く層`,
+    playMove: (symbol) => `${symbol}を再生`,
+    moveFigure: (symbol) => `${symbol}で動く層`,
     play: '再生',
     pause: '一時停止',
     toStart: '最初へ',
