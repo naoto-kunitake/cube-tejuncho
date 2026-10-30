@@ -1,7 +1,7 @@
 #!/bin/bash
-# レビューを通った差分の印 (SHA-256)。計算を 1 か所にして、書く側と照合する側がずれて全部が止まる事故を防ぐ。
-# - ステージ済みの差分: /commit が `write` で書き、check-self-review.sh が `hash` で照合する
-# - ブランチ全体の差分 (main との差): /pr が `write-branch` で書き、check-branch-review.sh が `hash-branch` で照合する
+# レビューを通った差分の印 (SHA-256)。計算を1か所にして、書く側と照合する側がずれて全部が止まる事故を防ぐ。
+# - ステージ済みの差分: /commitが`write`で書き、check-self-review.shが`hash`で照合する
+# - ブランチ全体の差分 (mainとの差): /prが`write-branch`で書き、check-branch-review.shが`hash-branch`で照合する
 set -euo pipefail
 
 ROOT=$(git rev-parse --show-toplevel)
@@ -12,11 +12,11 @@ hash_staged() {
   git -C "$ROOT" diff --cached | shasum -a 256 | awk '{print $1}'
 }
 
-# 比較の基準。ローカルの main がなければ origin/main。どちらもなければ失敗させる (黙って「差分なし」にしない)
+# 比較の基準。ローカルのmainがなければorigin/main。どちらもなければ失敗させる (黙って「差分なし」にしない)
 resolve_base() {
   git -C "$ROOT" rev-parse --verify -q main 2>/dev/null && return 0
   git -C "$ROOT" rev-parse --verify -q origin/main 2>/dev/null && return 0
-  echo "review-stamp: main も origin/main も見つからない" >&2
+  echo "review-stamp: mainもorigin/mainも見つからない" >&2
   return 1
 }
 
