@@ -5,6 +5,7 @@ import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
+import type { LoadIssue } from '@/data/store';
 import type { WideStyle } from '@/lib/alg/format';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
@@ -95,6 +96,7 @@ type Copy = {
     cancel: string;
     close: string;
   };
+  notice: Record<LoadIssue, { title: string; body: string }>;
   toast: {
     undo: string;
   };
@@ -152,6 +154,7 @@ type Copy = {
     imported: (count: number) => string;
     importFailedTitle: string;
     importFailedBody: string;
+    importFailedNewerBody: string;
     registerAll: string;
     unregisteredCount: (count: number) => string;
     register: string;
@@ -372,6 +375,24 @@ export const copy = {
     cancel: 'キャンセル',
     close: '閉じる',
   },
+  notice: {
+    brokenDocument: {
+      title: 'データを読み込めませんでした',
+      body: '壊れたデータは消さずに取り置き、空の状態で開きました。書き出したJSONがあれば読み込めます。',
+    },
+    newerDocument: {
+      title: 'アプリの版が古いようです',
+      body: '保存されたデータは新しい版で書かれていて読めません。ページを開き直してください。',
+    },
+    storageUnavailable: {
+      title: 'このブラウザでは保存できません',
+      body: 'プライベートモードでは端末に残せません。閉じると書いたものは消えます。',
+    },
+    quotaExceeded: {
+      title: '保存できませんでした',
+      body: '端末の空きが足りません。使っていないデータを消すか、JSONに書き出してから試してください。',
+    },
+  },
   toast: {
     undo: '元に戻す',
   },
@@ -441,6 +462,7 @@ export const copy = {
     imported: (count) => `${count}件を読み込みました`,
     importFailedTitle: '読み込めませんでした',
     importFailedBody: 'このアプリで書き出したファイルを選んでください。',
+    importFailedNewerBody: 'ファイルは新しい版で書かれています。ページを開き直してから試してください。',
     registerAll: '基本手順を一括登録',
     unregisteredCount: (count) => `未登録 ${count}件`,
     register: '登録',

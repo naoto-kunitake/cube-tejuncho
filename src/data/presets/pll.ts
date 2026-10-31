@@ -3,7 +3,7 @@ import type { TopView } from '@/lib/figure/view';
 
 export type PllShape = 'headlights4' | 'barAndHeadlights3' | 'headlights1' | 'bar1' | 'none';
 
-// 一覧の「種類ごと」の並び (モックで決めた順)
+// 一覧の「種類ごと」の並び。側面の手がかりが多い順に置き、見分けやすいものから目に入るようにする
 export const PLL_SHAPE_ORDER: readonly PllShape[] = ['headlights4', 'barAndHeadlights3', 'headlights1', 'bar1', 'none'];
 
 export type PllPreset = {

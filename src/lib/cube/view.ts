@@ -1,6 +1,13 @@
 import type { Alg } from 'cubing/alg';
 
-import { type CubeView, mapFace, type PairMask, type StickerColor, type TopView } from '@/lib/figure/view';
+import {
+  type CubeView,
+  mapFace,
+  type PairMask,
+  type StickerColor,
+  type TopView,
+  type ViewSettings,
+} from '@/lib/figure/view';
 
 import { applyAlg, type CubeState, solvedState } from './kpuzzle';
 import { setupAlgFor } from './setup';
@@ -10,8 +17,23 @@ import { type Facelets, faceletsOf, pieceFaceOf, pieceOfColors } from './sticker
 // 再生の開始姿勢と同じ手順 (z2で持ち替えてから逆手順) を揃った状態に掛ける
 const FIGURE_FRAME = { topColor: 'yellow', frontColor: 'green' } as const;
 
+// 再生の開始状態 (手順の適用前)
+export async function startStateOf(alg: Alg, settings: ViewSettings): Promise<CubeState> {
+  return applyAlg(await solvedState(), setupAlgFor(alg, settings));
+}
+
 export async function caseStartState(alg: Alg): Promise<CubeState> {
-  return applyAlg(await solvedState(), setupAlgFor(alg, FIGURE_FRAME));
+  return startStateOf(alg, FIGURE_FRAME);
+}
+
+// 開始状態で正面に来ている中心の色。手順の中の持ち替え (y、d) の分だけ設定の前面の色からずれる
+export function frontCenterOf(state: CubeState): StickerColor {
+  return faceletsOf(state).F[4];
+}
+
+// 開始状態で上面に来ている中心の色。設定の上面の色と違えば、y以外の持ち替え (x、z) が残っている
+export function topCenterOf(state: CubeState): StickerColor {
+  return faceletsOf(state).U[4];
 }
 
 // 図の枠 (黄上・緑前) に持ち替え済みの状態から上面図を読む。側面は上から見て左から右の順 (後面と右面は正面から見た順の逆)

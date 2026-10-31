@@ -16,8 +16,10 @@ const DraftSchema = z.object({
 export type Draft = z.infer<typeof DraftSchema>;
 export type DraftData = Omit<Draft, 'version'>;
 
+const DRAFT_PREFIX = 'cube-tejuncho:draft:';
+
 export function draftKey(patternId: string): string {
-  return `cube-tejuncho:draft:${patternId}`;
+  return `${DRAFT_PREFIX}${patternId}`;
 }
 
 // 編集の書きかけ。文書とは別の鍵に置き、保存か破棄で消す。読めない下書きは黙って捨てる (書きかけなので退避しない)
@@ -48,6 +50,15 @@ export function createDraftStore(storage: KeyValueStorage) {
     },
     remove: (patternId: string): void => {
       storage.removeItem(draftKey(patternId));
+    },
+    removeMany: (patternIds: Iterable<string>): void => {
+      for (const patternId of patternIds) {
+        storage.removeItem(draftKey(patternId));
+      }
+    },
+    // 文書を丸ごと入れ替える操作のあと。プリセットのidは固定なので、残すと消したはずの書きかけが復元される
+    removeAll: (): void => {
+      storage.removeByPrefix(DRAFT_PREFIX);
     },
   };
 }

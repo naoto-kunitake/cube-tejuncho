@@ -8,6 +8,8 @@ export type KeyValueStorage = {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => Result<undefined, StorageError>;
   removeItem: (key: string) => void;
+  // 下書きはパターンごとの鍵に散るので、まとめて消すには前置きで引く
+  removeByPrefix: (prefix: string) => void;
 };
 
 const PROBE_KEY = 'cube-tejuncho:probe';
@@ -40,6 +42,13 @@ export function createMemoryStorage(): KeyValueStorage {
     removeItem: (key) => {
       map.delete(key);
     },
+    removeByPrefix: (prefix) => {
+      for (const key of [...map.keys()]) {
+        if (key.startsWith(prefix)) {
+          map.delete(key);
+        }
+      }
+    },
   };
 }
 
@@ -61,6 +70,19 @@ export function createStorage(): KeyValueStorage {
     },
     removeItem: (key) => {
       nativeStorage.removeItem(key);
+    },
+    removeByPrefix: (prefix) => {
+      // 消すと添字がずれるので、先に鍵を集めてから消す
+      const keys: string[] = [];
+      for (let index = 0; index < nativeStorage.length; index += 1) {
+        const key = nativeStorage.key(index);
+        if (key?.startsWith(prefix) === true) {
+          keys.push(key);
+        }
+      }
+      for (const key of keys) {
+        nativeStorage.removeItem(key);
+      }
     },
   };
 }

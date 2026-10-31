@@ -1,3 +1,4 @@
+import type { TwistyPlayerConfig } from 'cubing/twisty';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 
 import { toCubingAlg } from '@/lib/cube/alg';
@@ -38,7 +39,7 @@ export function currentIndexOf(info: CurrentMoveInfo): number | null {
   return null;
 }
 
-function createPlayer(Player: TwistyModule['TwistyPlayer'], config: ReturnType<typeof playerConfigFor>): PlayerLike {
+function createPlayer(Player: TwistyModule['TwistyPlayer'], config: TwistyPlayerConfig): PlayerLike {
   try {
     return new Player(config);
   } catch (error: unknown) {
@@ -78,41 +79,43 @@ export function usePlayer({ algText, category, settings, stageRef }: UsePlayerAr
       console.error('player load failed', error);
       setStatus('failed');
     };
-    loadTwisty()
-      .then(({ TwistyPlayer }) => {
-        if (!isActive) {
-          return;
-        }
-        clearTimeout(timeout);
-        const parsed = toCubingAlg(algText);
-        if (!parsed.ok) {
-          fail(parsed.error);
-          return;
-        }
-        const player = createPlayer(
-          TwistyPlayer,
-          playerConfigFor(parsed.value, { topColor, frontColor, playbackSpeed, greyUnrelated }, category),
-        );
-        player.style.width = '100%';
-        player.style.height = '100%';
-        const model = player.experimentalModel;
-        model.playingInfo.addFreshListener((info) => {
-          setIsPlaying(info.playing);
-        });
-        model.detailedTimelineInfo.addFreshListener((info) => {
-          setIsAtEnd(info.atEnd);
-        });
-        model.currentMoveInfo.addFreshListener((info) => {
-          setCurrentIndex(currentIndexOf(info));
-        });
-        stage.replaceChildren(player);
-        playerRef.current = player;
-        setStatus('ready');
-        autoplay = setTimeout(() => {
-          player.play();
-        }, AUTOPLAY_DELAY_MS);
-      })
-      .catch(fail);
+    const show = ([{ TwistyPlayer }, config]: [TwistyModule, TwistyPlayerConfig]) => {
+      if (!isActive) {
+        return;
+      }
+      clearTimeout(timeout);
+      const player = createPlayer(TwistyPlayer, config);
+      player.style.width = '100%';
+      player.style.height = '100%';
+      const model = player.experimentalModel;
+      model.playingInfo.addFreshListener((info) => {
+        setIsPlaying(info.playing);
+      });
+      model.detailedTimelineInfo.addFreshListener((info) => {
+        setIsAtEnd(info.atEnd);
+      });
+      model.currentMoveInfo.addFreshListener((info) => {
+        setCurrentIndex(currentIndexOf(info));
+      });
+      stage.replaceChildren(player);
+      playerRef.current = player;
+      setStatus('ready');
+      autoplay = setTimeout(() => {
+        player.play();
+      }, AUTOPLAY_DELAY_MS);
+    };
+    const parsed = toCubingAlg(algText);
+    if (!parsed.ok) {
+      fail(parsed.error);
+    } else {
+      // 3Dの読み込みと灰の指定の計算は独立しているので並列に待つ
+      Promise.all([
+        loadTwisty(),
+        playerConfigFor(parsed.value, { topColor, frontColor, playbackSpeed, greyUnrelated }, category),
+      ])
+        .then(show)
+        .catch(fail);
+    }
     return () => {
       isActive = false;
       clearTimeout(timeout);

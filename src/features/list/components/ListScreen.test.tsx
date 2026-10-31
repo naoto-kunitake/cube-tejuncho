@@ -57,6 +57,17 @@ describe('ListScreen', () => {
     expect(screen.getAllByRole('link', { name: /未登録$/ })).toHaveLength(21);
   });
 
+  it('タブは選んだカテゴリの一覧を指す', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.oll })).toBeInTheDocument();
+  });
+
   it('OLL のタブには 57 種のタイルが 15 の形の見出しで並ぶ', async () => {
     const user = userEvent.setup();
     render(

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 export type TileSettings = FigureSettings & Pick<Settings, 'listView' | 'wideStyle'>;
 
-type PatternTileProps = {
+type PresetTileProps = {
   preset: Preset;
   settings: TileSettings;
   categoryLabel: string;
@@ -22,7 +22,7 @@ type PatternTileProps = {
 
 // グリッド = 図 + 名前のタイル (識別が主)。リスト = 図56 + 名前 + 手順の行 (手順をその場で読む)。
 // どちらも1枚ずつのカードで、未登録は点線で浮かせない
-export function PatternTile({ preset, settings, categoryLabel, name, isRegistered, mainAlg }: PatternTileProps) {
+export function PresetTile({ preset, settings, categoryLabel, name, isRegistered, mainAlg }: PresetTileProps) {
   const isList = settings.listView === 'list';
   return (
     <Link

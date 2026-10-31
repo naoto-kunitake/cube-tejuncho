@@ -31,8 +31,9 @@ iPhoneのSafariは、しばらく開かないサイトのデータを消すこ�
 ページ自体はネットワークから読むので、オフラインでは開けない。
 
 - 画面はReact 19 (React Compiler) とTypeScript。組み立てはVite、見た目はTailwind CSS v4とトークン
-- 状態はZustandの1ストア。保存はlocalStorageの1文書で、読むときにZodで検証する
-- 壊れた文書は捨てずに退避し、1世代前の控えを残す。最初の書き込みで`navigator.storage.persist()`を呼ぶ
+- 状態はZustandの1ストア (保存しない一時状態のトーストだけ別)。保存はlocalStorageの1文書で、読むときにZodで検証する
+- 壊れた文書は捨てずに退避し、1世代前の控えを残す。自分より新しい版の文書は壊れたものと区別し、動かさず保存も止める
+- 最初の書き込みで`navigator.storage.persist()`を呼ぶ
 - 記号の解析と検証は自前のパーサー。cubing.jsは状態の計算と再生の3Dに使い、図は自前のSVGで描く
 - テストはVitestとTesting Library
 - CIで型、lint、整形、テスト、ビルドを通す。mainに入るとGitHub Pagesへ配信される

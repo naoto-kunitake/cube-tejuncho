@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 
+import { err, ok, type Result } from '@/lib/result';
+
 import {
   type AlgEntry,
   createEmptyDocument,
@@ -8,11 +10,13 @@ import {
   type Document,
   DOCUMENT_VERSION,
   DocumentSchema,
+  normalizeDocument,
   type RegistrationData,
   type Settings,
 } from './document';
+import { createDraftStore } from './draft';
 import { applyImport, type ImportMode } from './import-data';
-import { migrateDocument } from './migrate';
+import { isNewerDocument, migrateDocument } from './migrate';
 import { hasPresets, type PresetCategoryId, presetsOf } from './presets/catalog';
 import { createStorage, type KeyValueStorage } from './storage';
 
@@ -20,31 +24,43 @@ export const DOCUMENT_KEY = 'cube-tejuncho:doc';
 const PREVIOUS_KEY = `${DOCUMENT_KEY}.prev`;
 const BROKEN_KEY = `${DOCUMENT_KEY}.broken`;
 
-export type LoadIssue = 'brokenDocument' | 'storageUnavailable' | 'quotaExceeded';
+export type LoadIssue = 'brokenDocument' | 'newerDocument' | 'storageUnavailable' | 'quotaExceeded';
 
 type PersistedShape = { state: { document: Document }; version: number };
 
-type DocumentStorage = StateStorage & { takeIssue: () => LoadIssue | null };
+// 読み込めなかった理由。壊れた文書は退避するが、新しい版の文書は動かさない
+type ReadFailure = 'brokenDocument' | 'newerDocument';
+
+type DocumentStorage = StateStorage & {
+  takeIssue: () => LoadIssue | null;
+  // 新しい版の文書があるときは書き込みを止めている。下書きの消去も同じ判断に揃えるために外から問える
+  isSaveBlocked: () => boolean;
+};
 
 // persistに渡す包み。読み込みでmigrate → Zodを通し、壊れた文書は退避して空で始める。保存は前の文書を1世代残す
 function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
   let issue: LoadIssue | null = storage.isPersistent ? null : 'storageUnavailable';
   let hasRequestedPersistence = false;
+  // issueは1回で消えるので、保存を止め続ける印は別に持つ
+  let hasNewerDocument = false;
 
-  const readDocument = (raw: string): Document | null => {
+  const readDocument = (raw: string): Result<Document, ReadFailure> => {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (typeof parsed !== 'object' || parsed === null || !('state' in parsed)) {
-        return null;
+        return err('brokenDocument');
       }
       const state: unknown = parsed.state;
       if (typeof state !== 'object' || state === null || !('document' in state)) {
-        return null;
+        return err('brokenDocument');
+      }
+      if (isNewerDocument(state.document)) {
+        return err('newerDocument');
       }
       const result = DocumentSchema.safeParse(migrateDocument(state.document));
-      return result.success ? result.data : null;
+      return result.success ? ok(normalizeDocument(result.data)) : err('brokenDocument');
     } catch {
-      return null;
+      return err('brokenDocument');
     }
   };
 
@@ -54,25 +70,41 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
       issue = null;
       return current;
     },
+    isSaveBlocked: () => hasNewerDocument,
     getItem: (key) => {
       const raw = storage.getItem(key);
       if (raw === null) {
         return null;
       }
-      const document = readDocument(raw);
-      if (document === null) {
-        const backup = storage.setItem(BROKEN_KEY, raw);
-        if (!backup.ok) {
-          console.error('broken document backup failed', backup.error);
-        }
-        storage.removeItem(key);
-        issue = 'brokenDocument';
+      const result = readDocument(raw);
+      if (result.ok) {
+        const document = result.value;
+        const persisted: PersistedShape = { state: { document }, version: document.version };
+        return JSON.stringify(persisted);
+      }
+      // 自分より新しい版の文書は壊れていない。アプリを更新すれば読めるので、動かさずに知らせるだけ
+      if (result.error === 'newerDocument') {
+        hasNewerDocument = true;
+        issue = 'newerDocument';
         return null;
       }
-      const persisted: PersistedShape = { state: { document }, version: document.version };
-      return JSON.stringify(persisted);
+      // 退避できないまま消すと控えが1つも残らないので、退避できたときだけ本体を消す
+      const backup = storage.setItem(BROKEN_KEY, raw);
+      if (backup.ok) {
+        storage.removeItem(key);
+      } else {
+        console.error('broken document backup failed', backup.error);
+      }
+      issue = 'brokenDocument';
+      return null;
     },
     setItem: (key, value) => {
+      // 上書きすると新しい版の文書は.prevに移るだけで、戻す画面がないので実質失われる。
+      // アプリを更新するまで保存せず、操作のたびに知らせ直す
+      if (hasNewerDocument) {
+        issue = 'newerDocument';
+        return;
+      }
       const previous = storage.getItem(key);
       if (previous !== null) {
         const backup = storage.setItem(PREVIOUS_KEY, previous);
@@ -140,6 +172,19 @@ export type DocumentStore = {
 
 export function createDocumentStore(storage: KeyValueStorage) {
   const documentStorage = createDocumentStorage(storage);
+  // 文書から消えたパターンの下書きも消す。残すとプリセットのidは固定なので、消したはずの書きかけが復元される。
+  // ただし文書の保存が止まっているときは消さない。文書はリロードで戻るが、下書きには控えがなく取り戻せない
+  const drafts = createDraftStore(storage);
+  const removeDrafts = (patternIds: readonly string[]) => {
+    if (!documentStorage.isSaveBlocked()) {
+      drafts.removeMany(patternIds);
+    }
+  };
+  const removeAllDrafts = () => {
+    if (!documentStorage.isSaveBlocked()) {
+      drafts.removeAll();
+    }
+  };
   // persistの読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
   void documentStorage.getItem(DOCUMENT_KEY);
   const initialLoadIssue = documentStorage.takeIssue();
@@ -219,23 +264,25 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           removeCategory: (categoryId) => {
+            let removedPatternIds: readonly string[] = [];
             set((state) => {
               const { document } = state;
               // プリセットのidもtabOrderに並ぶので、実在する自作カテゴリ以外では何も触らない
               if (!document.categories.some((category) => category.id === categoryId)) {
                 return state;
               }
-              const removedPatternIds = new Set(
+              const removed = new Set(
                 document.patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
               );
+              removedPatternIds = [...removed];
               // lastTabは一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
               return {
                 document: {
                   ...document,
                   categories: document.categories.filter((category) => category.id !== categoryId),
-                  patterns: document.patterns.filter((pattern) => !removedPatternIds.has(pattern.id)),
-                  registrations: document.registrations.filter((entry) => !removedPatternIds.has(entry.patternId)),
-                  pinned: document.pinned.filter((id) => !removedPatternIds.has(id)),
+                  patterns: document.patterns.filter((pattern) => !removed.has(pattern.id)),
+                  registrations: document.registrations.filter((entry) => !removed.has(entry.patternId)),
+                  pinned: document.pinned.filter((id) => !removed.has(id)),
                   settings: {
                     ...document.settings,
                     tabOrder: document.settings.tabOrder.filter((id) => id !== categoryId),
@@ -243,6 +290,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
+            removeDrafts(removedPatternIds);
             reportStorageIssue();
           },
           moveCategory: (categoryId, toIndex) => {
@@ -286,6 +334,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           removeCustomPattern: (patternId) => {
+            removeDrafts([patternId]);
             set((state) => ({
               document: {
                 ...state.document,
@@ -297,6 +346,9 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           importDocument: (imported, mode) => {
+            if (mode === 'replace') {
+              removeAllDrafts();
+            }
             set((state) => ({ document: applyImport(state.document, imported, mode) }));
             reportStorageIssue();
           },
@@ -340,6 +392,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
           },
           clearRegistrations: (categoryIds) => {
             let removedCount = 0;
+            let removedPatternIds: readonly string[] = [];
             set((state) => {
               const { document } = state;
               const presetIds = new Set(
@@ -351,6 +404,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
                   .map((pattern) => pattern.id),
               );
               const isRemoved = (patternId: string) => presetIds.has(patternId) || customIds.has(patternId);
+              removedPatternIds = [...presetIds, ...customIds];
               // 登録のない自作パターンも消えるので、自作はパターンの数で数える
               removedCount =
                 document.registrations.filter((entry) => presetIds.has(entry.patternId)).length + customIds.size;
@@ -363,10 +417,12 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
+            removeDrafts(removedPatternIds);
             reportStorageIssue();
             return removedCount;
           },
           resetDocument: () => {
+            removeAllDrafts();
             set({ document: createEmptyDocument() });
             reportStorageIssue();
           },

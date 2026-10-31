@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { NoticeDialog } from '@/components/NoticeDialog';
 import { SectionHeading } from '@/components/SectionHeading';
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
@@ -14,10 +15,12 @@ import { cn } from '@/lib/utils';
 
 import { CategoryPickSheet } from './CategoryPickSheet';
 import { ImportSheet } from './ImportSheet';
-import { NoticeDialog } from './NoticeDialog';
 import { ROW_BUTTON_CLASS } from './SettingRow';
 
 const DANGER_ROW_CLASS = cn(ROW_BUTTON_CLASS, 'text-danger');
+
+// 読み込めなかった理由。新しい版のファイルだけ文言を分ける (壊れたファイルとは直し方が違う)
+type ImportFailure = 'invalid' | 'newerVersion';
 
 type Clearing = { ids: string[]; names: string[]; count: number };
 
@@ -33,7 +36,7 @@ export function DataSection() {
   const resetDocument = useDocumentStore((state) => state.resetDocument);
   const showToast = useToastStore((state) => state.show);
   const [isImporting, setIsImporting] = useState(false);
-  const [hasImportFailed, setHasImportFailed] = useState(false);
+  const [importFailure, setImportFailure] = useState<ImportFailure | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [clearing, setClearing] = useState<Clearing | null>(null);
@@ -60,7 +63,7 @@ export function DataSection() {
       const result = importData(await file.text());
       if (!result.ok) {
         console.error('import failed', result.error);
-        setHasImportFailed(true);
+        setImportFailure(result.error.kind === 'newerVersion' ? 'newerVersion' : 'invalid');
         return;
       }
       importDocument(result.value, mode);
@@ -72,7 +75,7 @@ export function DataSection() {
       });
     } catch (error: unknown) {
       console.error('import file read failed', error);
-      setHasImportFailed(true);
+      setImportFailure('invalid');
     }
   };
 
@@ -175,7 +178,7 @@ export function DataSection() {
           {copy.settings.registerAll}
         </button>
       </div>
-      {/* 破壊的な操作のカードは、区画の間隔8に12を足して離す (モックの決定: カード間12 + 区画内の間隔) */}
+      {/* 破壊的な操作のカードは、区画の間隔8にカード間の12を足して離す */}
       <div className="mt-3 overflow-hidden rounded-md border border-line bg-surface">
         <button
           type="button"
@@ -263,12 +266,12 @@ export function DataSection() {
           }}
         />
       )}
-      {hasImportFailed && (
+      {importFailure !== null && (
         <NoticeDialog
           title={copy.settings.importFailedTitle}
-          body={copy.settings.importFailedBody}
+          body={importFailure === 'newerVersion' ? copy.settings.importFailedNewerBody : copy.settings.importFailedBody}
           onClose={() => {
-            setHasImportFailed(false);
+            setImportFailure(null);
           }}
         />
       )}

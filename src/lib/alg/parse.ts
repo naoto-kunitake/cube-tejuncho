@@ -34,7 +34,7 @@ function isMoveBase(char: string): char is MoveBase {
   return FACE_BASES.has(char) || OTHER_BASES.has(char);
 }
 
-// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの2、Ri / R- / R3の逆手順、'2の順
+// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの2、Ri / R- / R3 / R3'の逆手順、'2の順
 export function cleanAlgText(raw: string): string {
   return raw
     .replace(/[！-～]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
@@ -42,7 +42,8 @@ export function cleanAlgText(raw: string): string {
     .replace(/[’‘′`´]/g, "'")
     .replace(/²/g, '2')
     .replace(/([RLUDFBMESxyzrludfb]w?)[i-](?![A-Za-z])/g, "$1'")
-    .replace(/([RLUDFBMESxyzrludfb]w?)3(?![\d])/g, "$1'")
+    .replace(/([RLUDFBMESxyzrludfb]w?)3'(?![\d])/g, '$1')
+    .replace(/([RLUDFBMESxyzrludfb]w?)3(?![\d'])/g, "$1'")
     .replace(/'2/g, "2'")
     .trim();
 }
@@ -120,8 +121,9 @@ export function parseAlg(raw: string): Result<AlgItem[], AlgError> {
         return err({ kind: 'emptyGroup', index: groupStart });
       }
       scan.index += 1;
-      // 手と同じ並び (繰り返しの数 → 省略できる ') だけ認める。はみ出した文字は次の周でunknownSymbolになる
-      const suffix = /^(\d+'?|')?/.exec(text.slice(scan.index))?.[0] ?? '';
+      // 手と同じ並び (繰り返しの数 → 省略できる ') だけ認める。はみ出した文字は次の周でunknownSymbolになる。
+      // 0と先頭の0は展開すると空になるので数に入れない
+      const suffix = /^([1-9]\d*'?|')?/.exec(text.slice(scan.index))?.[0] ?? '';
       scan.index += suffix.length;
       items.push({ ...group, suffix });
       group = null;

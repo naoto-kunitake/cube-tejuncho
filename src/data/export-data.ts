@@ -35,6 +35,9 @@ export async function saveFile(file: File): Promise<boolean> {
   anchor.href = url;
   anchor.download = file.name;
   anchor.click();
-  URL.revokeObjectURL(url);
+  // クリックの直後に取り消すとダウンロードが始まる前に無効になるブラウザがあるので、次のタスクまで待つ
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 0);
   return true;
 }

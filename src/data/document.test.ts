@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createEmptyDocument, DocumentSchema, findRegistration } from './document';
+import { createEmptyDocument, DocumentSchema, findRegistration, normalizeDocument } from './document';
 
 describe('DocumentSchema', () => {
   it('空の文書は検証を通る', () => {
@@ -71,5 +71,54 @@ describe('findRegistration', () => {
 
   it('見つからないときは undefined', () => {
     expect(findRegistration([registration], 'pll-ub')).toBeUndefined();
+  });
+});
+
+describe('normalizeDocument', () => {
+  const ALG = { text: 'R U', mnemonic: '', fingering: '' };
+
+  it('同じ id のカテゴリは先に出てきた方だけ残る', () => {
+    const document = {
+      ...createEmptyDocument(),
+      categories: [
+        { id: 'c1', name: 'COLL' },
+        { id: 'c1', name: '別の名前' },
+      ],
+    };
+    expect(normalizeDocument(document).categories).toEqual([{ id: 'c1', name: 'COLL' }]);
+  });
+
+  it('同じ patternId の登録は先に出てきた方だけ残る', () => {
+    const entry = { patternId: 'pll-ua', recognition: '', mainAlg: ALG, altAlgs: [], createdAt: '', updatedAt: '' };
+    const document = {
+      ...createEmptyDocument(),
+      registrations: [entry, { ...entry, recognition: '後の方' }],
+    };
+    expect(normalizeDocument(document).registrations).toEqual([entry]);
+  });
+
+  it('ピン留めの重複を落とす', () => {
+    const document = { ...createEmptyDocument(), pinned: ['pll-ua', 'pll-ua'] };
+    expect(normalizeDocument(document).pinned).toEqual(['pll-ua']);
+  });
+
+  it('タブ順の重複を落とす', () => {
+    const document = createEmptyDocument();
+    const normalized = normalizeDocument({
+      ...document,
+      settings: { ...document.settings, tabOrder: ['pll', 'oll', 'pll'] },
+    });
+    expect(normalized.settings.tabOrder).toEqual(['pll', 'oll']);
+  });
+
+  it('タブ順にないカテゴリを末尾に足す', () => {
+    const document = { ...createEmptyDocument(), categories: [{ id: 'c1', name: 'COLL' }] };
+    expect(normalizeDocument(document).settings.tabOrder).toEqual(['pll', 'oll', 'f2l', 'c1']);
+  });
+
+  it('存在しないパターンへの登録は残す', () => {
+    const entry = { patternId: 'gone', recognition: '', mainAlg: ALG, altAlgs: [], createdAt: '', updatedAt: '' };
+    const document = { ...createEmptyDocument(), registrations: [entry] };
+    expect(normalizeDocument(document).registrations).toEqual([entry]);
   });
 });

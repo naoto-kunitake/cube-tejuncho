@@ -7,7 +7,7 @@ type SwitchProps = {
 };
 
 // 即時に効くon / off (44 × 24、押せる範囲は疑似要素で上下に広げて44)。オンはテーマ色、オフはgray-420のトラック。
-// ツマミはダークでオンのときだけon-accentにする (白いテーマ色に沈まないように。モックで決めた)
+// オンのツマミの色はトークン (ダークだけ文字色側に寄る。tokens.cssを参照)
 export function Switch({ label, checked, onChange }: SwitchProps) {
   return (
     <button
@@ -26,7 +26,7 @@ export function Switch({ label, checked, onChange }: SwitchProps) {
       <span
         className={cn(
           'absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-1 transition-transform duration-150 motion-reduce:transition-none',
-          checked && 'translate-x-5 dark:bg-on-accent',
+          checked && 'translate-x-5 bg-switch-knob-on',
         )}
       />
     </button>

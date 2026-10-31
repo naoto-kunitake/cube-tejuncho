@@ -1,11 +1,12 @@
 import { err, ok, type Result } from '@/lib/result';
 
-import { type Category, type Document, DocumentSchema } from './document';
-import { migrateDocument } from './migrate';
+import { type Category, type Document, DocumentSchema, normalizeDocument } from './document';
+import { isNewerDocument, migrateDocument } from './migrate';
 import { hasCategoryNamed } from './patterns';
 
 export type ImportMode = 'add' | 'replace';
-export type ImportError = { kind: 'invalidJson' } | { kind: 'invalidDocument'; message: string };
+export type ImportError =
+  { kind: 'invalidJson' } | { kind: 'newerVersion' } | { kind: 'invalidDocument'; message: string };
 
 // 書き出したファイルの中身を文書に戻す。保存文書と同じ移行と検証を通すので、別アプリや壊れたファイルはここで止まる
 export function importData(text: string): Result<Document, ImportError> {
@@ -15,11 +16,15 @@ export function importData(text: string): Result<Document, ImportError> {
   } catch {
     return err({ kind: 'invalidJson' });
   }
+  // 新しい版のファイルは壊れているわけではないので、文言を分けてアプリの更新を促す
+  if (isNewerDocument(parsed)) {
+    return err({ kind: 'newerVersion' });
+  }
   const result = DocumentSchema.safeParse(migrateDocument(parsed));
   if (!result.success) {
     return err({ kind: 'invalidDocument', message: result.error.message });
   }
-  return ok(result.data);
+  return ok(normalizeDocument(result.data));
 }
 
 type Dated = { updatedAt: string };
@@ -59,7 +64,8 @@ function categoryIdMapOf(current: readonly Category[], imported: readonly Catego
   return map;
 }
 
-// 追加: 同じパターンは新しい方を残し、カテゴリ・タブ順・ピン留めは合算する。設定は今のまま
+// 追加: 同じパターンは新しい方を残し、カテゴリ・タブ順・ピン留めは合算する。設定は今のまま。
+// どちらもnormalizeDocumentを通った文書を受け取るので、カテゴリはタブ順に含まれている
 export function mergeDocuments(current: Document, imported: Document): Document {
   const idMap = categoryIdMapOf(current.categories, imported.categories);
   const categoryIdOf = (id: string) => idMap.get(id) ?? id;

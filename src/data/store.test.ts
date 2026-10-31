@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createEmptyDocument } from './document';
+import { createDraftStore } from './draft';
 import { createMemoryStorage, type KeyValueStorage } from './storage';
 import { createDocumentStore, DOCUMENT_KEY, HOME_SCREEN_BANNER } from './store';
 
@@ -253,12 +254,46 @@ describe('createDocumentStore', () => {
     expect(storage.getItem(DOCUMENT_KEY)).not.toBe('{not json');
   });
 
+  it('退避に失敗したときは壊れた文書を消さない', () => {
+    const storage = persistedStorage();
+    storage.setItem(DOCUMENT_KEY, '{not json');
+    const write = storage.setItem;
+    storage.setItem = (key, value) =>
+      key === `${DOCUMENT_KEY}.broken` ? { ok: false, error: { kind: 'quotaExceeded' } } : write(key, value);
+    const store = createDocumentStore(storage);
+    expect(store.getState().loadIssue).toBe('brokenDocument');
+    expect(storage.getItem(DOCUMENT_KEY)).toBe('{not json');
+  });
+
   it('形の合わない文書も壊れたものとして扱う', () => {
     const storage = persistedStorage();
     storage.setItem(DOCUMENT_KEY, JSON.stringify({ state: { document: { version: 1 } }, version: 1 }));
     const store = createDocumentStore(storage);
     expect(store.getState().loadIssue).toBe('brokenDocument');
     expect(store.getState().document.registrations).toEqual([]);
+  });
+
+  it('自分より新しい版の文書は退避も削除もせずに知らせる', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    expect(store.getState().loadIssue).toBe('newerDocument');
+    expect(store.getState().document).toEqual(createEmptyDocument());
+    expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
+    expect(storage.getItem(`${DOCUMENT_KEY}.broken`)).toBeNull();
+  });
+
+  it('自分より新しい版の文書があるときは保存せずに知らせ直す', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    store.getState().dismissLoadIssue();
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBeNull();
+    expect(store.getState().loadIssue).toBe('newerDocument');
   });
 
   it('localStorage が使えないときは知らせてメモリで動く', () => {
@@ -272,6 +307,80 @@ describe('createDocumentStore', () => {
     const store = createDocumentStore(createMemoryStorage());
     store.getState().dismissLoadIssue();
     expect(store.getState().loadIssue).toBeNull();
+  });
+});
+
+describe('下書きの後始末', () => {
+  const DRAFT = { name: '', categoryId: '', recognition: 'かきかけ', cards: [] };
+
+  it('初期状態に戻すと下書きも消える', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    createDraftStore(storage).write('pll-ua', DRAFT);
+    store.getState().resetDocument();
+    expect(createDraftStore(storage).read('pll-ua')).toBeNull();
+  });
+
+  it('カテゴリの登録を消すと、そのカテゴリのパターンの下書きも消える', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    drafts.write('pll-ua', DRAFT);
+    drafts.write('oll-21', DRAFT);
+    store.getState().clearRegistrations(['pll']);
+    expect(drafts.read('pll-ua')).toBeNull();
+    expect(drafts.read('oll-21')).toEqual(DRAFT);
+  });
+
+  it('カテゴリを消すと、中のパターンの下書きも消える', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    const categoryId = store.getState().addCategory('COLL');
+    const patternId = store.getState().addCustomPattern({ name: 'a', categoryId }, null);
+    drafts.write(patternId, DRAFT);
+    store.getState().removeCategory(categoryId);
+    expect(drafts.read(patternId)).toBeNull();
+  });
+
+  it('自作のパターンを消すと下書きも消える', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    const categoryId = store.getState().addCategory('COLL');
+    const patternId = store.getState().addCustomPattern({ name: 'a', categoryId }, null);
+    drafts.write(patternId, DRAFT);
+    store.getState().removeCustomPattern(patternId);
+    expect(drafts.read(patternId)).toBeNull();
+  });
+
+  it('自分より新しい版の文書があるときは、初期状態に戻しても下書きを消さない', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    drafts.write('pll-ua', DRAFT);
+    store.getState().resetDocument();
+    expect(drafts.read('pll-ua')).toEqual(DRAFT);
+  });
+
+  it('追加で読み込んでも下書きは残る', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    drafts.write('pll-ua', DRAFT);
+    store.getState().importDocument(createEmptyDocument(), 'add');
+    expect(drafts.read('pll-ua')).toEqual(DRAFT);
+  });
+
+  it('置き換えで読み込むと下書きが消える', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    drafts.write('pll-ua', DRAFT);
+    store.getState().importDocument(createEmptyDocument(), 'replace');
+    expect(drafts.read('pll-ua')).toBeNull();
   });
 });
 

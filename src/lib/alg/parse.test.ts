@@ -23,6 +23,10 @@ describe('cleanAlgText', () => {
     expect(cleanAlgText("U'2")).toBe("U2'");
   });
 
+  it("R3' を R に直す", () => {
+    expect(cleanAlgText("R3' U")).toBe('R U');
+  });
+
   it("R3 を R' に直す", () => {
     expect(cleanAlgText('R3 U')).toBe("R' U");
   });
@@ -82,6 +86,10 @@ describe('parseAlg', () => {
 
   it("括弧の後ろの崩れた接尾 ('' など) を知らせる", () => {
     expect(parseAlg("(R U)''")).toEqual({ ok: false, error: { kind: 'unknownSymbol', symbol: "'", index: 6 } });
+  });
+
+  it('括弧の繰り返しに 0 を認めない (展開すると空になる)', () => {
+    expect(parseAlg('(R U)0')).toEqual({ ok: false, error: { kind: 'unknownSymbol', symbol: '0', index: 5 } });
   });
 
   it("括弧の後ろの 2' を繰り返しと逆手順として読む", () => {

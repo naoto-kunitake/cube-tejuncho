@@ -1,3 +1,6 @@
+import { TEXT_PILL_TAP_AREA_CLASS } from '@/components/tap-area';
+import { cn } from '@/lib/utils';
+
 import { useToastStore } from './toast-store';
 
 // 画面の下に出る知らせ。反転色の帯 + 右に取り消しの文字ボタン。読み上げはstatus (操作を遮らない)
@@ -18,7 +21,10 @@ export function Toast() {
           {action !== null && (
             <button
               type="button"
-              className="min-h-9 rounded-full px-3 font-bold pressable hover:bg-on-inverse/15"
+              className={cn(
+                TEXT_PILL_TAP_AREA_CLASS,
+                'min-h-9 rounded-full px-3 font-bold pressable hover:bg-on-inverse/15',
+              )}
               onClick={() => {
                 dismiss();
                 action.run();

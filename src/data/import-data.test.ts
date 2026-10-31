@@ -28,6 +28,23 @@ describe('importData', () => {
     expect(importData(JSON.stringify({ version: 1, registrations: 'x' })).ok).toBe(false);
   });
 
+  it('新しい版のファイルは版が新しいこととして返す', () => {
+    const result = importData(JSON.stringify({ ...createEmptyDocument(), version: 2 }));
+    expect(result).toEqual({ ok: false, error: { kind: 'newerVersion' } });
+  });
+
+  it('タブ順にないカテゴリを持つファイルは、カテゴリをタブ順に足して読み込む', () => {
+    const document = { ...createEmptyDocument(), categories: [{ id: 'c1', name: 'COLL' }] };
+    const result = importData(JSON.stringify(document));
+    expect(result).toMatchObject({ ok: true, value: { settings: { tabOrder: ['pll', 'oll', 'f2l', 'c1'] } } });
+  });
+
+  it('同じ patternId の登録が 2 つあるファイルは 1 つにして読み込む', () => {
+    const entry = registrationOf('pll-ua', '2026-10-01T00:00:00.000Z');
+    const result = importData(JSON.stringify({ ...createEmptyDocument(), registrations: [entry, entry] }));
+    expect(result).toEqual({ ok: true, value: documentWith({ registrations: [entry] }) });
+  });
+
   it('知らない項目は落として読み込む', () => {
     const result = importData(JSON.stringify({ ...createEmptyDocument(), exportedAt: 'x' }));
     expect(result).toEqual({ ok: true, value: createEmptyDocument() });

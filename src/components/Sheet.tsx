@@ -25,6 +25,9 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
     }
     if (!dialog.open) {
       dialog.showModal();
+      // showModalは中の最初の押せる要素 (×) に焦点を移すので、押したように見えてしまう。
+      // 読み上げもシートの名前ではなく「閉じる」になる。決める場面ではないので器に移す
+      dialog.focus();
     }
     // 暗幕 (dialog自身) を押したら閉じる。中身の上では閉じない。Escはdialogのcloseで拾う
     const closeOnBackdrop = (event: MouseEvent) => {
@@ -41,6 +44,8 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
   return (
     <dialog
       ref={dialogRef}
+      // 器に焦点を移すため。Tabの順には入らない (-1)
+      tabIndex={-1}
       aria-label={label}
       onClose={onClose}
       className={cn(

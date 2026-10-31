@@ -1,6 +1,6 @@
 /*
  * 見た目の正。色はデジタル庁デザインシステム (DADS) のトークンで、例外 (地と面2の生成り、テーマ色、再生の枠) は
- * モックで決めた値。ライトは:root、ダークは.darkで同じ変数を差し替え、部品のCSSは触らない。
+ * このアプリで決めた値。ライトは:root、ダークは.darkで同じ変数を差し替え、部品のCSSは触らない。
  * Tailwindのクラスにする変数は下の@theme inlineに置き、既定のパレット・型スケール・角・影は使わない。
  */
 :root {
@@ -58,6 +58,16 @@
   --segment-hover: #e6e6e6;
   --segment-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 0 0 0.5px rgb(0 0 0 / 0.04);
   --switch-track: #949494;
+  /* ツマミは白。ダークでオンのときだけ文字色側に寄せる (白いテーマ色に沈まないように) */
+  --switch-knob-on: #ffffff;
+
+  /* キーパッド: 文字キーは白、操作キーは灰 (iOSのキーボードと同じ区別)。
+     ダークは 下地 < 操作キー < 文字キー の3段にして、押す面を手前に見せる */
+  --key-character: var(--surface);
+  --key-character-hover: var(--hover);
+  --key-action: var(--ground);
+  --key-action-hover: var(--hover);
+
   /* 色の点 (上面・前面の色の選択肢) の縁。白の点が白い錠剤に溶けないように */
   --dot-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.3);
 
@@ -126,6 +136,12 @@
   --segment-track: #1a1a1a;
   --segment-selected: #666666;
   --segment-hover: #333333;
+  --switch-knob-on: var(--on-accent);
+
+  --key-character: var(--hover);
+  --key-character-hover: var(--press);
+  --key-action: var(--surface);
+  --key-action-hover: var(--hover);
 
   --sticker-none: #666666;
 }
@@ -172,6 +188,11 @@
   --color-segment-selected: var(--segment-selected);
   --color-segment-hover: var(--segment-hover);
   --color-switch-track: var(--switch-track);
+  --color-switch-knob-on: var(--switch-knob-on);
+  --color-key-character: var(--key-character);
+  --color-key-character-hover: var(--key-character-hover);
+  --color-key-action: var(--key-action);
+  --color-key-action-hover: var(--key-action-hover);
   --color-sticker-yellow: var(--sticker-yellow);
   --color-sticker-white: var(--sticker-white);
   --color-sticker-green: var(--sticker-green);

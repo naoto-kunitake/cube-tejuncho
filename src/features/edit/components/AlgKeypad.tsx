@@ -9,15 +9,12 @@ type AlgKeypadProps = {
   onKey: (key: KeypadKey) => void;
 };
 
-// 文字キーは白、操作キーは灰 (iOSのキーボードと同じ区別)。ダークは 下地 < 操作キー < 文字キー の3段。
+// キーの地色はトークン (文字キーと操作キーでライトとダークの段が違う。tokens.cssを参照)。
 // 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去とキーボードは最下段を半分ずつ
 const KEY_CLASS =
-  'h-11 rounded-sm border border-line font-mono text-alg-compact font-semibold text-ink pressable hover:bg-hover active:bg-press dark:hover:bg-press';
-const CHARACTER_KEY_CLASS = cn(KEY_CLASS, 'bg-surface dark:bg-hover');
-const ACTION_KEY_CLASS = cn(
-  KEY_CLASS,
-  'bg-ground font-sans text-small font-medium dark:bg-surface dark:hover:bg-hover',
-);
+  'h-11 rounded-sm border border-line font-mono text-alg-compact font-semibold text-ink pressable active:bg-press';
+const CHARACTER_KEY_CLASS = cn(KEY_CLASS, 'bg-key-character hover:bg-key-character-hover');
+const ACTION_KEY_CLASS = cn(KEY_CLASS, 'bg-key-action font-sans text-small font-medium hover:bg-key-action-hover');
 
 const ACTION_LABELS: Record<ActionKey, string> = {
   backspace: copy.keypad.backspace,

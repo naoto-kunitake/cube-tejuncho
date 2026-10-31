@@ -337,7 +337,12 @@ describe('SettingsScreen', () => {
   it('置き換えで読み込むと今の登録が消え、ファイルの中身になる', async () => {
     const user = userEvent.setup();
     useDocumentStore.getState().addRegistration('pll-ua', UA_ALG);
-    const imported = { ...createEmptyDocument(), categories: [{ id: 'c1', name: 'ZBLL' }] };
+    const empty = createEmptyDocument();
+    const imported = {
+      ...empty,
+      categories: [{ id: 'c1', name: 'ZBLL' }],
+      settings: { ...empty.settings, tabOrder: [...empty.settings.tabOrder, 'c1'] },
+    };
     renderSettings();
     await openImportSheet(user);
     await user.click(screen.getByRole('radio', { name: new RegExp(copy.settings.importReplace) }));
@@ -360,6 +365,16 @@ describe('SettingsScreen', () => {
     });
     useToastStore.getState().toast?.action?.run();
     expect(useDocumentStore.getState().document).toEqual(before);
+  });
+
+  it('新しい版のファイルは別の文言で知らせる', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderSettings();
+    await openImportSheet(user);
+    await user.upload(fileInput(), fileOf(JSON.stringify({ ...createEmptyDocument(), version: 2 })));
+    const dialog = await screen.findByRole('alertdialog', { name: copy.settings.importFailedTitle });
+    expect(dialog).toHaveTextContent(copy.settings.importFailedNewerBody);
   });
 
   it('読めないファイルは知らせるだけで、文書は変わらない', async () => {
