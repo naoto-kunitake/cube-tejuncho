@@ -1,6 +1,9 @@
-import { frontColorTurns, type ViewSettings } from '@/lib/figure/view';
+import type { Alg } from 'cubing/alg';
+
+import { frontColorTurns, sideTurnsOf, TOP_LETTER, type ViewSettings } from '@/lib/figure/view';
 
 import type { Face } from './stickers';
+import { frontCenterOf, startStateOf, topCenterOf } from './view';
 
 export type StickeringCategory = 'pll' | 'oll' | 'f2l';
 
@@ -19,8 +22,8 @@ const Z2: Record<Face, Face> = { U: 'D', D: 'U', F: 'F', B: 'B', R: 'L', L: 'R' 
 
 // 図の枠 (上面と前面の設定で持ち替えたあと) の面が、cubing.jsの枠のどの面に当たるか。
 // cubing.jsのパーツの番号は白上・緑前の枠で付くので、開始姿勢の持ち替え (z2、y^k) を逆にたどる
-function toCubingFace(settings: ViewSettings): (face: Face) => Face {
-  const turned = Y_TURNED[frontColorTurns(settings)] ?? Y_TURNED[0];
+function toCubingFace(settings: ViewSettings, sideTurns: number): (face: Face) => Face {
+  const turned = Y_TURNED[sideTurns] ?? Y_TURNED[0];
   const flip = settings.topColor === 'yellow';
   return (face) => {
     const side = face === 'U' || face === 'D' ? face : (turned?.[face] ?? face);
@@ -35,9 +38,10 @@ function hasFaces(position: string, faces: readonly Face[]): boolean {
 // 関係ないパーツを灰にする指定 (cubing.jsのexperimentalStickeringMaskOrbits)。
 // 文字: "-" 通常、"I"灰、"O"主ステッカー (上面側) 以外を灰 (OLL用)。"D" (薄い色) は見分けがつきにくいので使わない。
 // PLL = 上層のパーツは通常・他は灰・センターは下以外通常。OLL = 上層のパーツはO・他は灰・センターは上だけ通常。
-// F2L = ペアのコーナー (下・前・右) とエッジ (前・右) だけ通常・センターは全部通常・他は灰
-export function stickeringMaskFor(category: StickeringCategory, settings: ViewSettings): string {
-  const toCubing = toCubingFace(settings);
+// F2L = ペアのコーナー (下・前・右) とエッジ (前・右) だけ通常・センターは全部通常・他は灰。
+// sideTurnsは開始状態で正面に来ている色が側面の並びの何番目か (手順の持ち替えの分だけ設定の前面の色からずれる)
+export function stickeringMaskFor(category: StickeringCategory, settings: ViewSettings, sideTurns: number): string {
+  const toCubing = toCubingFace(settings, sideTurns);
   const top = toCubing('U');
   const bottom = toCubing('D');
   const front = toCubing('F');
@@ -61,4 +65,24 @@ export function stickeringMaskFor(category: StickeringCategory, settings: ViewSe
     });
   }
   return `EDGES:${edges.join('')},CORNERS:${corners.join('')},CENTERS:${centers.join('')}`;
+}
+
+// 再生で灰にする指定。F2Lのペアは手順の中の持ち替え (y、d) で変わるので、設定ではなく開始状態の正面の色から決める
+// (図は中心の色を付け替えて吸収するが、3Dは付け替えない)。
+// 上面の中心が設定の色でなければy以外の持ち替え (x、z) が残っていて側面の並びが使えないので、灰にしない (nullは全色で出す)
+export async function stickeringMaskOf(
+  category: StickeringCategory,
+  settings: ViewSettings,
+  alg: Alg,
+): Promise<string | null> {
+  // 上層だけを見るPLLとOLLは、側面がどれだけ回っていても指定が変わらない
+  if (category !== 'f2l') {
+    return stickeringMaskFor(category, settings, frontColorTurns(settings));
+  }
+  const state = await startStateOf(alg, settings);
+  if (topCenterOf(state) !== TOP_LETTER[settings.topColor]) {
+    return null;
+  }
+  const sideTurns = sideTurnsOf(settings.topColor, frontCenterOf(state));
+  return sideTurns < 0 ? null : stickeringMaskFor(category, settings, sideTurns);
 }

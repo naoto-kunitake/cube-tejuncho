@@ -78,9 +78,14 @@ const SIDE_SEQUENCE: Record<TopColor, readonly StickerColor[]> = {
   white: ['G', 'R', 'B', 'O'],
 };
 
+// 側面の色の並びの中で、その色が何番目か (0〜3)。上下の色なら-1
+export function sideTurnsOf(topColor: TopColor, color: StickerColor): number {
+  return SIDE_SEQUENCE[topColor].indexOf(color);
+}
+
 // 前面の色を正面に持ってくるのに要るy回転の回数 (0〜3)。側面の色の巡回と再生の開始姿勢が同じ値を使う
 export function frontColorTurns(settings: ViewSettings): number {
-  return Math.max(0, SIDE_SEQUENCE[settings.topColor].indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
+  return Math.max(0, sideTurnsOf(settings.topColor, FRONT_COLOR_LETTER[settings.frontColor]));
 }
 
 function recolorerFor(settings: ViewSettings): (color: StickerColor) => StickerColor {

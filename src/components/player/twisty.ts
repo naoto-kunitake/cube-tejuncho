@@ -3,7 +3,7 @@ import type { TwistyPlayerConfig } from 'cubing/twisty';
 
 import type { Settings } from '@/data/document';
 import { setupAlgFor } from '@/lib/cube/setup';
-import { type StickeringCategory, stickeringMaskFor } from '@/lib/cube/stickering';
+import { type StickeringCategory, stickeringMaskOf } from '@/lib/cube/stickering';
 
 type Listenable<T> = { addFreshListener: (listener: (value: T) => void) => void };
 
@@ -47,8 +47,13 @@ export const TEMPO_SCALE: Record<Settings['playbackSpeed'], number> = { slow: 0.
 
 export type PlayerSettings = Pick<Settings, 'topColor' | 'frontColor' | 'playbackSpeed' | 'greyUnrelated'>;
 
-// 操作列は自前 (controlPanel: none)、背景なし、面の名前のヒントなし
-export function playerConfigFor(alg: Alg, settings: PlayerSettings, category?: StickeringCategory): TwistyPlayerConfig {
+// 操作列は自前 (controlPanel: none)、背景なし、面の名前のヒントなし。
+// 灰にする指定は開始状態から決めるので、cubing.jsの3x3x3の定義を読むまで待つ
+export async function playerConfigFor(
+  alg: Alg,
+  settings: PlayerSettings,
+  category?: StickeringCategory,
+): Promise<TwistyPlayerConfig> {
   const config: TwistyPlayerConfig = {
     puzzle: '3x3x3',
     alg,
@@ -59,7 +64,10 @@ export function playerConfigFor(alg: Alg, settings: PlayerSettings, category?: S
     tempoScale: TEMPO_SCALE[settings.playbackSpeed],
   };
   if (settings.greyUnrelated && category !== undefined) {
-    config.experimentalStickeringMaskOrbits = stickeringMaskFor(category, settings);
+    const mask = await stickeringMaskOf(category, settings, alg);
+    if (mask !== null) {
+      config.experimentalStickeringMaskOrbits = mask;
+    }
   }
   return config;
 }
