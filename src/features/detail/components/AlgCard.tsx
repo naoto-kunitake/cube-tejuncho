@@ -15,7 +15,7 @@ type AlgCardProps = {
 
 // 手順 → 覚え方・指使い の縦積み。手順の文字を全幅に出すため横に何も置かない
 export function AlgCard({ alg, wideStyle, isMain, onPlay }: AlgCardProps) {
-  const hasNotes = alg.mnemonic !== '' || alg.fingering !== '';
+  const hasMnemonicOrFingering = alg.mnemonic !== '' || alg.fingering !== '';
   return (
     <div
       className={cn(
@@ -33,7 +33,7 @@ export function AlgCard({ alg, wideStyle, isMain, onPlay }: AlgCardProps) {
         )}
       />
       <PlayPill onClick={onPlay} />
-      {hasNotes && (
+      {hasMnemonicOrFingering && (
         <dl className="note-grid text-small">
           {alg.mnemonic !== '' && (
             <>

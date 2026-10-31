@@ -23,11 +23,11 @@ import { StandardAlgCard } from './StandardAlgCard';
 const EMPTY_SLOT_CLASS =
   'w-full rounded-md border border-dashed border-line-state px-3 py-2.75 text-center text-body leading-normal text-muted pressable hover:border-line-strong hover:bg-hover-ground';
 
-type PatternDetailProps = {
+type PresetDetailProps = {
   preset: Preset;
 };
 
-function PatternDetail({ preset }: PatternDetailProps) {
+function PresetDetail({ preset }: PresetDetailProps) {
   const settings = useDocumentStore((state) => state.document.settings);
   const registrations = useDocumentStore((state) => state.document.registrations);
   const addRegistration = useDocumentStore((state) => state.addRegistration);
@@ -236,7 +236,7 @@ export function DetailScreen() {
           </>
         )}
       </TopBar>
-      {ref?.kind === 'preset' && <PatternDetail preset={ref.preset} />}
+      {ref?.kind === 'preset' && <PresetDetail preset={ref.preset} />}
       {ref?.kind === 'custom' && (
         <CustomDetail
           pattern={ref.pattern}

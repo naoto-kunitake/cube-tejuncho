@@ -20,7 +20,7 @@ import { CATEGORY_PANEL_ID, categoryTabId, CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { FirstRunBanner } from './FirstRunBanner';
 import { HomeScreenBanner } from './HomeScreenBanner';
-import { PatternTile } from './PatternTile';
+import { PresetTile } from './PresetTile';
 
 type TileSectionProps = {
   label: string;
@@ -100,7 +100,7 @@ function PresetList({ category, settings, registrations, pinnedIds }: PresetList
             listView={settings.listView}
           >
             {section.presets.map((preset) => (
-              <PatternTile
+              <PresetTile
                 key={preset.id}
                 preset={preset}
                 settings={settings}
@@ -128,9 +128,9 @@ type CustomListProps = {
 // 並び方の概念がないので、ピン留めがあるときだけ「ピン留め」と「その他」で区切る (Keepと同じ)
 function CustomList({ categoryId, settings, registrations, pinnedIds }: CustomListProps) {
   const patterns = useDocumentStore((state) => state.document.patterns);
-  const own = patterns.filter((pattern) => pattern.categoryId === categoryId);
-  const pinned = own.filter((pattern) => pinnedIds.has(pattern.id));
-  const rest = own.filter((pattern) => !pinnedIds.has(pattern.id));
+  const custom = patterns.filter((pattern) => pattern.categoryId === categoryId);
+  const pinned = custom.filter((pattern) => pinnedIds.has(pattern.id));
+  const rest = custom.filter((pattern) => !pinnedIds.has(pattern.id));
   const tileOf = (pattern: CustomPattern) => (
     <CustomTile
       key={pattern.id}
