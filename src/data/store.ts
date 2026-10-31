@@ -31,7 +31,11 @@ type PersistedShape = { state: { document: Document }; version: number };
 // 読み込めなかった理由。壊れた文書は退避するが、新しい版の文書は動かさない
 type ReadFailure = 'brokenDocument' | 'newerDocument';
 
-type DocumentStorage = StateStorage & { takeIssue: () => LoadIssue | null };
+type DocumentStorage = StateStorage & {
+  takeIssue: () => LoadIssue | null;
+  // 新しい版の文書があるときは書き込みを止めている。下書きの消去も同じ判断に揃えるために外から問える
+  isSaveBlocked: () => boolean;
+};
 
 // persistに渡す包み。読み込みでmigrate → Zodを通し、壊れた文書は退避して空で始める。保存は前の文書を1世代残す
 function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
@@ -66,6 +70,7 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
       issue = null;
       return current;
     },
+    isSaveBlocked: () => hasNewerDocument,
     getItem: (key) => {
       const raw = storage.getItem(key);
       if (raw === null) {
@@ -167,8 +172,19 @@ export type DocumentStore = {
 
 export function createDocumentStore(storage: KeyValueStorage) {
   const documentStorage = createDocumentStorage(storage);
-  // 文書から消えたパターンの下書きも消す。残すとプリセットのidは固定なので、消したはずの書きかけが復元される
+  // 文書から消えたパターンの下書きも消す。残すとプリセットのidは固定なので、消したはずの書きかけが復元される。
+  // ただし文書の保存が止まっているときは消さない。文書はリロードで戻るが、下書きには控えがなく取り戻せない
   const drafts = createDraftStore(storage);
+  const removeDrafts = (patternIds: readonly string[]) => {
+    if (!documentStorage.isSaveBlocked()) {
+      drafts.removeMany(patternIds);
+    }
+  };
+  const removeAllDrafts = () => {
+    if (!documentStorage.isSaveBlocked()) {
+      drafts.removeAll();
+    }
+  };
   // persistの読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
   void documentStorage.getItem(DOCUMENT_KEY);
   const initialLoadIssue = documentStorage.takeIssue();
@@ -274,7 +290,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
-            drafts.removeMany(removedPatternIds);
+            removeDrafts(removedPatternIds);
             reportStorageIssue();
           },
           moveCategory: (categoryId, toIndex) => {
@@ -318,7 +334,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           removeCustomPattern: (patternId) => {
-            drafts.remove(patternId);
+            removeDrafts([patternId]);
             set((state) => ({
               document: {
                 ...state.document,
@@ -331,7 +347,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
           },
           importDocument: (imported, mode) => {
             if (mode === 'replace') {
-              drafts.removeAll();
+              removeAllDrafts();
             }
             set((state) => ({ document: applyImport(state.document, imported, mode) }));
             reportStorageIssue();
@@ -401,12 +417,12 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
-            drafts.removeMany(removedPatternIds);
+            removeDrafts(removedPatternIds);
             reportStorageIssue();
             return removedCount;
           },
           resetDocument: () => {
-            drafts.removeAll();
+            removeAllDrafts();
             set({ document: createEmptyDocument() });
             reportStorageIssue();
           },

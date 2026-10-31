@@ -354,6 +354,17 @@ describe('下書きの後始末', () => {
     expect(drafts.read(patternId)).toBeNull();
   });
 
+  it('自分より新しい版の文書があるときは、初期状態に戻しても下書きを消さない', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    const drafts = createDraftStore(storage);
+    drafts.write('pll-ua', DRAFT);
+    store.getState().resetDocument();
+    expect(drafts.read('pll-ua')).toEqual(DRAFT);
+  });
+
   it('追加で読み込んでも下書きは残る', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);
