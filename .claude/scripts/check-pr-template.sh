@@ -1,11 +1,11 @@
 #!/bin/bash
-# PreToolUse (Bash) フック。`gh pr create` の本文が雛形の必須の見出し (目的・変更) を持つかを確かめ、
-# なければ exit 2 で止める。本文は `--body-file - <<'EOF'` の HEREDOC からだけ読む。それ以外の渡し方は止める。
+# PreToolUse (Bash) フック。`gh pr create`の本文が雛形の必須の見出し (目的・変更) を持つかを確かめ、
+# なければexit 2で止める。本文は`--body-file - <<'EOF'`のHEREDOCからだけ読む。それ以外の渡し方は止める。
 set -euo pipefail
 
 RAW=$(cat)
 grep -q 'gh' <<< "$RAW" || exit 0
-command -v jq >/dev/null || { echo "[check-pr-template] jq がない。brew install jq を手で実行する。" >&2; exit 2; }
+command -v jq >/dev/null || { echo "[check-pr-template] jqがない。brew install jqを手で実行する。" >&2; exit 2; }
 
 CMD=$(jq -r '.tool_input.command // empty' <<< "$RAW")
 
@@ -29,12 +29,12 @@ if grep -qE -- "--body-file[[:space:]]+-[[:space:]]+<<-?'?EOF'?" <<< "$CMD"; the
 fi
 
 if [[ -z "$BODY" ]]; then
-  echo "[check-pr-template] PR 本文を読み取れない。gh pr create --title ... --body-file - <<'EOF' ... EOF の形で渡す。" >&2
+  echo "[check-pr-template] PR本文を読み取れない。gh pr create --title ... --body-file - <<'EOF' ... EOFの形で渡す。" >&2
   exit 2
 fi
 
 MISSING=()
-# チェックリストは持ち主が実機で確かめることがあるときだけ (なければ見出しごと省く)
+# チェックリストはオーナーが実機で確かめることがあるときだけ (なければ見出しごと省く)
 for section in "目的" "変更"; do
   if ! grep -qE "^##[[:space:]]+${section}[[:space:]]*$" <<< "$BODY"; then
     MISSING+=("## ${section}")
@@ -42,7 +42,7 @@ for section in "目的" "変更"; do
 done
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then
-  echo "[check-pr-template] 必須の見出しがない: ${MISSING[*]}。.github/pull_request_template.md の形に合わせる。" >&2
+  echo "[check-pr-template] 必須の見出しがない: ${MISSING[*]}。.github/pull_request_template.mdの形に合わせる。" >&2
   exit 2
 fi
 
