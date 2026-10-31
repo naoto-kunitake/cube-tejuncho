@@ -11,8 +11,8 @@ export function formatMove(move: Move, wideStyle: WideStyle): string {
   return wide + move.suffix;
 }
 
-// 表示用の整形。揺れを吸収し、空白を補い、2 層回しを設定の表記に揃える。
-// 読めない手順は手を加えずに返す (登録前の検証は parseAlg の責務)
+// 表示用の整形。揺れを吸収し、空白を補い、2層回しを設定の表記に揃える。
+// 読めない手順は手を加えずに返す (登録前の検証はparseAlgの責務)
 export function formatAlg(raw: string, wideStyle: WideStyle): string {
   const parsed = parseAlg(raw);
   if (!parsed.ok) {

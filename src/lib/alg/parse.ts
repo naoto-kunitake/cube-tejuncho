@@ -10,7 +10,7 @@ export type Move = {
   suffix: MoveSuffix;
 };
 
-// (R U R' U')2 のような塊。塊の後ろの数字や ' は繰り返しと逆手順の指定で、そのまま文字で持つ
+// (R U R' U')2のような塊。塊の後ろの数字や ' は繰り返しと逆手順の指定で、そのまま文字で持つ
 export type MoveGroup = {
   kind: 'group';
   moves: Move[];
@@ -34,7 +34,7 @@ function isMoveBase(char: string): char is MoveBase {
   return FACE_BASES.has(char) || OTHER_BASES.has(char);
 }
 
-// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの 2、Ri / R- / R3 の逆手順、'2 の順
+// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの2、Ri / R- / R3の逆手順、'2の順
 export function cleanAlgText(raw: string): string {
   return raw
     .replace(/[！-～]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
@@ -62,7 +62,7 @@ function readSuffix(scan: Scan): MoveSuffix {
 function readMove(scan: Scan): Move | null {
   const { text } = scan;
   let index = scan.index;
-  // WCA の 2Rw は Rw と同じ
+  // WCAの2RwはRwと同じ
   if (text[index] === '2' && FACE_BASES.has(text[index + 1] ?? '') && text[index + 2] === 'w') {
     index += 1;
   }
@@ -120,7 +120,7 @@ export function parseAlg(raw: string): Result<AlgItem[], AlgError> {
         return err({ kind: 'emptyGroup', index: groupStart });
       }
       scan.index += 1;
-      // 手と同じ並び (繰り返しの数 → 省略できる ') だけ認める。はみ出した文字は次の周で unknownSymbol になる
+      // 手と同じ並び (繰り返しの数 → 省略できる ') だけ認める。はみ出した文字は次の周でunknownSymbolになる
       const suffix = /^(\d+'?|')?/.exec(text.slice(scan.index))?.[0] ?? '';
       scan.index += suffix.length;
       items.push({ ...group, suffix });

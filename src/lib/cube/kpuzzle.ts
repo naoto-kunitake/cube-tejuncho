@@ -2,7 +2,7 @@ import { Alg } from 'cubing/alg';
 import type { KPattern, KPuzzle } from 'cubing/kpuzzle';
 import { cube3x3x3 } from 'cubing/puzzles';
 
-// cubing.js の 3x3x3 の定義は非同期に読み込まれる。1 度だけ読み、以後は同じものを使う
+// cubing.jsの3x3x3の定義は非同期に読み込まれる。1度だけ読み、以後は同じものを使う
 let kpuzzlePromise: Promise<KPuzzle> | null = null;
 
 export function loadKPuzzle(): Promise<KPuzzle> {
@@ -10,7 +10,7 @@ export function loadKPuzzle(): Promise<KPuzzle> {
   return kpuzzlePromise;
 }
 
-// cubing.js の「状態」(KPattern) はアプリの Pattern と衝突するので、外には cubeState の語で出す
+// cubing.jsの「状態」(KPattern) はアプリのPatternと衝突するので、外にはcubeStateの語で出す
 export type CubeState = KPattern;
 
 export async function solvedState(): Promise<CubeState> {

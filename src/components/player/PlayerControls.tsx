@@ -13,7 +13,7 @@ type PlayerControlsProps = {
   onStep: (direction: StepDirection) => void;
 };
 
-// 副の操作は枠なしの記号 (音楽アプリの操作列と同じ)。再生だけ 48 の塗りで主役にする。タップ領域は 44
+// 副の操作は枠なしの記号 (音楽アプリの操作列と同じ)。再生だけ48の塗りで主役にする。タップ領域は44
 const SUB_BUTTON_CLASS =
   'pressable inline-grid size-11 place-items-center rounded-full text-ink hover:bg-hover active:scale-96 active:bg-press';
 

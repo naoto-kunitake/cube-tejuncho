@@ -16,7 +16,7 @@ import {
 
 export type PlayerStatus = 'loading' | 'ready' | 'failed';
 
-// 初回は約 1MB の読み込み。10 秒で失敗扱いにして再試行を出す。開いたら 0.4 秒後に自動で再生する
+// 初回は約1MBの読み込み。10秒で失敗扱いにして再試行を出す。開いたら0.4秒後に自動で再生する
 const LOAD_TIMEOUT_MS = 10_000;
 const AUTOPLAY_DELAY_MS = 400;
 
@@ -27,7 +27,7 @@ type UsePlayerArgs = {
   stageRef: RefObject<HTMLDivElement | null>;
 };
 
-// 動いている手、または止まった直後の手 (1 手進んだ後もどの手だったか読める)。先頭に戻ったら強調なし
+// 動いている手、または止まった直後の手 (1手進んだ後もどの手だったか読める)。先頭に戻ったら強調なし
 export function currentIndexOf(info: CurrentMoveInfo): number | null {
   if (info.currentMoves.length > 0 || info.movesFinishing.length > 0) {
     return info.patternIndex;

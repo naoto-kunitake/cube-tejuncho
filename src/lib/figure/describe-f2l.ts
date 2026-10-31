@@ -1,6 +1,6 @@
 import type { CubeView, PairMask } from './view';
 
-// 右前スロットの位置 (3 面の図の添字)。コーナーは前面の右下と右面の左下、エッジは前面の右中と右面の左中
+// 右前スロットの位置 (3面の図の添字)。コーナーは前面の右下と右面の左下、エッジは前面の右中と右面の左中
 const SLOT_CORNER_FRONT = 8;
 const SLOT_CORNER_RIGHT = 6;
 const SLOT_EDGE_FRONT = 5;

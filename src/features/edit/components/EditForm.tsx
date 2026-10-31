@@ -43,9 +43,9 @@ import { applyEdit, clearingFor, deletionFor, insertionFor, type KeypadKey, type
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad } from './AlgKeypad';
 
-// 入力のたびに書く下書きは 300ms まとめる (打鍵ごとに localStorage へ書かない)
+// 入力のたびに書く下書きは300msまとめる (打鍵ごとにlocalStorageへ書かない)
 const DRAFT_DEBOUNCE_MS = 300;
-// 新規の下書きはパターンの id がまだないので固定の鍵
+// 新規の下書きはパターンのidがまだないので固定の鍵
 const NEW_DRAFT_ID = 'new';
 
 export type FocusTarget = { kind: 'recognition' } | { kind: 'alg'; index: number };
@@ -93,8 +93,8 @@ type EditFigureProps = {
   settings: Settings;
 };
 
-// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて 17 下げる)。判断を書くときの参考に全色と手がかりを並べる。
-// 手がかりは PLL だけ
+// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて17下げる)。判断を書くときの参考に全色と手がかりを並べる。
+// 手がかりはPLLだけ
 function EditFigure({ preset, settings }: EditFigureProps) {
   if (preset.category === 'pll' && settings.showCueFigure) {
     return (
@@ -170,7 +170,7 @@ export function EditForm({
   // 自作は名前が必須
   const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
-  // 判断の文章の手がかり: PLL は側面の揃い方、F2L はパーツの位置と白の向き (OLL は上面の向きで見分けるので出さない)
+  // 判断の文章の手がかり: PLLは側面の揃い方、F2Lはパーツの位置と白の向き (OLLは上面の向きで見分けるので出さない)
   const recognitionExamplesOf = (preset: Preset): string[] | null => {
     switch (preset.category) {
       case 'pll': {
@@ -203,7 +203,7 @@ export function EditForm({
         setForm(formFrom(registration, fields));
       },
     });
-    // fields は target から毎回作られるので、target を依存に置く
+    // fieldsはtargetから毎回作られるので、targetを依存に置く
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial.isRestored, showToast, draftStore, draftId, registration, target]);
 
@@ -263,7 +263,7 @@ export function EditForm({
     });
   };
 
-  // 欄の値と選択範囲を直接書き換えて input イベントを投げる。React が値を入れ直さないので、カーソルの位置が保てる
+  // 欄の値と選択範囲を直接書き換えてinputイベントを投げる。Reactが値を入れ直さないので、カーソルの位置が保てる
   const editActiveInput = (edit: (value: string, start: number, end: number) => TextEdit) => {
     if (keypadIndex === null) {
       return;
@@ -286,8 +286,8 @@ export function EditForm({
       if (input === undefined) {
         return;
       }
-      // 焦点のある欄の inputMode を外しただけでは端末のキーボードは開かない。属性を先に反映させてから焦点を入れ直す。
-      // iOS は利用者の操作の中でしかキーボードを開かないので、後回しにせず同じ押下の中で行う
+      // 焦点のある欄のinputModeを外しただけでは端末のキーボードは開かない。属性を先に反映させてから焦点を入れ直す。
+      // iOSは利用者の操作の中でしかキーボードを開かないので、後回しにせず同じ押下の中で行う
       isSwitchingKeyboardRef.current = true;
       flushSync(() => {
         setUsesNativeKeyboard(true);

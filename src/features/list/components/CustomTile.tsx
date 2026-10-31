@@ -13,7 +13,7 @@ type CustomTileProps = {
   settings: Pick<Settings, 'listView' | 'wideStyle'>;
 };
 
-// 自作は図がないので、グリッドでは図の位置にメイン手順の文字を出す (長い手順は 4 行で省略。全文は詳細)。
+// 自作は図がないので、グリッドでは図の位置にメイン手順の文字を出す (長い手順は4行で省略。全文は詳細)。
 // リストでは名前と手順の行
 export function CustomTile({ patternId, name, mainAlg, settings }: CustomTileProps) {
   const isList = settings.listView === 'list';

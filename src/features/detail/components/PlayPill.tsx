@@ -8,7 +8,7 @@ type PlayPillProps = {
   onClick: () => void;
 };
 
-// 手順カードの「▶ 再生」。見た目 36 のピル、押せる範囲は 44
+// 手順カードの「▶ 再生」。見た目36のピル、押せる範囲は44
 export function PlayPill({ onClick }: PlayPillProps) {
   return (
     <button

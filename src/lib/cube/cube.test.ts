@@ -49,7 +49,7 @@ describe('topViewOf', () => {
   });
 
   it('側面は上から見て左から右の順で読む', async () => {
-    // 黄上で F を回すと、上面の手前の行に赤 (左面)、右面の手前に黄 (上面)、左面の手前に白 (下面) が来る
+    // 黄上でFを回すと、上面の手前の行に赤 (左面)、右面の手前に黄 (上面)、左面の手前に白 (下面) が来る
     const view = topViewOf(applyAlg(await solvedState(), 'z2 F'));
     expect(view.u.slice(6)).toEqual(['R', 'R', 'R']);
     expect(view.r).toEqual(['O', 'O', 'Y']);

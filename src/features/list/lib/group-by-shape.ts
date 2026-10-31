@@ -11,7 +11,7 @@ export type ShapeSection = { label: string; presets: readonly Preset[] };
 type ShapeHeading = { shape: string; label: string };
 
 // 形の見出しの並びと名前。形の鍵はカテゴリごとに別の型なので、ここで文字列に落として突き合わせる。
-// F2L の「白」はクロスの色なので、上面の色の設定で言い換える
+// F2Lの「白」はクロスの色なので、上面の色の設定で言い換える
 function shapeHeadingsOf(category: PresetCategoryId, topColor: TopColor): readonly ShapeHeading[] {
   switch (category) {
     case 'pll':
@@ -32,7 +32,7 @@ export type GroupingOptions = {
   pinnedIds: ReadonlySet<string>;
 };
 
-// ピン留めは並び方によらず先頭の「ピン留め」の見出しにまとめ、元の群からは外す (Keep / Apple メモと同じ。タイルにピンの記号は出さない)。
+// ピン留めは並び方によらず先頭の「ピン留め」の見出しにまとめ、元の群からは外す (Keep / Appleメモと同じ。タイルにピンの記号は出さない)。
 // ピン留めの中は元の並びを保つ。残りの見出しは標準順でも常に出し、見出しが今の並び方を示す
 export function groupByShape(presets: readonly Preset[], options: GroupingOptions): ShapeSection[] {
   const { category, sortOrder, topColor, pinnedIds } = options;
@@ -40,7 +40,7 @@ export function groupByShape(presets: readonly Preset[], options: GroupingOption
   const rest = presets.filter((preset) => !pinnedIds.has(preset.id));
   const pinnedSections: ShapeSection[] = pinned.length > 0 ? [{ label: copy.list.pinned, presets: pinned }] : [];
   if (sortOrder === 'standard') {
-    // ピン留め以外が 0 件でも標準順の見出しは出す (形の見出しの「空なら隠す」とは別の決定)
+    // ピン留め以外が0件でも標準順の見出しは出す (形の見出しの「空なら隠す」とは別の決定)
     return [...pinnedSections, { label: copy.list.standardOrder[category], presets: rest }];
   }
   const shapeSections = shapeHeadingsOf(category, topColor)

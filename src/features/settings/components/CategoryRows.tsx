@@ -37,7 +37,7 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
   };
 
   const startDrag = (event: PointerEvent<HTMLButtonElement>, index: number) => {
-    // ハンドルは行の div の直接の子 (入れ子を挟むと高さが 0 になり、ドラッグが始まらない)
+    // ハンドルは行のdivの直接の子 (入れ子を挟むと高さが0になり、ドラッグが始まらない)
     const rowHeight = event.currentTarget.parentElement?.offsetHeight ?? 0;
     if (rowHeight <= 0) {
       return;
@@ -80,12 +80,12 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
 
   return (
     <>
-      {/* 角の丸みは overflow で切るが、持ち上げた行の影と拡大は切らない */}
+      {/* 角の丸みはoverflowで切るが、持ち上げた行の影と拡大は切らない */}
       <div className={cn('rounded-md border border-line bg-surface', drag === null && 'overflow-hidden')}>
         {categories.map((category, index) => {
           const isLifted = drag !== null && drag.index === index;
           const shift = drag === null || targetIndex === null ? 0 : shiftOf(index, drag.index, targetIndex);
-          // 動かす量はポインタの位置と行の高さから決まるので、トークンではなく inline の transform
+          // 動かす量はポインタの位置と行の高さから決まるので、トークンではなくinlineのtransform
           const style = isLifted
             ? { transform: `translateY(${drag.deltaY}px) scale(1.02)` }
             : { transform: shift === 0 ? undefined : `translateY(${shift * (drag?.rowHeight ?? 0)}px)` };
@@ -95,7 +95,7 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
               style={style}
               className={cn(
                 SETTING_ROW_CLASS,
-                // 押せるのは本文のボタンだが、hover / 押下の色は行全体に付ける (ハンドルの下まで続く。:active は祖先にも効く)
+                // 押せるのは本文のボタンだが、hover / 押下の色は行全体に付ける (ハンドルの下まで続く。:activeは祖先にも効く)
                 category.kind === 'custom' && 'pressable hover:bg-hover active:bg-press',
                 isLifted && 'relative z-10 rounded-md border-t-transparent bg-surface shadow-3',
                 drag !== null && !isLifted && 'transition-transform duration-150 motion-reduce:transition-none',
@@ -110,7 +110,7 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
                   }}
                 >
                   <span className="min-w-0 truncate">{category.label}</span>
-                  {/* 読み上げ名を「COLL 0件」と区切る空白 (flex の項目にはならない) */}{' '}
+                  {/* 読み上げ名を「COLL 0件」と区切る空白 (flexの項目にはならない) */}{' '}
                   <span className="text-label whitespace-nowrap text-muted tabular-nums">{category.detail}</span>
                 </button>
               ) : (

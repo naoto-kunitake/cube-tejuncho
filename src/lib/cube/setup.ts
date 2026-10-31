@@ -6,8 +6,8 @@ import { invertAlg } from './alg';
 
 const Y_TURNS = ['', 'y', 'y2', "y'"] as const;
 
-// 再生の開始姿勢: cubing.js の既定 (白上・緑前) から、上面の設定 (黄上なら z2)、前面の色 (y を k 回)、手順の逆の順。
-// z2 のあとは右が橙になり、黄上の側面の並び (緑→橙→青→赤) と一致する
+// 再生の開始姿勢: cubing.jsの既定 (白上・緑前) から、上面の設定 (黄上ならz2)、前面の色 (yをk回)、手順の逆の順。
+// z2のあとは右が橙になり、黄上の側面の並び (緑→橙→青→赤) と一致する
 export function setupAlgFor(alg: Alg, settings: ViewSettings): string {
   const turns = frontColorTurns(settings);
   const yTurn = Y_TURNS[turns];

@@ -13,7 +13,7 @@ vi.mock('./twisty', async (importOriginal) => {
   return { ...original, loadTwisty: vi.fn() };
 });
 
-// 3D は jsdom で動かないので、再生シートが使う範囲 (PlayerLike) だけ真似た要素を返す
+// 3Dはjsdomで動かないので、再生シートが使う範囲 (PlayerLike) だけ真似た要素を返す
 function fakePlayer(): PlayerLike {
   const listener = { addFreshListener: vi.fn() };
   return Object.assign(document.createElement('div'), {

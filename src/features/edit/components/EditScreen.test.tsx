@@ -13,7 +13,7 @@ import { useDocumentStore } from '@/data/store';
 
 import { EditScreen } from './EditScreen';
 
-// 下書きは本物の localStorage ではなくメモリに置く (テスト間で残らない)
+// 下書きは本物のlocalStorageではなくメモリに置く (テスト間で残らない)
 vi.mock('@/data/draft', async (importOriginal) => {
   const original = await importOriginal<typeof DraftExports>();
   const storage = await import('@/data/storage');
@@ -29,7 +29,7 @@ const REGISTRATION = {
   updatedAt: '2026-10-22T00:00:00.000Z',
 };
 
-// 回転記号の画面は別の feature なので、受け取る state だけを映す探針を置く
+// 回転記号の画面は別のfeatureなので、受け取るstateだけを映す探針を置く
 function LocationStateProbe() {
   const location = useLocation();
   return <p>{JSON.stringify(location.state)}</p>;

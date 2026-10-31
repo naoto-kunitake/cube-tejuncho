@@ -6,7 +6,7 @@ import { applyAlg, isSolved } from '@/lib/cube/kpuzzle';
 import { caseStartState, topViewOf } from '@/lib/cube/view';
 import type { TopView } from '@/lib/figure/view';
 
-// プリセット (PLL / OLL / F2L) が共通で満たすこと。テストの名前 (1 テスト 1 事実) は呼ぶ側に置き、本体だけを共有する
+// プリセット (PLL / OLL / F2L) が共通で満たすこと。テストの名前 (1テスト1事実) は呼ぶ側に置き、本体だけを共有する
 
 export function expectStandardAlgReadable(standardAlg: string): void {
   expect(parseAlg(standardAlg).ok).toBe(true);
@@ -24,7 +24,7 @@ export async function expectStandardAlgSolves(standardAlg: string): Promise<void
   expect(isSolved(applyAlg(await caseStartState(alg), alg))).toBe(true);
 }
 
-// 図は AUF を正規化した向きで持つので、上面を 0〜3 回まわしたどれかと一致すればよい
+// 図はAUFを正規化した向きで持つので、上面を0〜3回まわしたどれかと一致すればよい
 export async function expectViewMatchesStandardAlg(standardAlg: string, view: TopView): Promise<void> {
   const start = await caseStartState(cubingAlgOrThrow(standardAlg));
   const views = ['', 'U', 'U2', "U'"].map((turn) => topViewOf(applyAlg(start, turn)));

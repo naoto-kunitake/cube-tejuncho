@@ -20,7 +20,7 @@ type PlayerSheetProps = {
   onClose: () => void;
 };
 
-// × / 3D の舞台 / 手順の文字 (今の手を強調) / 操作列 の順に縦に並べる (音楽アプリの再生中画面と同じ)
+// × / 3Dの舞台 / 手順の文字 (今の手を強調) / 操作列 の順に縦に並べる (音楽アプリの再生中画面と同じ)
 export function PlayerSheet({ algText, category, settings, onClose }: PlayerSheetProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const player = usePlayer({ algText, category, settings, stageRef });
@@ -60,7 +60,7 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
           </div>
         )}
       </div>
-      {/* 手順の枠は 2 行ぶんの高さを確保し、短くても長くても操作列を動かさない */}
+      {/* 手順の枠は2行ぶんの高さを確保し、短くても長くても操作列を動かさない */}
       <AlgText
         text={algText}
         wideStyle={settings.wideStyle}

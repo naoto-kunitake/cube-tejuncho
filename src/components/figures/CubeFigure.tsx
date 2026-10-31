@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 import { STICKER_COLOR_VARIABLE } from './sticker-color';
 
-// 添字は等角投影の表が 0〜8 しか出さないので、外れていたら表のバグ
+// 添字は等角投影の表が0〜8しか出さないので、外れていたら表のバグ
 function colorOf(view: CubeFigureView, face: CubeFace, index: number): FigureColor {
   const color = view[face][index];
   if (color === undefined) {
@@ -19,7 +19,7 @@ type CubeFigureProps = {
   className?: string;
 };
 
-// 3 面 (上・前・右) の等角投影の図。F2L の右前スロットの様子を見せる。
+// 3面 (上・前・右) の等角投影の図。F2Lの右前スロットの様子を見せる。
 // 白は真っ白にして縁取りだけ濃くする (上面図と同じ)
 export function CubeFigure({ view, label, className }: CubeFigureProps) {
   return (

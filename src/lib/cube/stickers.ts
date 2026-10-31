@@ -4,12 +4,12 @@ import type { CubeState } from './kpuzzle';
 
 export type Face = 'U' | 'D' | 'F' | 'B' | 'R' | 'L';
 
-// cubing.js の 3x3x3 のパーツの並び (白が上・緑が前の枠で定義される)
+// cubing.jsの3x3x3のパーツの並び (白が上・緑が前の枠で定義される)
 const EDGE_POSITIONS = ['UF', 'UR', 'UB', 'UL', 'DF', 'DR', 'DB', 'DL', 'FR', 'FL', 'BR', 'BL'] as const;
 const CORNER_POSITIONS = ['UFR', 'URB', 'UBL', 'ULF', 'DRF', 'DFL', 'DLB', 'DBR'] as const;
 const CENTER_POSITIONS = ['U', 'L', 'F', 'R', 'B', 'D'] as const;
 
-// cubing.js の既定の配色 (白上・緑前)
+// cubing.jsの既定の配色 (白上・緑前)
 const FACE_COLOR: Record<Face, StickerColor> = { U: 'W', D: 'Y', F: 'G', B: 'B', R: 'R', L: 'O' };
 const FACES: readonly Face[] = CENTER_POSITIONS;
 
@@ -37,7 +37,7 @@ export function pieceOfColors(colors: EdgeColors | CornerColors): string {
   return piece;
 }
 
-// 面ごとの 9 枚 (左上から行ごと)。各面を正面から見た向きで、U は B 側が上、D は F 側が上
+// 面ごとの9枚 (左上から行ごと)。各面を正面から見た向きで、UはB側が上、DはF側が上
 const FACELET_ORDER: Record<Face, TopFace<string>> = {
   U: ['UBL', 'UB', 'URB', 'UL', 'U', 'UR', 'ULF', 'UF', 'UFR'],
   D: ['DFL', 'DF', 'DRF', 'DL', 'D', 'DR', 'DLB', 'DB', 'DBR'],
@@ -51,7 +51,7 @@ export type Facelets = Record<Face, TopFace<StickerColor>>;
 
 type PlacedPiece = { piece: string; orientation: number };
 
-// 位置 position にあるパーツ (白上・緑前の枠での名前) とその向き
+// 位置positionにあるパーツ (白上・緑前の枠での名前) とその向き
 function placedPieceAt(state: CubeState, position: string): PlacedPiece {
   const orbitName = position.length === 1 ? 'CENTERS' : position.length === 2 ? 'EDGES' : 'CORNERS';
   const positions: readonly string[] =
@@ -73,7 +73,7 @@ function placedPieceAt(state: CubeState, position: string): PlacedPiece {
   return { piece, orientation };
 }
 
-// 位置 position の面 face に見えているステッカーの色。向き o は「位置の面 i にパーツのステッカー (i + o) が来る」の規約
+// 位置positionの面faceに見えているステッカーの色。向きoは「位置の面iにパーツのステッカー (i + o) が来る」の規約
 function stickerAt(state: CubeState, position: string, face: Face): StickerColor {
   const { piece, orientation } = placedPieceAt(state, position);
   const positionFaces = facesOf(position);
@@ -104,7 +104,7 @@ export function faceletsOf(state: CubeState): Facelets {
   };
 }
 
-// 面ごとの 9 枚それぞれに、どのパーツが来ているか (パーツは白上・緑前の枠での名前。例: 白・緑・橙のコーナーは ULF)
+// 面ごとの9枚それぞれに、どのパーツが来ているか (パーツは白上・緑前の枠での名前。例: 白・緑・橙のコーナーはULF)
 export function pieceFaceOf(state: CubeState, face: Face): TopFace<string> {
   const [a, b, c, d, e, f, g, h, i] = FACELET_ORDER[face];
   const at = (position: string) => placedPieceAt(state, position).piece;

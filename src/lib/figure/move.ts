@@ -21,7 +21,7 @@ const MOVING_LAYERS: Record<FaceOrSlice, LayerMask> = {
   S: { u: [3, 4, 5], r: [1, 4, 7] },
 };
 
-// 2 層回しは面と、その隣の中層
+// 2層回しは面と、その隣の中層
 const WIDE_SLICE: Record<FaceOrSlice, FaceOrSlice> = {
   R: 'M',
   L: 'M',
@@ -65,7 +65,7 @@ function movingIndicesOf(layers: readonly LayerMask[], face: CubeFace): Readonly
 
 export type MoveFigureMove = { base: MoveBase; isWide: boolean };
 
-// 記号の説明に添える図: 動く層だけ色、ほかは灰。色の基準は 上 Y・前 G・右 O で、上面・前面の色の設定に合わせて置き換える
+// 記号の説明に添える図: 動く層だけ色、ほかは灰。色の基準は 上Y・前G・右Oで、上面・前面の色の設定に合わせて置き換える
 export function moveFigureView(move: MoveFigureMove, settings: ViewSettings): CubeFigureView {
   const solved: TopFace<'Y'> = ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'];
   const colored = recolorCubeView(

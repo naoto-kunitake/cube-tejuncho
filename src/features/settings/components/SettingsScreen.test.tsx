@@ -202,7 +202,7 @@ describe('SettingsScreen', () => {
   });
 
   it('ハンドルをドラッグして離すと、動かした先の位置にカテゴリが入る', () => {
-    // jsdom は大きさを持たないので、行の高さ 52 を足す
+    // jsdomは大きさを持たないので、行の高さ52を足す
     vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(52);
     renderSettings();
     const handle = screen.getByRole('button', { name: copy.a11y.reorderHandle(copy.list.categories.pll) });

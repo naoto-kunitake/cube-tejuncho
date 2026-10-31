@@ -16,8 +16,8 @@ function isAbort(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
-// ファイルを渡せる共有シートがあればそれで (iPhone では「ファイルに保存」や AirDrop が選べる)、なければダウンロード。
-// 共有を取りやめたら false
+// ファイルを渡せる共有シートがあればそれで (iPhoneでは「ファイルに保存」やAirDropが選べる)、なければダウンロード。
+// 共有を取りやめたらfalse
 export async function saveFile(file: File): Promise<boolean> {
   if ('canShare' in navigator && navigator.canShare({ files: [file] })) {
     try {

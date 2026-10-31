@@ -1,5 +1,5 @@
 export type StickerColor = 'Y' | 'W' | 'G' | 'B' | 'R' | 'O';
-// N は関係ないパーツの灰
+// Nは関係ないパーツの灰
 export type FigureColor = StickerColor | 'N';
 
 export const TOP_COLORS = ['yellow', 'white'] as const;
@@ -10,7 +10,7 @@ export type FrontColor = (typeof FRONT_COLORS)[number];
 export type Side<T> = readonly [T, T, T];
 export type TopFace<T> = readonly [T, T, T, T, T, T, T, T, T];
 
-// 標準形: 上面 9 マス (左上から行ごと) + 側面の上段 3 マスずつ (左から)
+// 標準形: 上面9マス (左上から行ごと) + 側面の上段3マスずつ (左から)
 export type TopView = {
   u: TopFace<StickerColor>;
   f: Side<StickerColor>;
@@ -27,7 +27,7 @@ export type FigureView = {
   l: Side<FigureColor>;
 };
 
-// 3 面の図 (F2L): 上面・前面・右面の 9 マスずつ。各面を正面から見た向きで左上から行ごと (前面は上の行が上層、右面は左の列が前)
+// 3面の図 (F2L): 上面・前面・右面の9マスずつ。各面を正面から見た向きで左上から行ごと (前面は上の行が上層、右面は左の列が前)
 export type CubeView = {
   u: TopFace<StickerColor>;
   f: TopFace<StickerColor>;
@@ -71,14 +71,14 @@ export type ViewSettings = {
 
 export const FRONT_COLOR_LETTER: Record<FrontColor, StickerColor> = { green: 'G', red: 'R', blue: 'B', orange: 'O' };
 
-// 白上は x2 で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
+// 白上はx2で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
 const WHITE_TOP: Record<StickerColor, StickerColor> = { Y: 'W', W: 'Y', R: 'O', O: 'R', G: 'G', B: 'B' };
 const SIDE_SEQUENCE: Record<TopColor, readonly StickerColor[]> = {
   yellow: ['G', 'O', 'B', 'R'],
   white: ['G', 'R', 'B', 'O'],
 };
 
-// 前面の色を正面に持ってくるのに要る y 回転の回数 (0〜3)。側面の色の巡回と再生の開始姿勢が同じ値を使う
+// 前面の色を正面に持ってくるのに要るy回転の回数 (0〜3)。側面の色の巡回と再生の開始姿勢が同じ値を使う
 export function frontColorTurns(settings: ViewSettings): number {
   return Math.max(0, SIDE_SEQUENCE[settings.topColor].indexOf(FRONT_COLOR_LETTER[settings.frontColor]));
 }
@@ -92,7 +92,7 @@ function recolorerFor(settings: ViewSettings): (color: StickerColor) => StickerC
     if (index < 0) {
       return topped;
     }
-    // 前面の色の変更は全体の y 回転で、側面の色の巡回置換になる
+    // 前面の色の変更は全体のy回転で、側面の色の巡回置換になる
     return sequence[(index + shift) % sequence.length] ?? topped;
   };
 }
@@ -115,7 +115,7 @@ export function recolorCubeView(view: CubeView, settings: ViewSettings): CubeVie
 
 const CENTER_INDEX = 4;
 
-// F2L の図: ペアのステッカーと中心 3 枚 (向きの手がかり) だけ色を残し、他は灰
+// F2Lの図: ペアのステッカーと中心3枚 (向きの手がかり) だけ色を残し、他は灰
 export function pairView(view: CubeView, pair: PairMask): CubeFigureView {
   const keep = (face: TopFace<StickerColor>, mask: TopFace<boolean>): TopFace<FigureColor> =>
     mapFace(face, (color, index) => (mask[index] === true || index === CENTER_INDEX ? color : 'N'));
@@ -124,7 +124,7 @@ export function pairView(view: CubeView, pair: PairMask): CubeFigureView {
 
 export const TOP_LETTER: Record<TopColor, StickerColor> = { yellow: 'Y', white: 'W' };
 
-// OLL の図: 上面の色 (黄、白上の設定なら白) のステッカーだけ色を残し、他は灰。見分けるのは「上面の色がどこにあるか」だけ
+// OLLの図: 上面の色 (黄、白上の設定なら白) のステッカーだけ色を残し、他は灰。見分けるのは「上面の色がどこにあるか」だけ
 export function orientationView(view: TopView, topColor: TopColor): FigureView {
   const top = TOP_LETTER[topColor];
   const keep = (color: StickerColor): FigureColor => (color === top ? color : 'N');
@@ -137,7 +137,7 @@ export function orientationView(view: TopView, topColor: TopColor): FigureView {
   };
 }
 
-// 判断の手がかり: 側面の揃っている塊 (両端が同色 = ヘッドライト、隣り同士が同色 = 2 連、3 つ同色 = 3 連) だけ色を残す
+// 判断の手がかり: 側面の揃っている塊 (両端が同色 = ヘッドライト、隣り同士が同色 = 2連、3つ同色 = 3連) だけ色を残す
 function keepBlocks(side: Side<StickerColor>): Side<FigureColor> {
   const [a, b, c] = side;
   const isHeadlight = a === c;

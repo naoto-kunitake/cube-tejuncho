@@ -58,7 +58,7 @@ export function ImportSheet({ onChoose, onClose }: ImportSheetProps) {
           if (file !== undefined) {
             onChoose(file, mode);
           }
-          // 同じファイルをもう一度選んでも change が起きるように空にする
+          // 同じファイルをもう一度選んでもchangeが起きるように空にする
           event.target.value = '';
         }}
       />

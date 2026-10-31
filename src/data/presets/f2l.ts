@@ -16,12 +16,12 @@ export type F2lPreset = {
   name: string;
   shape: F2lShape;
   standardAlg: string;
-  // 3 面の図の定義。黄上・緑前で、右前のスロットが崩れている
+  // 3面の図の定義。黄上・緑前で、右前のスロットが崩れている
   view: CubeView;
   pair: PairMask;
 };
 
-// 番号順 (speedsolving wiki の 42 項目から「揃った状態」を除いて 1〜41 に振り直したもの)。基本手順は wiki の各項目の先頭の手順
+// 番号順 (speedsolving wikiの42項目から「揃った状態」を除いて1〜41に振り直したもの)。基本手順はwikiの各項目の先頭の手順
 export const F2L_PRESETS: readonly F2lPreset[] = [
   {
     id: 'f2l-1',

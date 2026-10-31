@@ -1,7 +1,7 @@
 /*
- * 見た目の正。色はデジタル庁デザインシステム (DADS) のトークンで、例外 (地と面 2 の生成り、テーマ色、再生の枠) は
- * モックで決めた値。ライトは :root、ダークは .dark で同じ変数を差し替え、部品の CSS は触らない。
- * Tailwind のクラスにする変数は下の @theme inline に置き、既定のパレット・型スケール・角・影は使わない。
+ * 見た目の正。色はデジタル庁デザインシステム (DADS) のトークンで、例外 (地と面2の生成り、テーマ色、再生の枠) は
+ * モックで決めた値。ライトは:root、ダークは.darkで同じ変数を差し替え、部品のCSSは触らない。
+ * Tailwindのクラスにする変数は下の@theme inlineに置き、既定のパレット・型スケール・角・影は使わない。
  */
 :root {
   color-scheme: light;
@@ -39,20 +39,20 @@
   /* テーマ色。既定は墨 (= ink-strong)。文字色は墨 / 白のうち対比が高い方 */
   --accent: #1a1a1a;
   --on-accent: #ffffff;
-  /* 塗りボタンの hover / 押下は文字色の方へ寄せる。墨なら明るく、黄のような明るいテーマ色なら暗くなり、
+  /* 塗りボタンのhover / 押下は文字色の方へ寄せる。墨なら明るく、黄のような明るいテーマ色なら暗くなり、
      どのテーマ色でも見える方向に動く (黒へ寄せると墨では見えない)。文字ボタンはテーマ色を薄く敷く */
   --accent-hover: color-mix(in oklab, var(--accent), var(--on-accent) 12%);
   --accent-press: color-mix(in oklab, var(--accent), var(--on-accent) 24%);
   --accent-tint-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
   --accent-tint-press: color-mix(in srgb, var(--accent) 20%, #fff);
 
-  /* 白い面の上の hover / 押下と、地の上 (丸ボタン・タブ・空の枠) の 1 段濃い hover / 押下 */
+  /* 白い面の上のhover / 押下と、地の上 (丸ボタン・タブ・空の枠) の1段濃いhover / 押下 */
   --hover: #f2f2f2;
   --press: #e6e6e6;
   --hover-ground: #e6e6e6;
   --press-ground: #cccccc;
 
-  /* セグメント: 溝 (gray-50) の上に白い錠剤 + 薄い影 (iOS の流儀)。スイッチのオフのトラックは gray-420 (3:1) */
+  /* セグメント: 溝 (gray-50) の上に白い錠剤 + 薄い影 (iOSの流儀)。スイッチのオフのトラックはgray-420 (3:1) */
   --segment-track: #f2f2f2;
   --segment-selected: #ffffff;
   --segment-hover: #e6e6e6;
@@ -61,7 +61,7 @@
   /* 色の点 (上面・前面の色の選択肢) の縁。白の点が白い錠剤に溶けないように */
   --dot-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.3);
 
-  /* 図の色。図は SVG のインライン style からこの変数を参照する */
+  /* 図の色。図はSVGのインラインstyleからこの変数を参照する */
   --sticker-yellow: #ffd400;
   --sticker-white: #ffffff;
   --sticker-green: #00a651;
@@ -73,7 +73,7 @@
   --frame: #1c1b19;
   --frame-edge: #3a3935;
 
-  /* DADS の elevation */
+  /* DADSのelevation */
   --elevation-1: 0 2px 8px 1px rgb(0 0 0 / 0.1), 0 1px 5px 0 rgb(0 0 0 / 0.3);
   --elevation-2: 0 2px 12px 2px rgb(0 0 0 / 0.1), 0 1px 6px 0 rgb(0 0 0 / 0.3);
   --elevation-3: 0 4px 16px 3px rgb(0 0 0 / 0.1), 0 1px 6px 0 rgb(0 0 0 / 0.3);
@@ -81,7 +81,7 @@
   --elevation-5: 0 8px 24px 5px rgb(0 0 0 / 0.1), 0 2px 10px 0 rgb(0 0 0 / 0.3);
 }
 
-/* DADS の灰を反転。地は純灰 (生成りに対応する暗い暖色は DADS にない) */
+/* DADSの灰を反転。地は純灰 (生成りに対応する暗い暖色はDADSにない) */
 .dark {
   color-scheme: dark;
 
@@ -92,7 +92,7 @@
   --ink: #f2f2f2;
   --ink-strong: #ffffff;
   --muted: #b3b3b3;
-  /* 420 だと面 800 の上で 4.2:1 に届かないので 300 */
+  /* 420だと面800の上で4.2:1に届かないので300 */
   --placeholder: #b3b3b3;
   --disabled: #666666;
   --on-disabled: #4d4d4d;
@@ -122,7 +122,7 @@
   --hover-ground: #333333;
   --press-ground: #4d4d4d;
 
-  /* セグメントの溝は地 (カードより暗い)、選択は 600 + 影、hover 800 (iOS のダークのセグメントと同じ) */
+  /* セグメントの溝は地 (カードより暗い)、選択は600 + 影、hover 800 (iOSのダークのセグメントと同じ) */
   --segment-track: #1a1a1a;
   --segment-selected: #666666;
   --segment-hover: #333333;
@@ -179,7 +179,7 @@
   --color-sticker-red: var(--sticker-red);
   --color-sticker-orange: var(--sticker-orange);
   --color-sticker-none: var(--sticker-none);
-  /* テーマ色の見本 (Material Design 2 の 8 色)。保存する値は lib/theme/palette.ts に同じ hex がある */
+  /* テーマ色の見本 (Material Design 2の8色)。保存する値はlib/theme/palette.tsに同じhexがある */
   --color-theme-red: #d32f2f;
   --color-theme-orange: #f57c00;
   --color-theme-yellow: #fdd835;
@@ -189,8 +189,8 @@
   --color-theme-purple: #8e24aa;
   --color-theme-pink: #d81b60;
 
-  /* shadcn の部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す。
-     input は型スケールの text-input (16) と衝突するので割り当てず、部品側で line-strong を使う */
+  /* shadcnの部品が参照するテーマ変数。コピーした部品はこの割り当てを前提に直す。
+     inputは型スケールのtext-input (16) と衝突するので割り当てず、部品側でline-strongを使う */
   --color-background: var(--ground);
   --color-foreground: var(--ink);
   --color-primary: var(--accent);
@@ -202,11 +202,11 @@
 
   --font-sans: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  /* 合字は無効 (記号の 1 文字 1 文字を読ませる) */
+  /* 合字は無効 (記号の1文字1文字を読ませる) */
   --font-mono--font-feature-settings: 'liga' 0, 'calt' 0;
 
-  /* 型スケール。画面の題 20 / 詳細のメイン手順 24 / 手順の入力・再生シート・記号 17 / 入力欄と題 16 /
-     行・タブ・ボタン 15 / 説明・文字ボタン 14 / 区画見出し・ラベル・副文 13 / 自作タイルの手順 12 */
+  /* 型スケール。画面の題20 / 詳細のメイン手順24 / 手順の入力・再生シート・記号17 / 入力欄と題16 /
+     行・タブ・ボタン15 / 説明・文字ボタン14 / 区画見出し・ラベル・副文13 / 自作タイルの手順12 */
   --text-*: initial;
   --text-title: 20px;
   --text-alg: 24px;
@@ -217,10 +217,10 @@
   --text-label: 13px;
   --text-caption: 12px;
 
-  /* 字間: 題と手順の文字は .01em、件数は .02em、区画見出しは既定の widest (.1em) */
+  /* 字間: 題と手順の文字は.01em、件数は.02em、区画見出しは既定のwidest (.1em) */
   --tracking-title: 0.01em;
   --tracking-count: 0.02em;
-  /* 行間: タイルの名前 1.2、手順の文字 1.3、本文 1.5 (既定の normal)、画面全体 1.55 */
+  /* 行間: タイルの名前1.2、手順の文字1.3、本文1.5 (既定のnormal)、画面全体1.55 */
   --leading-name: 1.2;
   --leading-alg: 1.3;
   --leading-screen: 1.55;
@@ -232,7 +232,7 @@
   --radius-xl: 16px;
   --radius-sheet: 22px;
 
-  /* 狭い幅 (359px 以下): 設定の見出しと選択肢が 1 行に入らない行は選択肢を下の行へ (max-xs:) */
+  /* 狭い幅 (359px以下): 設定の見出しと選択肢が1行に入らない行は選択肢を下の行へ (max-xs:) */
   --breakpoint-xs: 22.5rem;
 
   --shadow-*: initial;

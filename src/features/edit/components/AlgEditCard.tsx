@@ -17,13 +17,13 @@ type AlgEditCardProps = {
   usesKeypad: boolean;
   onChange: (card: EditCard) => void;
   onFocus: () => void;
-  // 欄を離れたときに呼ぶ。false を返したら離れていない扱い (キーボードの切り替えで焦点を入れ直す間)
+  // 欄を離れたときに呼ぶ。falseを返したら離れていない扱い (キーボードの切り替えで焦点を入れ直す間)
   onBlur: () => boolean;
   onMakeMain: () => void;
   onDelete: () => void;
 };
 
-// 手順 1 枚ぶんの編集 (メイン手順もほかの手順も同じ構造)。欄を全幅にするため縦積み
+// 手順1枚ぶんの編集 (メイン手順もほかの手順も同じ構造)。欄を全幅にするため縦積み
 export function AlgEditCard({
   index,
   card,

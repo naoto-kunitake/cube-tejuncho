@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-// 錠剤は溝 (36) の内側で 32。押せる範囲は疑似要素で上下 6 ずつ広げて 44 にする (ピルの ±5 では 42 で足りない)
+// 錠剤は溝 (36) の内側で32。押せる範囲は疑似要素で上下6ずつ広げて44にする (ピルの ±5では42で足りない)
 const SEGMENT_TAP_AREA_CLASS = 'relative before:absolute before:inset-x-0 before:-inset-y-1.5 before:rounded-full';
 
 export type SegmentedOption<T extends string> = {
@@ -15,12 +15,12 @@ type SegmentedProps<T extends string> = {
   options: readonly SegmentedOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  // 4 択 (前面の色) は錠剤の余白を詰めて 1 行に収める
+  // 4択 (前面の色) は錠剤の余白を詰めて1行に収める
   isCompact?: boolean;
 };
 
-// 2〜4 個の排他的な選択肢を常に見せる部品 (iOS の UISegmentedControl の形)。選ばれた錠剤は白 + 薄い影。
-// 錠剤の間に 2px の溝を置き、選択の影と隣の hover が触れないようにする
+// 2〜4個の排他的な選択肢を常に見せる部品 (iOSのUISegmentedControlの形)。選ばれた錠剤は白 + 薄い影。
+// 錠剤の間に2pxの溝を置き、選択の影と隣のhoverが触れないようにする
 export function Segmented<T extends string>({ label, options, value, onChange, isCompact = false }: SegmentedProps<T>) {
   return (
     <div
@@ -37,7 +37,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, i
             aria-pressed={isSelected}
             className={cn(
               SEGMENT_TAP_AREA_CLASS,
-              // 「r」のような短い選択肢でも押せる幅 44 を確保する (疑似要素は上下にしか広げない)
+              // 「r」のような短い選択肢でも押せる幅44を確保する (疑似要素は上下にしか広げない)
               'inline-flex min-w-11 items-center justify-center rounded-full text-small text-ink pressable',
               isCompact ? 'gap-1.25 pr-2.5 pl-2' : 'gap-1.5 pr-3.5 pl-3',
               isSelected

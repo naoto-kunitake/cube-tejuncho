@@ -24,7 +24,7 @@ const RegistrationSchema = z.object({
   updatedAt: z.string(),
 });
 export type Registration = z.infer<typeof RegistrationSchema>;
-// 編集画面が保存する部分 (id と日時は保存側が付ける)
+// 編集画面が保存する部分 (idと日時は保存側が付ける)
 export type RegistrationData = Pick<Registration, 'recognition' | 'mainAlg' | 'altAlgs'>;
 
 const CategorySchema = z.object({
@@ -52,7 +52,7 @@ const SettingsSchema = z.object({
   greyUnrelated: z.boolean(),
   playbackSpeed: z.enum(['slow', 'normal', 'fast']),
   wideStyle: z.enum(WIDE_STYLES),
-  // 'ink' は墨 (ダークでは白)。それ以外は #rrggbb (型は lib/theme の HexColor に揃える)
+  // 'ink'は墨 (ダークでは白)。それ以外は#rrggbb (型はlib/themeのHexColorに揃える)
   themeColor: z.union([
     z.literal('ink'),
     z.custom<HexColor>((value) => typeof value === 'string' && isHexColor(value)),

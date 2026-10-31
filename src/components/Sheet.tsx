@@ -13,7 +13,7 @@ type SheetProps = {
   children: ReactNode;
 };
 
-// 下から出るシート。native の dialog を使い、Esc と背景の暗幕で閉じ、背後にフォーカスが行かないようにする。
+// 下から出るシート。nativeのdialogを使い、Escと背景の暗幕で閉じ、背後にフォーカスが行かないようにする。
 // 狭い幅は親指の届く底のシート。広い幅は窓が縦に長く、底に出すと押した場所から遠いので中央のカードにする
 export function Sheet({ label, onClose, className, children }: SheetProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -26,7 +26,7 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
     if (!dialog.open) {
       dialog.showModal();
     }
-    // 暗幕 (dialog 自身) を押したら閉じる。中身の上では閉じない。Esc は dialog の close で拾う
+    // 暗幕 (dialog自身) を押したら閉じる。中身の上では閉じない。Escはdialogのcloseで拾う
     const closeOnBackdrop = (event: MouseEvent) => {
       if (event.target === dialog) {
         onClose();

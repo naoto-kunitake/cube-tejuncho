@@ -6,7 +6,7 @@ import { useAppearance } from './appearance';
 import { AppRoutes } from './AppRoutes';
 import { ScrollToTop } from './ScrollToTop';
 
-// Pages のサブパス配信では Vite の base が basename になる。末尾の / は React Router 側で付くので外す
+// Pagesのサブパス配信ではViteのbaseがbasenameになる。末尾の / はReact Router側で付くので外す
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 export function App() {

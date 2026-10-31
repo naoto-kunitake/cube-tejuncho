@@ -22,7 +22,7 @@ type SettingsSectionProps = {
   children: ReactNode;
 };
 
-// 区画 = 見出し + 白いカード (行の列)。区画の間は 24、見出しとカードの間は 8
+// 区画 = 見出し + 白いカード (行の列)。区画の間は24、見出しとカードの間は8
 function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <section className="flex flex-col gap-2">
@@ -37,7 +37,7 @@ type OptionSectionsProps = {
   onChange: (patch: Partial<Settings>) => void;
 };
 
-// 一覧の並び順 / 図 / 再生 / 表記 / 外観 の 5 区画。選択肢はセグメント、on / off はスイッチ、テーマ色は色見本
+// 一覧の並び順 / 図 / 再生 / 表記 / 外観 の5区画。選択肢はセグメント、on / offはスイッチ、テーマ色は色見本
 export function OptionSections({ settings, onChange }: OptionSectionsProps) {
   return (
     <>
@@ -144,7 +144,7 @@ export function OptionSections({ settings, onChange }: OptionSectionsProps) {
         </SettingRow>
       </SettingsSection>
       <SettingsSection title={copy.settings.appearance}>
-        {/* 色見本は 5 列 × 2 段で横に収まらないので、この行だけ見出しの下に積む (上 12 / 下 16) */}
+        {/* 色見本は5列 × 2段で横に収まらないので、この行だけ見出しの下に積む (上12 / 下16) */}
         <div className="flex flex-col gap-3 border-t border-line px-4 pt-3 pb-4 text-body text-ink first:border-t-0">
           <span aria-hidden="true">{copy.settings.themeColor}</span>
           <ThemeColorPicker
