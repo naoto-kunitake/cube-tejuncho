@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router';
 
+import { LoadIssueNotice } from '@/components/LoadIssueNotice';
 import { Toast } from '@/components/toast/Toast';
 
 import { useAppearance } from './appearance';
@@ -15,6 +16,7 @@ export function App() {
     <BrowserRouter basename={basename}>
       <ScrollToTop />
       <AppRoutes />
+      <LoadIssueNotice />
       <Toast />
     </BrowserRouter>
   );

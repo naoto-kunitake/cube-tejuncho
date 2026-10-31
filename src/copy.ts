@@ -5,6 +5,7 @@ import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
+import type { LoadIssue } from '@/data/store';
 import type { WideStyle } from '@/lib/alg/format';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';
@@ -95,6 +96,7 @@ type Copy = {
     cancel: string;
     close: string;
   };
+  notice: Record<LoadIssue, { title: string; body: string }>;
   toast: {
     undo: string;
   };
@@ -371,6 +373,20 @@ export const copy = {
   dialog: {
     cancel: 'キャンセル',
     close: '閉じる',
+  },
+  notice: {
+    brokenDocument: {
+      title: 'データを読み込めませんでした',
+      body: '壊れたデータは消さずに取り置き、空の状態で開きました。書き出したJSONがあれば読み込めます。',
+    },
+    storageUnavailable: {
+      title: 'このブラウザでは保存できません',
+      body: 'プライベートモードでは端末に残せません。閉じると書いたものは消えます。',
+    },
+    quotaExceeded: {
+      title: '保存できませんでした',
+      body: '端末の空きが足りません。使っていないデータを消すか、JSONに書き出してから試してください。',
+    },
   },
   toast: {
     undo: '元に戻す',
