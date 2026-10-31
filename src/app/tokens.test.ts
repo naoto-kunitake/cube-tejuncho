@@ -16,3 +16,23 @@ describe('tokens.css のテーマ色', () => {
     }
   });
 });
+
+describe('tokens.css のダークの差し替え', () => {
+  const blockOf = (selector: string) => new RegExp(`${selector}\\s*\\{([^}]*)\\}`).exec(tokensCss)?.[1] ?? '';
+
+  // ライトだけに書いてダークを忘れると、ダークでライトの値がそのまま出る (部品側にdark:を書かない方針なので気づきにくい)
+  it('部品ごとの色はライトとダークの両方で定義される', () => {
+    const light = blockOf(':root');
+    const dark = blockOf('\\.dark');
+    for (const name of [
+      '--key-character',
+      '--key-character-hover',
+      '--key-action',
+      '--key-action-hover',
+      '--switch-knob-on',
+    ]) {
+      expect(light).toContain(`${name}:`);
+      expect(dark).toContain(`${name}:`);
+    }
+  });
+});
