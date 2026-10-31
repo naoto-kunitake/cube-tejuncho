@@ -46,9 +46,16 @@
   }
 }
 
-/* トップバーの上の余白16。ホーム画面から開いたときはノッチのぶん (safe-area) を足す */
+/* トップバーの上の余白。指で触る画面は4、PCだけ16に広げる。ブラウザの枠の下にそのまま題が来るPCでは
+   4が窮屈に見えるが、指で触る画面では詰まっている方が画面を広く使える。
+   幅ではなくpointerで分けるのは、iPadの縦幅768pxがmdの閾値と同じで、幅基準だとタブレットがPC側に入るため
+   (トラックパッドを付けたiPadはPC扱いになる)。ホーム画面から開いたときはノッチのぶん (safe-area) を足す */
 @utility pt-bar {
-  padding-top: max(--spacing(4), env(safe-area-inset-top));
+  padding-top: max(--spacing(1), env(safe-area-inset-top));
+
+  @media (pointer: fine) {
+    padding-top: max(--spacing(4), env(safe-area-inset-top));
+  }
 }
 
 /* 一覧のタイルの格子。狭い幅は3列、広い幅はタイルの幅 (120px) で列数を決める */
