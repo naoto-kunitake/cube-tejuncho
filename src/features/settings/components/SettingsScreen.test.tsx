@@ -362,6 +362,16 @@ describe('SettingsScreen', () => {
     expect(useDocumentStore.getState().document).toEqual(before);
   });
 
+  it('新しい版のファイルは別の文言で知らせる', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderSettings();
+    await openImportSheet(user);
+    await user.upload(fileInput(), fileOf(JSON.stringify({ ...createEmptyDocument(), version: 2 })));
+    const dialog = await screen.findByRole('alertdialog', { name: copy.settings.importFailedTitle });
+    expect(dialog).toHaveTextContent(copy.settings.importFailedNewerBody);
+  });
+
   it('読めないファイルは知らせるだけで、文書は変わらない', async () => {
     const user = userEvent.setup();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);

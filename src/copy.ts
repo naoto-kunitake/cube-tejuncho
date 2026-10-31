@@ -154,6 +154,7 @@ type Copy = {
     imported: (count: number) => string;
     importFailedTitle: string;
     importFailedBody: string;
+    importFailedNewerBody: string;
     registerAll: string;
     unregisteredCount: (count: number) => string;
     register: string;
@@ -379,6 +380,10 @@ export const copy = {
       title: 'データを読み込めませんでした',
       body: '壊れたデータは消さずに取り置き、空の状態で開きました。書き出したJSONがあれば読み込めます。',
     },
+    newerDocument: {
+      title: 'アプリの版が古いようです',
+      body: '保存されたデータは新しい版で書かれていて読めません。ページを開き直してください。',
+    },
     storageUnavailable: {
       title: 'このブラウザでは保存できません',
       body: 'プライベートモードでは端末に残せません。閉じると書いたものは消えます。',
@@ -457,6 +462,7 @@ export const copy = {
     imported: (count) => `${count}件を読み込みました`,
     importFailedTitle: '読み込めませんでした',
     importFailedBody: 'このアプリで書き出したファイルを選んでください。',
+    importFailedNewerBody: 'ファイルは新しい版で書かれています。ページを開き直してから試してください。',
     registerAll: '基本手順を一括登録',
     unregisteredCount: (count) => `未登録 ${count}件`,
     register: '登録',

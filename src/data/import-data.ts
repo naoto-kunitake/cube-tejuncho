@@ -1,11 +1,12 @@
 import { err, ok, type Result } from '@/lib/result';
 
 import { type Category, type Document, DocumentSchema } from './document';
-import { migrateDocument } from './migrate';
+import { isNewerDocument, migrateDocument } from './migrate';
 import { hasCategoryNamed } from './patterns';
 
 export type ImportMode = 'add' | 'replace';
-export type ImportError = { kind: 'invalidJson' } | { kind: 'invalidDocument'; message: string };
+export type ImportError =
+  { kind: 'invalidJson' } | { kind: 'newerVersion' } | { kind: 'invalidDocument'; message: string };
 
 // 書き出したファイルの中身を文書に戻す。保存文書と同じ移行と検証を通すので、別アプリや壊れたファイルはここで止まる
 export function importData(text: string): Result<Document, ImportError> {
@@ -14,6 +15,10 @@ export function importData(text: string): Result<Document, ImportError> {
     parsed = JSON.parse(text);
   } catch {
     return err({ kind: 'invalidJson' });
+  }
+  // 新しい版のファイルは壊れているわけではないので、文言を分けてアプリの更新を促す
+  if (isNewerDocument(parsed)) {
+    return err({ kind: 'newerVersion' });
   }
   const result = DocumentSchema.safeParse(migrateDocument(parsed));
   if (!result.success) {

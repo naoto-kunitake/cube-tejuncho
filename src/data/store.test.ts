@@ -272,6 +272,29 @@ describe('createDocumentStore', () => {
     expect(store.getState().document.registrations).toEqual([]);
   });
 
+  it('自分より新しい版の文書は退避も削除もせずに知らせる', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    expect(store.getState().loadIssue).toBe('newerDocument');
+    expect(store.getState().document).toEqual(createEmptyDocument());
+    expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
+    expect(storage.getItem(`${DOCUMENT_KEY}.broken`)).toBeNull();
+  });
+
+  it('自分より新しい版の文書があるときは保存せずに知らせ直す', () => {
+    const storage = persistedStorage();
+    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
+    storage.setItem(DOCUMENT_KEY, raw);
+    const store = createDocumentStore(storage);
+    store.getState().dismissLoadIssue();
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBeNull();
+    expect(store.getState().loadIssue).toBe('newerDocument');
+  });
+
   it('localStorage が使えないときは知らせてメモリで動く', () => {
     const store = createDocumentStore(createMemoryStorage());
     expect(store.getState().loadIssue).toBe('storageUnavailable');

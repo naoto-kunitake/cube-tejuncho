@@ -28,6 +28,11 @@ describe('importData', () => {
     expect(importData(JSON.stringify({ version: 1, registrations: 'x' })).ok).toBe(false);
   });
 
+  it('新しい版のファイルは版が新しいこととして返す', () => {
+    const result = importData(JSON.stringify({ ...createEmptyDocument(), version: 2 }));
+    expect(result).toEqual({ ok: false, error: { kind: 'newerVersion' } });
+  });
+
   it('知らない項目は落として読み込む', () => {
     const result = importData(JSON.stringify({ ...createEmptyDocument(), exportedAt: 'x' }));
     expect(result).toEqual({ ok: true, value: createEmptyDocument() });

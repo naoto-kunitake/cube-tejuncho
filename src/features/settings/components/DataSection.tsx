@@ -19,6 +19,9 @@ import { ROW_BUTTON_CLASS } from './SettingRow';
 
 const DANGER_ROW_CLASS = cn(ROW_BUTTON_CLASS, 'text-danger');
 
+// 読み込めなかった理由。新しい版のファイルだけ文言を分ける (壊れたファイルとは直し方が違う)
+type ImportFailure = 'invalid' | 'newerVersion';
+
 type Clearing = { ids: string[]; names: string[]; count: number };
 
 // 設定のデータの区画。安全な操作 (書き出す / 読み込む / 基本手順を一括登録) と、
@@ -33,7 +36,7 @@ export function DataSection() {
   const resetDocument = useDocumentStore((state) => state.resetDocument);
   const showToast = useToastStore((state) => state.show);
   const [isImporting, setIsImporting] = useState(false);
-  const [hasImportFailed, setHasImportFailed] = useState(false);
+  const [importFailure, setImportFailure] = useState<ImportFailure | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [clearing, setClearing] = useState<Clearing | null>(null);
@@ -60,7 +63,7 @@ export function DataSection() {
       const result = importData(await file.text());
       if (!result.ok) {
         console.error('import failed', result.error);
-        setHasImportFailed(true);
+        setImportFailure(result.error.kind === 'newerVersion' ? 'newerVersion' : 'invalid');
         return;
       }
       importDocument(result.value, mode);
@@ -72,7 +75,7 @@ export function DataSection() {
       });
     } catch (error: unknown) {
       console.error('import file read failed', error);
-      setHasImportFailed(true);
+      setImportFailure('invalid');
     }
   };
 
@@ -263,12 +266,12 @@ export function DataSection() {
           }}
         />
       )}
-      {hasImportFailed && (
+      {importFailure !== null && (
         <NoticeDialog
           title={copy.settings.importFailedTitle}
-          body={copy.settings.importFailedBody}
+          body={importFailure === 'newerVersion' ? copy.settings.importFailedNewerBody : copy.settings.importFailedBody}
           onClose={() => {
-            setHasImportFailed(false);
+            setImportFailure(null);
           }}
         />
       )}
