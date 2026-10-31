@@ -14,6 +14,7 @@ import {
   type RegistrationData,
   type Settings,
 } from './document';
+import { createDraftStore } from './draft';
 import { applyImport, type ImportMode } from './import-data';
 import { isNewerDocument, migrateDocument } from './migrate';
 import { hasPresets, type PresetCategoryId, presetsOf } from './presets/catalog';
@@ -166,6 +167,8 @@ export type DocumentStore = {
 
 export function createDocumentStore(storage: KeyValueStorage) {
   const documentStorage = createDocumentStorage(storage);
+  // 文書から消えたパターンの下書きも消す。残すとプリセットのidは固定なので、消したはずの書きかけが復元される
+  const drafts = createDraftStore(storage);
   // persistの読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
   void documentStorage.getItem(DOCUMENT_KEY);
   const initialLoadIssue = documentStorage.takeIssue();
@@ -245,23 +248,25 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           removeCategory: (categoryId) => {
+            let removedPatternIds: readonly string[] = [];
             set((state) => {
               const { document } = state;
               // プリセットのidもtabOrderに並ぶので、実在する自作カテゴリ以外では何も触らない
               if (!document.categories.some((category) => category.id === categoryId)) {
                 return state;
               }
-              const removedPatternIds = new Set(
+              const removed = new Set(
                 document.patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
               );
+              removedPatternIds = [...removed];
               // lastTabは一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
               return {
                 document: {
                   ...document,
                   categories: document.categories.filter((category) => category.id !== categoryId),
-                  patterns: document.patterns.filter((pattern) => !removedPatternIds.has(pattern.id)),
-                  registrations: document.registrations.filter((entry) => !removedPatternIds.has(entry.patternId)),
-                  pinned: document.pinned.filter((id) => !removedPatternIds.has(id)),
+                  patterns: document.patterns.filter((pattern) => !removed.has(pattern.id)),
+                  registrations: document.registrations.filter((entry) => !removed.has(entry.patternId)),
+                  pinned: document.pinned.filter((id) => !removed.has(id)),
                   settings: {
                     ...document.settings,
                     tabOrder: document.settings.tabOrder.filter((id) => id !== categoryId),
@@ -269,6 +274,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
+            drafts.removeMany(removedPatternIds);
             reportStorageIssue();
           },
           moveCategory: (categoryId, toIndex) => {
@@ -312,6 +318,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           removeCustomPattern: (patternId) => {
+            drafts.remove(patternId);
             set((state) => ({
               document: {
                 ...state.document,
@@ -323,6 +330,9 @@ export function createDocumentStore(storage: KeyValueStorage) {
             reportStorageIssue();
           },
           importDocument: (imported, mode) => {
+            if (mode === 'replace') {
+              drafts.removeAll();
+            }
             set((state) => ({ document: applyImport(state.document, imported, mode) }));
             reportStorageIssue();
           },
@@ -366,6 +376,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
           },
           clearRegistrations: (categoryIds) => {
             let removedCount = 0;
+            let removedPatternIds: readonly string[] = [];
             set((state) => {
               const { document } = state;
               const presetIds = new Set(
@@ -377,6 +388,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
                   .map((pattern) => pattern.id),
               );
               const isRemoved = (patternId: string) => presetIds.has(patternId) || customIds.has(patternId);
+              removedPatternIds = [...presetIds, ...customIds];
               // 登録のない自作パターンも消えるので、自作はパターンの数で数える
               removedCount =
                 document.registrations.filter((entry) => presetIds.has(entry.patternId)).length + customIds.size;
@@ -389,10 +401,12 @@ export function createDocumentStore(storage: KeyValueStorage) {
                 },
               };
             });
+            drafts.removeMany(removedPatternIds);
             reportStorageIssue();
             return removedCount;
           },
           resetDocument: () => {
+            drafts.removeAll();
             set({ document: createEmptyDocument() });
             reportStorageIssue();
           },

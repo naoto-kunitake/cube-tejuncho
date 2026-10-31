@@ -25,6 +25,17 @@ describe('createStorage', () => {
     expect(storage.getItem('k')).toBe('v');
   });
 
+  it('前置きで引いた鍵だけまとめて消す', () => {
+    const storage = createStorage();
+    storage.setItem('cube-tejuncho:draft:a', '1');
+    storage.setItem('cube-tejuncho:draft:b', '2');
+    storage.setItem('cube-tejuncho:doc', '3');
+    storage.removeByPrefix('cube-tejuncho:draft:');
+    expect(storage.getItem('cube-tejuncho:draft:a')).toBeNull();
+    expect(storage.getItem('cube-tejuncho:draft:b')).toBeNull();
+    expect(storage.getItem('cube-tejuncho:doc')).toBe('3');
+  });
+
   it('容量超過を知らせる', () => {
     const storage = createStorage();
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
@@ -40,5 +51,16 @@ describe('createMemoryStorage', () => {
     storage.setItem('k', 'v');
     storage.removeItem('k');
     expect(storage.getItem('k')).toBeNull();
+  });
+
+  it('前置きで引いた鍵だけまとめて消す', () => {
+    const storage = createMemoryStorage();
+    storage.setItem('p:a', '1');
+    storage.setItem('p:b', '2');
+    storage.setItem('q:a', '3');
+    storage.removeByPrefix('p:');
+    expect(storage.getItem('p:a')).toBeNull();
+    expect(storage.getItem('p:b')).toBeNull();
+    expect(storage.getItem('q:a')).toBe('3');
   });
 });

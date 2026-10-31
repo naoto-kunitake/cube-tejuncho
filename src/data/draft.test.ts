@@ -25,6 +25,27 @@ describe('createDraftStore', () => {
     expect(store.read('pll-ua')).toBeNull();
   });
 
+  it('渡したパターンの下書きだけまとめて消す', () => {
+    const store = createDraftStore(createMemoryStorage());
+    store.write('pll-ua', DATA);
+    store.write('pll-ub', DATA);
+    store.write('oll-21', DATA);
+    store.removeMany(['pll-ua', 'pll-ub']);
+    expect(store.read('pll-ua')).toBeNull();
+    expect(store.read('pll-ub')).toBeNull();
+    expect(store.read('oll-21')).toEqual(DATA);
+  });
+
+  it('すべて消すと文書の鍵は残る', () => {
+    const storage = createMemoryStorage();
+    const store = createDraftStore(storage);
+    store.write('pll-ua', DATA);
+    storage.setItem('cube-tejuncho:doc', 'x');
+    store.removeAll();
+    expect(store.read('pll-ua')).toBeNull();
+    expect(storage.getItem('cube-tejuncho:doc')).toBe('x');
+  });
+
   it('壊れた下書きと版の違う下書きは捨てる', () => {
     const storage = createMemoryStorage();
     const store = createDraftStore(storage);
