@@ -24,6 +24,7 @@ paths:
 ## 命名
 
 - 識別子は英語。日本語の概念との対応はCLAUDE.mdの用語表に従い、同じ概念に別の英語を使わない
+- 消す操作は層で語を分ける。画面のハンドラと文言の鍵は`delete` (利用者の操作「削除」)、データ層のactionは`remove` (文書からの除去)。同じ名前にするとactionを隠す
 - 真偽値は`is` `has` `can`で始める。関数は動詞で始める (`normalizeAlg`, `loadDocument`)
 - `UPPER_SNAKE`は本当の定数 (プリセットの一覧、上限値) だけ
 - 略語 (`btn` `cfg` `idx`) とローマ字 (`tejun`) を使わない。ファイル名は`project-structure`に従う

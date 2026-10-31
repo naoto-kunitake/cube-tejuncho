@@ -66,7 +66,7 @@
 | 上面 / 前面の色 | topColor / frontColor | |
 | 判断の手がかり (図) | cueFigure | |
 | 入れ替えの矢印 | arrows | |
-| 図 | figure | `TopFigure` `CubeFigure` `MoveFigure` |
+| 図 | figure | 部品は`TopFigure` `CubeFigure`。回転記号の図は`CubeFigure` + `moveFigureView` |
 | 再生シート | PlayerSheet | |
 | 書き出す / 読み込む | exportData / importData | |
 | 外観モード | appearance | `'auto' \| 'light' \| 'dark'` |
