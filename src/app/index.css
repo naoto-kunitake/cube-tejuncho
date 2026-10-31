@@ -38,6 +38,12 @@
     border-color: var(--color-ink);
     box-shadow: 0 0 0 1px var(--color-ink);
   }
+
+  /* シートは開いたときに器へ焦点を移す (中の × に移ると押したように見える)。
+     器はTabの順に入らないので、輪を出しても行き先を示さない */
+  dialog:focus-visible {
+    outline: none;
+  }
 }
 
 /* トップバーの上の余白16。ホーム画面から開いたときはノッチのぶん (safe-area) を足す */
