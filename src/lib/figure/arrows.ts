@@ -3,7 +3,7 @@ import { cellCenter, cellPosition, FIGURE_LAYOUT } from './layout';
 export type Arrow = readonly [number, number];
 
 const { cell } = FIGURE_LAYOUT;
-// 端点をタイルの内側に寄せる量、中心基準の矢印の先端の越え、3 巡の平行移動 (ノートの矢印の規則)
+// 端点をタイルの内側に寄せる量、中心基準の矢印の先端の越え、3巡の平行移動 (ノートの矢印の規則)
 const INSET = 0.1 * cell;
 const TIP_EXTENSION = 0.2 * cell;
 const CYCLE_SHIFT = 0.25 * cell;
@@ -39,7 +39,7 @@ function isEdge(index: number): boolean {
 
 type Point = readonly [number, number];
 
-// 端点はタイルの「外側」。辺タイルは外側の辺の真ん中。角タイルは 2 点入れ替えの縦横だけ外側の辺の真ん中、斜めと 3 巡は中心
+// 端点はタイルの「外側」。辺タイルは外側の辺の真ん中。角タイルは2点入れ替えの縦横だけ外側の辺の真ん中、斜めと3巡は中心
 function anchor(index: number, ux: number, uy: number, isCycle: boolean): Point {
   const x = centerX(index);
   const y = centerY(index);
@@ -63,7 +63,7 @@ function anchor(index: number, ux: number, uy: number, isCycle: boolean): Point 
   return [x, rowOf(index) === 0 ? LOW : HIGH];
 }
 
-// 軸と矢じりを 1 つの多角形にする (継ぎ目や線端のはみ出しをなくす)
+// 軸と矢じりを1つの多角形にする (継ぎ目や線端のはみ出しをなくす)
 function arrowPath(x1: number, y1: number, x2: number, y2: number, isTwoWay: boolean): string {
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -106,8 +106,8 @@ function arrowPath(x1: number, y1: number, x2: number, y2: number, isTwoWay: boo
 
 type CycleAdjustment = { offset: number; tail: number };
 
-// 3 巡の矢印が同じタイルで先端をぶつけないための補正。辺の 3 巡 (U perm) は尾を内側から始め、
-// 中心を通る直線だけ重心から離す。角の 3 巡 (A perm、G perm の角) は重心から外側へ離して先端を散らす
+// 3巡の矢印が同じタイルで先端をぶつけないための補正。辺の3巡 (U perm) は尾を内側から始め、
+// 中心を通る直線だけ重心から離す。角の3巡 (A perm、G permの角) は重心から外側へ離して先端を散らす
 function cycleAdjustment(isFromEdge: boolean, dx: number, dy: number, side: number): CycleAdjustment {
   const direction = side > 0 ? -1 : 1;
   if (isFromEdge) {
@@ -148,7 +148,7 @@ function buildAdjacency(arrows: readonly Arrow[]): Map<number, Set<number>> {
   return adjacency;
 }
 
-// 入れ替えの矢印の path (SVG の d 属性)。両向きの入れ替えは 1 本にまとめて両端に矢じりを付ける
+// 入れ替えの矢印のpath (SVGのd属性)。両向きの入れ替えは1本にまとめて両端に矢じりを付ける
 export function arrowPaths(arrows: readonly Arrow[]): string[] {
   const adjacency = buildAdjacency(arrows);
   const drawn = new Set<string>();

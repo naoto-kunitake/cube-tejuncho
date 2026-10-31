@@ -20,8 +20,8 @@ type PatternTileProps = {
   mainAlg: string;
 };
 
-// グリッド = 図 + 名前のタイル (識別が主)。リスト = 図 56 + 名前 + 手順の行 (手順をその場で読む)。
-// どちらも 1 枚ずつのカードで、未登録は点線で浮かせない
+// グリッド = 図 + 名前のタイル (識別が主)。リスト = 図56 + 名前 + 手順の行 (手順をその場で読む)。
+// どちらも1枚ずつのカードで、未登録は点線で浮かせない
 export function PatternTile({ preset, settings, categoryLabel, name, isRegistered, mainAlg }: PatternTileProps) {
   const isList = settings.listView === 'list';
   return (
@@ -30,7 +30,7 @@ export function PatternTile({ preset, settings, categoryLabel, name, isRegistere
       aria-label={copy.a11y.tile(categoryLabel, name, isRegistered)}
       className={cn(
         'flex min-w-0 rounded-md border pressable hover:border-line-strong active:scale-98 active:shadow-none',
-        // 行の余白 8/16/8/6: 図の見た目の左端と文字の右端が 16 に揃う (図の SVG は外側に空きがある)
+        // 行の余白8/16/8/6: 図の見た目の左端と文字の右端が16に揃う (図のSVGは外側に空きがある)
         isList ? 'min-h-18 flex-row items-center gap-3 py-2 pr-4 pl-1.5 text-left' : 'flex-col p-2 text-center',
         isRegistered
           ? 'border-line bg-surface hover:-translate-y-px hover:shadow-1'

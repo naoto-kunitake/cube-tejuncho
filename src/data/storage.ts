@@ -3,7 +3,7 @@ import { err, ok, type Result } from '@/lib/result';
 export type StorageError = { kind: 'quotaExceeded' } | { kind: 'unavailable' };
 
 export type KeyValueStorage = {
-  // false なら localStorage が使えず、メモリで動いている (閉じると消える)
+  // falseならlocalStorageが使えず、メモリで動いている (閉じると消える)
   isPersistent: boolean;
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => Result<undefined, StorageError>;

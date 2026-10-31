@@ -18,8 +18,8 @@ type CategorySheetProps = {
   onClose: () => void;
 };
 
-// カテゴリの名前を 1 つ聞く小さなシート。追加と編集 (名前の変更 + 削除) の両方に使う。
-// 同じ名前があれば赤い 1 行で知らせ、確定できない。編集では名前が変わっていなければ保存できない
+// カテゴリの名前を1つ聞く小さなシート。追加と編集 (名前の変更 + 削除) の両方に使う。
+// 同じ名前があれば赤い1行で知らせ、確定できない。編集では名前が変わっていなければ保存できない
 export function CategorySheet({ existingNames, editing, onSubmit, onClose }: CategorySheetProps) {
   const [name, setName] = useState(editing?.name ?? '');
   const trimmed = name.trim();

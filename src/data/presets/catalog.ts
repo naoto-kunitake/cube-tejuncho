@@ -5,7 +5,7 @@ import { PLL_PRESETS, type PllPreset } from './pll';
 export const PRESET_CATEGORY_IDS = ['pll', 'oll', 'f2l'] as const;
 export type PresetCategoryId = (typeof PRESET_CATEGORY_IDS)[number];
 
-// 画面が扱うプリセット。どのカテゴリのものかを持つ。矢印と手がかりの図は PLL だけ、3 面の図は F2L だけ
+// 画面が扱うプリセット。どのカテゴリのものかを持つ。矢印と手がかりの図はPLLだけ、3面の図はF2Lだけ
 export type Preset =
   (PllPreset & { category: 'pll' }) | (OllPreset & { category: 'oll' }) | (F2lPreset & { category: 'f2l' });
 
@@ -25,7 +25,7 @@ function isPresetCategoryId(id: string): id is PresetCategoryId {
   return PRESET_CATEGORY_IDS.some((entry) => entry === id);
 }
 
-// タブに出せるのは、プリセットがあるカテゴリだけ (利用者のカテゴリの id は false)
+// タブに出せるのは、プリセットがあるカテゴリだけ (利用者のカテゴリのidはfalse)
 export function hasPresets(id: string): id is PresetCategoryId {
   return isPresetCategoryId(id) && CATALOG[id].length > 0;
 }

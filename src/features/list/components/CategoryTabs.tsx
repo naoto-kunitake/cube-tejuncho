@@ -11,7 +11,7 @@ type CategoryTabsProps = {
 };
 
 export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsProps) {
-  // 選ばれていないタブは tabIndex -1 なので、矢印キーで隣へ移してフォーカスも動かす (WAI-ARIA のタブの型)
+  // 選ばれていないタブはtabIndex -1なので、矢印キーで隣へ移してフォーカスも動かす (WAI-ARIAのタブの型)
   const moveByArrow = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') {
       return;

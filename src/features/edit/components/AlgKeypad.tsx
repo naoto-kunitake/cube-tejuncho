@@ -9,8 +9,8 @@ type AlgKeypadProps = {
   onKey: (key: KeypadKey) => void;
 };
 
-// 文字キーは白、操作キーは灰 (iOS のキーボードと同じ区別)。ダークは 下地 < 操作キー < 文字キー の 3 段。
-// 削除は文字の段の右端 (iOS のキーボードと同じ位置)、全消去とキーボードは最下段を半分ずつ
+// 文字キーは白、操作キーは灰 (iOSのキーボードと同じ区別)。ダークは 下地 < 操作キー < 文字キー の3段。
+// 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去とキーボードは最下段を半分ずつ
 const KEY_CLASS =
   'h-11 rounded-sm border border-line font-mono text-alg-compact font-semibold text-ink pressable hover:bg-hover active:bg-press dark:hover:bg-press';
 const CHARACTER_KEY_CLASS = cn(KEY_CLASS, 'bg-surface dark:bg-hover');
@@ -25,12 +25,12 @@ const ACTION_LABELS: Record<ActionKey, string> = {
   keyboard: copy.keypad.keyboard,
 };
 
-// キーを押しても欄から焦点を奪わない (mousedown の既定の動きを止める)。欄の選択範囲にそのまま効く
+// キーを押しても欄から焦点を奪わない (mousedownの既定の動きを止める)。欄の選択範囲にそのまま効く
 function keepFocus(event: MouseEvent<HTMLButtonElement>) {
   event.preventDefault();
 }
 
-// 手順の欄の下に出る専用キーパッド。Tab では辿らない (キーボードを持つ人は普通に打てる)
+// 手順の欄の下に出る専用キーパッド。Tabでは辿らない (キーボードを持つ人は普通に打てる)
 export function AlgKeypad({ onKey }: AlgKeypadProps) {
   return (
     <div

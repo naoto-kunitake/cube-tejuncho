@@ -15,7 +15,7 @@ type StickerProps = {
   color: FigureColor;
 };
 
-// 白は真っ白にして縁取りだけ濃くする (csTimer / cubing.js / speedsolving wiki と同じ「白 + 黒い輪郭」方式)
+// 白は真っ白にして縁取りだけ濃くする (csTimer / cubing.js / speedsolving wikiと同じ「白 + 黒い輪郭」方式)
 function Sticker({ x, y, width, height, color }: StickerProps) {
   const isWhite = color === 'W';
   return (

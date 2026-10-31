@@ -2,7 +2,7 @@ import type { Side, StickerColor, TopView } from './view';
 
 export const SIDE_NAMES = ['back', 'front', 'left', 'right'] as const;
 export type SideName = (typeof SIDE_NAMES)[number];
-// 側面 3 枚の並び方。3連 = 3 枚同じ、ヘッドライト = 両端が同じ、2連 = 隣り合う 2 枚が同じ
+// 側面3枚の並び方。3連 = 3枚同じ、ヘッドライト = 両端が同じ、2連 = 隣り合う2枚が同じ
 export type SideRun = 'bar' | 'headlights' | 'pair';
 export type SideDescription = { side: SideName; run: SideRun };
 

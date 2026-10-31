@@ -41,7 +41,7 @@ Node.jsとpnpmの版は`.tool-versions`にある。
 
 ```sh
 pnpm install
-pnpm dev          # http://localhost:5173/cube-tejuncho/
+pnpm dev          # http://localhost:5173/
 pnpm test
 pnpm build
 ```

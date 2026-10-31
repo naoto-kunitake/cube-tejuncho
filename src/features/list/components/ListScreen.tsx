@@ -29,7 +29,7 @@ type TileSectionProps = {
   children: ReactNode;
 };
 
-// 見出し + 格子。群の間は 24 (設定の区画と同じ)、見出しとタイルの間は 8
+// 見出し + 格子。群の間は24 (設定の区画と同じ)、見出しとタイルの間は8
 function TileSection({ label, count, listView, children }: TileSectionProps) {
   return (
     <section className="flex flex-col gap-2">
@@ -62,7 +62,7 @@ function PresetList({ category, settings, registrations, pinnedIds }: PresetList
   });
   const registeredIds = new Set(registrations.map((registration) => registration.patternId));
   const registeredCount = presets.filter((preset) => registeredIds.has(preset.id)).length;
-  // 案内はタブごとに閉じる (行動 = そのタブの一括登録なので、文脈ごと)。1 件でも登録があれば出さない
+  // 案内はタブごとに閉じる (行動 = そのタブの一括登録なので、文脈ごと)。1件でも登録があれば出さない
   const showsBanner = registeredCount === 0 && !settings.dismissedBanners.includes(category);
   // 一括登録は取り消せるので確認は出さない
   const registerAll = () => {
@@ -125,7 +125,7 @@ type CustomListProps = {
 };
 
 // 利用者のカテゴリ: 登録の進み具合も群分けもなく、自作のタイルを作った順に並べ、末尾に追加のタイル。
-// 並び方の概念がないので、ピン留めがあるときだけ「ピン留め」と「その他」で区切る (Keep と同じ)
+// 並び方の概念がないので、ピン留めがあるときだけ「ピン留め」と「その他」で区切る (Keepと同じ)
 function CustomList({ categoryId, settings, registrations, pinnedIds }: CustomListProps) {
   const patterns = useDocumentStore((state) => state.document.patterns);
   const own = patterns.filter((pattern) => pattern.categoryId === categoryId);
@@ -171,8 +171,8 @@ export function ListScreen() {
   const setListView = useDocumentStore((state) => state.setListView);
   const dismissBanner = useDocumentStore((state) => state.dismissBanner);
   const isList = document.settings.listView === 'list';
-  // iOS でまだホーム画面に追加していないときに一度だけ出す案内 (閉じると設定に残る)。
-  // 守るデータがないうちは出さない (初回は登録の案内だけが出て、2 枚の案内が重ならない)
+  // iOSでまだホーム画面に追加していないときに一度だけ出す案内 (閉じると設定に残る)。
+  // 守るデータがないうちは出さない (初回は登録の案内だけが出て、2枚の案内が重ならない)
   const showsHomeScreenBanner =
     document.registrations.length > 0 &&
     isHomeScreenHintNeeded(homeScreenEnvironmentOf(window)) &&
@@ -189,7 +189,7 @@ export function ListScreen() {
     <section aria-label={copy.a11y.list} className="mx-auto flex w-full max-w-186 flex-col">
       <TopBar>
         <h1 className="flex-1 text-title font-bold tracking-title text-balance text-ink-strong">{copy.list.title}</h1>
-        {/* 押すたびに交互。記号と名前は切り替え先 (ドライブ・Keep と同じ)。全体で 1 つの設定で、設定画面には置かない */}
+        {/* 押すたびに交互。記号と名前は切り替え先 (ドライブ・Keepと同じ)。全体で1つの設定で、設定画面には置かない */}
         <IconButton
           label={isList ? copy.a11y.switchToGrid : copy.a11y.switchToList}
           onClick={() => {

@@ -9,10 +9,10 @@ export type Credit = {
   licenseUrl: string;
 };
 
-// id ごとの表を Record にして、id を増やしたときの書き忘れを型で止める。
-// 原文の URL はブランチではなくタグを指す (改名や削除で 404 にならない。ライセンス文は版が変わっても同じ)
+// idごとの表をRecordにして、idを増やしたときの書き忘れを型で止める。
+// 原文のURLはブランチではなくタグを指す (改名や削除で404にならない。ライセンス文は版が変わっても同じ)
 const CREDIT_INFO: Record<CreditId, Omit<Credit, 'id'>> = {
-  // MPL-2.0 と GPL-3.0 のデュアル。MPL-2.0 を選ぶとアプリ側のコードに伝播しない
+  // MPL-2.0とGPL-3.0のデュアル。MPL-2.0を選ぶとアプリ側のコードに伝播しない
   cubing: { license: 'MPL-2.0', licenseUrl: 'https://github.com/cubing/cubing.js/blob/v0.66.1/LICENSE-MPL.md' },
   jetbrainsMono: {
     license: 'SIL Open Font License 1.1',

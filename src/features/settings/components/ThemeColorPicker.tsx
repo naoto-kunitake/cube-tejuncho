@@ -13,8 +13,8 @@ import {
 } from '@/lib/theme/palette';
 import { cn } from '@/lib/utils';
 
-// 見本の塗りと選択の輪。墨は反転色 (ライトは墨、ダークは白) なので inverse のトークン。
-// チェックの色は自分で選ぶと同じく onColorOf で導く (手書きの表にすると palette と食い違う)
+// 見本の塗りと選択の輪。墨は反転色 (ライトは墨、ダークは白) なのでinverseのトークン。
+// チェックの色は自分で選ぶと同じくonColorOfで導く (手書きの表にするとpaletteと食い違う)
 const SWATCH_CLASS: Record<ThemePresetId, { fill: string; ring: string }> = {
   ink: { fill: 'bg-inverse', ring: 'ring-inverse' },
   red: { fill: 'bg-theme-red', ring: 'ring-theme-red' },
@@ -27,7 +27,7 @@ const SWATCH_CLASS: Record<ThemePresetId, { fill: string; ring: string }> = {
   pink: { fill: 'bg-theme-pink', ring: 'ring-theme-pink' },
 };
 
-// 丸 40、押せる範囲は疑似要素で 44。選択は面の色で 2px 空けた同色の輪 + チェック (色だけに頼らない)
+// 丸40、押せる範囲は疑似要素で44。選択は面の色で2px空けた同色の輪 + チェック (色だけに頼らない)
 const SWATCH_CLASS_BASE =
   'relative grid size-10 place-items-center rounded-full pressable before:absolute before:-inset-0.5 before:rounded-full active:scale-96';
 const SELECTED_RING_CLASS = 'ring-2 ring-offset-2 ring-offset-surface';
@@ -38,7 +38,7 @@ type ThemeColorPickerProps = {
   onChange: (themeColor: ThemeColor) => void;
 };
 
-// テーマ色の見本 (墨 + 8 色 + 自分で選ぶ)。自分で選ぶは端末のカラーピッカー (input type="color") を開く
+// テーマ色の見本 (墨 + 8色 + 自分で選ぶ)。自分で選ぶは端末のカラーピッカー (input type="color") を開く
 export function ThemeColorPicker({ value, onChange }: ThemeColorPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const preset = presetOf(value);
@@ -89,7 +89,7 @@ export function ThemeColorPicker({ value, onChange }: ThemeColorPickerProps) {
           inputRef.current?.click();
         }}
       >
-        {/* 選んだ色は利用者の任意の値なのでトークンにできず、ここだけインラインの style */}
+        {/* 選んだ色は利用者の任意の値なのでトークンにできず、ここだけインラインのstyle */}
         <span
           className="grid size-8 place-items-center rounded-full ring-2 ring-surface"
           style={isCustom ? { backgroundColor: customHex, color: onColorOf(customHex) } : undefined}
@@ -101,7 +101,7 @@ export function ThemeColorPicker({ value, onChange }: ThemeColorPickerProps) {
           )}
         </span>
       </button>
-      {/* 端末のカラーピッカーを開くためだけの入力。選ぶ操作は上の radio が担うので読み上げからは外す */}
+      {/* 端末のカラーピッカーを開くためだけの入力。選ぶ操作は上のradioが担うので読み上げからは外す */}
       <input
         ref={inputRef}
         type="color"
@@ -110,7 +110,7 @@ export function ThemeColorPicker({ value, onChange }: ThemeColorPickerProps) {
         tabIndex={-1}
         className="pointer-events-none absolute size-px opacity-0"
         onChange={(event) => {
-          // type="color" の値は常に #rrggbb だが、型のために確かめる
+          // type="color"の値は常に#rrggbbだが、型のために確かめる
           const hex = event.target.value;
           if (isHexColor(hex)) {
             onChange(hex);

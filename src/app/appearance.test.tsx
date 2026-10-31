@@ -36,7 +36,7 @@ function Probe() {
   return null;
 }
 
-// 端末のダークモードの設定を模す。changeTo で OS 側の切り替えを起こす
+// 端末のダークモードの設定を模す。changeToでOS側の切り替えを起こす
 function stubMatchMedia(initialMatches: boolean) {
   let matches = initialMatches;
   let onChange: (() => void) | null = null;

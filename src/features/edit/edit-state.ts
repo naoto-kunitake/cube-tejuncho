@@ -1,8 +1,8 @@
 import type { AlgEntry, Registration, RegistrationData } from '@/data/document';
 import { type AlgError, cleanAlgText, parseAlg } from '@/lib/alg/parse';
 
-// 編集中の手順カード。メイン手順も 1 枚目のカードとして同じ形で扱う。
-// id は並べ替えや削除の取り消しで React が同じカードを追えるようにする印で、保存しない
+// 編集中の手順カード。メイン手順も1枚目のカードとして同じ形で扱う。
+// idは並べ替えや削除の取り消しでReactが同じカードを追えるようにする印で、保存しない
 export type EditCard = AlgEntry & { id: number };
 export type EditForm = {
   // 名前とカテゴリは自作だけが編集する。プリセットでは空のまま
@@ -59,7 +59,7 @@ export function formSnapshot(form: EditForm): string {
   });
 }
 
-// 保存する形。手順の空いたカードは覚え方だけ書いてあっても残さない。何も残らなければ null (登録を消す)
+// 保存する形。手順の空いたカードは覚え方だけ書いてあっても残さない。何も残らなければnull (登録を消す)
 export function registrationDataFrom(form: EditForm): RegistrationData | null {
   const [mainAlg, ...altAlgs] = form.cards.map(trimCard).filter((card) => card.text !== '');
   const recognition = form.recognition.trim();
@@ -82,7 +82,7 @@ export function hasInvalidCard(form: EditForm): boolean {
   return form.cards.some((card) => algErrorOf(card.text) !== null);
 }
 
-// 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあれば null (もう足せる物がない)
+// 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあればnull (もう足せる物がない)
 export function standardAlgToAdd(form: EditForm, standardAlg: string): string | null {
   const target = cleanAlgText(standardAlg);
   return form.cards.some((card) => cleanAlgText(card.text) === target) ? null : standardAlg;
@@ -96,14 +96,14 @@ export function moveCardToFront(cards: readonly EditCard[], index: number): Edit
   return [card, ...cards.filter((_, i) => i !== index)];
 }
 
-// 最後の 1 枚を消しても空のカードを 1 枚残す (手順の欄が消えると書く場所がなくなる)
+// 最後の1枚を消しても空のカードを1枚残す (手順の欄が消えると書く場所がなくなる)
 export function removeCard(cards: readonly EditCard[], index: number): EditCard[] {
   const rest = cards.filter((_, i) => i !== index);
   return rest.length === 0 ? [newCard()] : rest;
 }
 
 export function insertCard(cards: readonly EditCard[], index: number, card: EditCard): EditCard[] {
-  // 消した直後の「元に戻す」。残っていたのが空の 1 枚だけなら、それは削除で補った物なので置き換える
+  // 消した直後の「元に戻す」。残っていたのが空の1枚だけなら、それは削除で補った物なので置き換える
   const base = cards.length === 1 && cards[0] !== undefined && isCardEmpty(cards[0]) ? [] : [...cards];
   const at = Math.min(index, base.length);
   return [...base.slice(0, at), card, ...base.slice(at)];

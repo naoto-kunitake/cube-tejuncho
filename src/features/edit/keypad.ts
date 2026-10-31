@@ -26,14 +26,14 @@ export type KeypadKey = CharacterKey | ActionKey;
 
 export type TextEdit = { start: number; end: number; insert: string };
 
-// 記号を入れるとき、直前が空白でも括弧でもなければ空白を補う (R の後に U を押せば R U になる)。' と 2 と ) は前の手にくっつく
+// 記号を入れるとき、直前が空白でも括弧でもなければ空白を補う (Rの後にUを押せばR Uになる)。'と2と ) は前の手にくっつく
 export function insertionFor(value: string, start: number, end: number, key: CharacterKey): TextEdit {
   const before = value.slice(0, start);
   const needsSpace = /^[A-Za-z(]$/.test(key) && before !== '' && !/[\s(]$/.test(before);
   return { start, end, insert: needsSpace ? ` ${key}` : key };
 }
 
-// 削除は選択範囲、なければ直前の 1 文字
+// 削除は選択範囲、なければ直前の1文字
 export function deletionFor(start: number, end: number): TextEdit {
   const from = start === end ? Math.max(0, start - 1) : start;
   return { start: from, end, insert: '' };

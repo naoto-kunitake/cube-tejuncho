@@ -5,7 +5,7 @@ type HomeScreenBannerProps = {
   onDismiss: () => void;
 };
 
-// iOS でまだホーム画面に追加していないときに一度だけ出す案内 (初回の案内と同じバナーの型)。
+// iOSでまだホーム画面に追加していないときに一度だけ出す案内 (初回の案内と同じバナーの型)。
 // 追加の操作は共有シートから行うので、ここには行動のボタンを置かず閉じるだけ
 export function HomeScreenBanner({ onDismiss }: HomeScreenBannerProps) {
   return (

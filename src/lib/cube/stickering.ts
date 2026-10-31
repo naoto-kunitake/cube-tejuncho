@@ -8,7 +8,7 @@ const EDGE_POSITIONS = ['UF', 'UR', 'UB', 'UL', 'DF', 'DR', 'DB', 'DL', 'FR', 'F
 const CORNER_POSITIONS = ['UFR', 'URB', 'UBL', 'ULF', 'DRF', 'DFL', 'DLB', 'DBR'] as const;
 const CENTER_POSITIONS = ['U', 'L', 'F', 'R', 'B', 'D'] as const;
 
-// y を k 回したあとの「図の枠の面」が、持ち替える前の cubing.js のどの面か
+// yをk回したあとの「図の枠の面」が、持ち替える前のcubing.jsのどの面か
 const Y_TURNED: readonly Record<'F' | 'R' | 'B' | 'L', Face>[] = [
   { F: 'F', R: 'R', B: 'B', L: 'L' },
   { F: 'R', R: 'B', B: 'L', L: 'F' },
@@ -17,8 +17,8 @@ const Y_TURNED: readonly Record<'F' | 'R' | 'B' | 'L', Face>[] = [
 ];
 const Z2: Record<Face, Face> = { U: 'D', D: 'U', F: 'F', B: 'B', R: 'L', L: 'R' };
 
-// 図の枠 (上面と前面の設定で持ち替えたあと) の面が、cubing.js の枠のどの面に当たるか。
-// cubing.js のパーツの番号は白上・緑前の枠で付くので、開始姿勢の持ち替え (z2、y^k) を逆にたどる
+// 図の枠 (上面と前面の設定で持ち替えたあと) の面が、cubing.jsの枠のどの面に当たるか。
+// cubing.jsのパーツの番号は白上・緑前の枠で付くので、開始姿勢の持ち替え (z2、y^k) を逆にたどる
 function toCubingFace(settings: ViewSettings): (face: Face) => Face {
   const turned = Y_TURNED[frontColorTurns(settings)] ?? Y_TURNED[0];
   const flip = settings.topColor === 'yellow';
@@ -32,9 +32,9 @@ function hasFaces(position: string, faces: readonly Face[]): boolean {
   return faces.every((face) => position.includes(face));
 }
 
-// 関係ないパーツを灰にする指定 (cubing.js の experimentalStickeringMaskOrbits)。
-// 文字: "-" 通常、"I" 灰、"O" 主ステッカー (上面側) 以外を灰 (OLL 用)。"D" (薄い色) は見分けがつきにくいので使わない。
-// PLL = 上層のパーツは通常・他は灰・センターは下以外通常。OLL = 上層のパーツは O・他は灰・センターは上だけ通常。
+// 関係ないパーツを灰にする指定 (cubing.jsのexperimentalStickeringMaskOrbits)。
+// 文字: "-" 通常、"I"灰、"O"主ステッカー (上面側) 以外を灰 (OLL用)。"D" (薄い色) は見分けがつきにくいので使わない。
+// PLL = 上層のパーツは通常・他は灰・センターは下以外通常。OLL = 上層のパーツはO・他は灰・センターは上だけ通常。
 // F2L = ペアのコーナー (下・前・右) とエッジ (前・右) だけ通常・センターは全部通常・他は灰
 export function stickeringMaskFor(category: StickeringCategory, settings: ViewSettings): string {
   const toCubing = toCubingFace(settings);

@@ -47,7 +47,7 @@ function unionOf(current: readonly string[], imported: readonly string[]): strin
   return [...new Set([...current, ...imported])];
 }
 
-// 同じ名前のカテゴリは別の端末で別の id になる。名前で同じものとみなし、読み込む側の id を今の id に寄せる
+// 同じ名前のカテゴリは別の端末で別のidになる。名前で同じものとみなし、読み込む側のidを今のidに寄せる
 function categoryIdMapOf(current: readonly Category[], imported: readonly Category[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const category of imported) {

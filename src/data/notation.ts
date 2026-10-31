@@ -10,7 +10,7 @@ const DIRECTIONS = ['prime', 'double'] as const;
 const SLICES = ['M', 'E', 'S'] as const;
 const ROTATIONS = ['x', 'y', 'z'] as const;
 
-// 行の id は文言の鍵でもあるので、取りうる値をここで尽くす
+// 行のidは文言の鍵でもあるので、取りうる値をここで尽くす
 export type NotationRowId =
   | (typeof FACES)[number]
   | (typeof DIRECTIONS)[number]
@@ -22,7 +22,7 @@ export type NotationRowId =
 export type NotationRow = {
   id: NotationRowId;
   symbol: string;
-  // 再生する 1 手。括弧の行は再生も図もない
+  // 再生する1手。括弧の行は再生も図もない
   move: (MoveFigureMove & { alg: string }) | null;
 };
 export type NotationSection = { id: NotationSectionId; rows: readonly NotationRow[] };
@@ -37,7 +37,7 @@ function rowOf(id: NotationRowId, alg: string, wideStyle: WideStyle): NotationRo
   return { id, symbol, move: { base: first.base, isWide: first.isWide, alg: symbol } };
 }
 
-// 回転記号の画面の 6 区画 21 行 (WCA の記法の構成)。2 層回しの記号は設定の表記 (r / Rw) に揃える
+// 回転記号の画面の6区画21行 (WCAの記法の構成)。2層回しの記号は設定の表記 (r / Rw) に揃える
 export function notationSectionsOf(wideStyle: WideStyle): NotationSection[] {
   const faceRow = (face: MoveBase) => rowOf(face, face, wideStyle);
   return [

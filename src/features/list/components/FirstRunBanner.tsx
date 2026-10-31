@@ -6,7 +6,7 @@ type FirstRunBannerProps = {
   onRegisterAll: () => void;
 };
 
-// 登録が 0 件のプリセットのタブに出す案内 (Material のバナーの型: 本文 + 右下に文字ボタン 2 つ)。
+// 登録が0件のプリセットのタブに出す案内 (Materialのバナーの型: 本文 + 右下に文字ボタン2つ)。
 // 画面全体が空なのではなくタイルの上に出る文脈つきの案内なので、中央に大きく置く空状態の型は使わない
 export function FirstRunBanner({ onDismiss, onRegisterAll }: FirstRunBannerProps) {
   return (

@@ -15,7 +15,7 @@ import { moveFigureView } from '@/lib/figure/move';
 
 const SETTINGS_PATH = '/settings';
 
-// 戻る先は開いた元の画面 (設定 / 詳細 / 編集)。リンクの state で受け取り、直接開いたときは設定へ
+// 戻る先は開いた元の画面 (設定 / 詳細 / 編集)。リンクのstateで受け取り、直接開いたときは設定へ
 function backPathOf(state: unknown): string {
   if (typeof state === 'object' && state !== null && 'from' in state && typeof state.from === 'string') {
     return state.from;
@@ -28,9 +28,9 @@ type NotationRowProps = {
   onPlay: (alg: string) => void;
 };
 
-// 行 = 動く層だけ色の図 48 + 記号 (等幅 17) + 説明 14 (副は 13 の小さい行) + 再生 (枠なし 36)。行の左右は 16。
-// 行の高さは 52 で、図は上下 -6・左 -4 の負マージンで収める (図の見た目の左端が文字の余白 16 に揃う)。
-// 説明が 2 行になる行 (副あり、狭い幅の折り返し) は説明の上下 12 で伸びる
+// 行 = 動く層だけ色の図48 + 記号 (等幅17) + 説明14 (副は13の小さい行) + 再生 (枠なし36)。行の左右は16。
+// 行の高さは52で、図は上下-6・左-4の負マージンで収める (図の見た目の左端が文字の余白16に揃う)。
+// 説明が2行になる行 (副あり、狭い幅の折り返し) は説明の上下12で伸びる
 function NotationRowItem({ row, onPlay }: NotationRowProps) {
   const settings = useDocumentStore((state) => state.document.settings);
   const text: NotationRowText = copy.notation.rows[row.id];
@@ -67,8 +67,8 @@ function NotationRowItem({ row, onPlay }: NotationRowProps) {
   );
 }
 
-// 回転記号の説明。WCA の記法の構成 (面の回転 / 向きと回数 / 中層 / 2層回し / 持ち替え / 括弧) で 21 行。
-// 再生は既存の再生シートで 1 手だけ動かす
+// 回転記号の説明。WCAの記法の構成 (面の回転 / 向きと回数 / 中層 / 2層回し / 持ち替え / 括弧) で21行。
+// 再生は既存の再生シートで1手だけ動かす
 export function NotationScreen() {
   const location = useLocation();
   const settings = useDocumentStore((state) => state.document.settings);

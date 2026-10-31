@@ -14,7 +14,7 @@ type SettingRowProps = {
   children: ReactNode;
 };
 
-// 見出し + 操作部品 (セグメント / スイッチ) の 1 行。行の高さ 52、折り返す行は上下 12
+// 見出し + 操作部品 (セグメント / スイッチ) の1行。行の高さ52、折り返す行は上下12
 export function SettingRow({ label, wrapsOnNarrow = false, children }: SettingRowProps) {
   return (
     <div className={cn(SETTING_ROW_CLASS, wrapsOnNarrow && 'max-xs:flex-wrap max-xs:py-3')}>

@@ -1,6 +1,6 @@
 import type { TopView } from '@/lib/figure/view';
 
-// 一覧の「種類ごと」の並び。最初に見る辺の形の順 (十字 → 向かい 2 辺 → 隣り 2 辺 → ドット)、同じ形の中は短く覚えやすい群から
+// 一覧の「種類ごと」の並び。最初に見る辺の形の順 (十字 → 向かい2辺 → 隣り2辺 → ドット)、同じ形の中は短く覚えやすい群から
 export const OLL_SHAPE_ORDER = [
   'cross',
   'cornersOriented',
@@ -25,11 +25,11 @@ export type OllPreset = {
   name: string;
   shape: OllShape;
   standardAlg: string;
-  // 図の定義。黄上・緑前で、上面の向きは基本手順の開始状態 (AUF は含めない)
+  // 図の定義。黄上・緑前で、上面の向きは基本手順の開始状態 (AUFは含めない)
   view: TopView;
 };
 
-// 番号順 (speedsolving wiki の番号)。基本手順は wiki・J Perm・SpeedCubeDB・だーおかの多数決
+// 番号順 (speedsolving wikiの番号)。基本手順はwiki・J Perm・SpeedCubeDB・だーおかの多数決
 export const OLL_PRESETS: readonly OllPreset[] = [
   {
     id: 'oll-1',

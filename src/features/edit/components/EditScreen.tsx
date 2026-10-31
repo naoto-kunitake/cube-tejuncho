@@ -8,7 +8,7 @@ import { useDocumentStore } from '@/data/store';
 
 import { EditForm, type EditTarget, type FocusTarget } from './EditForm';
 
-// 詳細の空枠 (判断を書く / 手順を登録) から来たときは、その欄に焦点を当てる。履歴の state で受け取り URL には持たない
+// 詳細の空枠 (判断を書く / 手順を登録) から来たときは、その欄に焦点を当てる。履歴のstateで受け取りURLには持たない
 function focusTargetOf(state: unknown): FocusTarget | null {
   if (typeof state !== 'object' || state === null || !('focus' in state)) {
     return null;
@@ -51,7 +51,7 @@ export function EditScreen() {
   );
 }
 
-// /p/new は新規 (カテゴリは検索パラメータ。なければ最初の利用者のカテゴリ)。それ以外はプリセットか自作の編集
+// /p/newは新規 (カテゴリは検索パラメータ。なければ最初の利用者のカテゴリ)。それ以外はプリセットか自作の編集
 function targetOf(
   id: string | undefined,
   categoryParam: string | null,

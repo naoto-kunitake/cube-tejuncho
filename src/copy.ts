@@ -13,10 +13,10 @@ import type { FrontColor, TopColor } from '@/lib/figure/view';
 import type { Appearance } from '@/lib/theme/color';
 import type { ThemePresetId } from '@/lib/theme/palette';
 
-// 回転記号の行: 主 (説明) + 副 (小さい行)。satisfies で絞られた型を画面で広げ直すために公開する
+// 回転記号の行: 主 (説明) + 副 (小さい行)。satisfiesで絞られた型を画面で広げ直すために公開する
 export type NotationRowText = { description: string; sub?: string };
 
-// 鍵の形を型にしておき、英語版を足すときは同じ Copy を満たす別ファイルを置く
+// 鍵の形を型にしておき、英語版を足すときは同じCopyを満たす別ファイルを置く
 type Copy = {
   list: {
     title: string;
@@ -24,10 +24,10 @@ type Copy = {
     registeredCount: (registered: number, total: number) => string;
     pllShapes: Record<PllShape, string>;
     ollShapes: Record<OllShape, string>;
-    // F2L の「白」はクロスの色。上面が白の設定ではクロスが黄になるので、表示のときに置き換える
+    // F2Lの「白」はクロスの色。上面が白の設定ではクロスが黄になるので、表示のときに置き換える
     crossColor: Record<TopColor, string>;
     f2lShapes: Record<F2lShape, (cross: string) => string>;
-    // 種類ごとでないときの見出し (PLL は標準順、OLL / F2L は番号順)
+    // 種類ごとでないときの見出し (PLLは標準順、OLL / F2Lは番号順)
     standardOrder: Record<PresetCategoryId, string>;
     addPattern: string;
     noAlg: string;
@@ -158,7 +158,7 @@ type Copy = {
     registeredAll: (count: number) => string;
     clearRegistrations: string;
     registeredCount: (count: number) => string;
-    // 「登録 N件」(プリセット) と並べるので、区画の patternCount (「N件」だけ) とは別に接頭の語を付ける
+    // 「登録N件」(プリセット) と並べるので、区画のpatternCount (「N件」だけ) とは別に接頭の語を付ける
     patternCountWithLabel: (count: number) => string;
     clear: string;
     clearTitle: (names: readonly string[]) => string;
@@ -186,7 +186,7 @@ type Copy = {
   notation: {
     title: string;
     sections: Record<NotationSectionId, string>;
-    // 区画の説明 (ない区画は空)。2 層回しはもう一方の書き方を併記する
+    // 区画の説明 (ない区画は空)。2層回しはもう一方の書き方を併記する
     leads: Record<NotationSectionId, (otherWideStyle: WideStyle) => string>;
     rows: Record<NotationRowId, NotationRowText>;
   };
@@ -252,7 +252,7 @@ export const copy = {
       bar1: '3連1つ',
       none: 'ヘッドライト・3連なし',
     },
-    // OLL の呼び名は日本語圏で複数の出典がある語を優先し (だーおか・cubequest)、定訳のない群は説明的な語
+    // OLLの呼び名は日本語圏で複数の出典がある語を優先し (だーおか・cubequest)、定訳のない群は説明的な語
     ollShapes: {
       cross: '十字',
       cornersOriented: 'コーナー揃い',
@@ -290,7 +290,7 @@ export const copy = {
     registerAll: '基本手順を一括登録',
     registeredAll: (count) => `${count}件を登録しました`,
     dismissBanner: '閉じる',
-    // iOS の Safari は 7 日間使われないサイトのデータを消すことがある。ホーム画面に追加すれば対象外
+    // iOSのSafariは7日間使われないサイトのデータを消すことがある。ホーム画面に追加すれば対象外
     homeScreenTitle: 'ホーム画面に追加しておくとデータが消えません',
     homeScreenHint: '共有ボタンから「ホーム画面に追加」を選ぶ',
   },
@@ -425,7 +425,7 @@ export const copy = {
       pink: '桃',
     },
     customColor: '自分で選ぶ',
-    // iOS の設定と同じ語。「自動」は端末のダークモードに追従する意味 (「システム」は 360 幅で収まらない)
+    // iOSの設定と同じ語。「自動」は端末のダークモードに追従する意味 (「システム」は360幅で収まらない)
     appearanceMode: '外観モード',
     appearances: { auto: '自動', light: 'ライト', dark: 'ダーク' },
     data: 'データ',
@@ -508,7 +508,7 @@ export const copy = {
       rotation: () => 'キューブ全体を回す',
       group: () => '',
     },
-    // 2 つの情報は句点で繋がず、主 (説明) + 副 (小さい行) に分ける
+    // 2つの情報は句点で繋がず、主 (説明) + 副 (小さい行) に分ける
     rows: {
       R: { description: '右面' },
       L: { description: '左面' },

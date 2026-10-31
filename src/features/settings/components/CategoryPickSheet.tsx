@@ -17,7 +17,7 @@ type CategoryPickSheetProps = {
   onClose: () => void;
 };
 
-// カテゴリをチェックで選んで 1 つの操作を確定する小さなシート (一括登録 / 登録を消す)
+// カテゴリをチェックで選んで1つの操作を確定する小さなシート (一括登録 / 登録を消す)
 export function CategoryPickSheet({
   label,
   title,

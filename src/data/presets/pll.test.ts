@@ -10,7 +10,7 @@ import {
   expectViewShape,
 } from './preset.fixtures';
 
-// ノートの AUF 正規化で確定した置換の型 (位置: 0 UBL 1 UB 2 UBR / 3 UL 4 中央 5 UR / 6 UFL 7 UF 8 UFR)
+// ノートのAUF正規化で確定した置換の型 (位置: 0 UBL 1 UB 2 UBR / 3 UL 4中央5 UR / 6 UFL 7 UF 8 UFR)
 const EXPECTED_ARROWS: Record<string, [number, number][]> = {
   Ua: [
     [3, 7],

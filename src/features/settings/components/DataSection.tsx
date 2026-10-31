@@ -22,7 +22,7 @@ const DANGER_ROW_CLASS = cn(ROW_BUTTON_CLASS, 'text-danger');
 type Clearing = { ids: string[]; names: string[]; count: number };
 
 // 設定のデータの区画。安全な操作 (書き出す / 読み込む / 基本手順を一括登録) と、
-// 赤字の破壊的な操作 (登録を消す / 初期状態に戻す) は別のカードに分ける (iOS の設定と同じ置き方)
+// 赤字の破壊的な操作 (登録を消す / 初期状態に戻す) は別のカードに分ける (iOSの設定と同じ置き方)
 export function DataSection() {
   const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
@@ -91,7 +91,7 @@ export function DataSection() {
     };
   });
 
-  // 一括登録は取り消せるので確認は出さない。選んだカテゴリ全部を 1 回の「元に戻す」で戻す
+  // 一括登録は取り消せるので確認は出さない。選んだカテゴリ全部を1回の「元に戻す」で戻す
   const registerAll = (categoryIds: string[]) => {
     setIsRegistering(false);
     const before = useDocumentStore.getState().document;
@@ -175,7 +175,7 @@ export function DataSection() {
           {copy.settings.registerAll}
         </button>
       </div>
-      {/* 破壊的な操作のカードは、区画の間隔 8 に 12 を足して離す (モックの決定: カード間 12 + 区画内の間隔) */}
+      {/* 破壊的な操作のカードは、区画の間隔8に12を足して離す (モックの決定: カード間12 + 区画内の間隔) */}
       <div className="mt-3 overflow-hidden rounded-md border border-line bg-surface">
         <button
           type="button"

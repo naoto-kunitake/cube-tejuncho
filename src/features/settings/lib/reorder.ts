@@ -5,7 +5,7 @@ export function targetIndexOf(startIndex: number, deltaY: number, rowHeight: num
   return Math.min(Math.max(target, 0), count - 1);
 }
 
-// 持ち上げた行以外の行が、空いた隙間を埋めるためにずれる向き (-1 は上へ 1 行、1 は下へ 1 行)
+// 持ち上げた行以外の行が、空いた隙間を埋めるためにずれる向き (-1は上へ1行、1は下へ1行)
 export function shiftOf(index: number, startIndex: number, targetIndex: number): -1 | 0 | 1 {
   if (startIndex < index && index <= targetIndex) {
     return -1;

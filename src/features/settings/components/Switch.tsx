@@ -6,8 +6,8 @@ type SwitchProps = {
   onChange: (checked: boolean) => void;
 };
 
-// 即時に効く on / off (44 × 24、押せる範囲は疑似要素で上下に広げて 44)。オンはテーマ色、オフは gray-420 のトラック。
-// ツマミはダークでオンのときだけ on-accent にする (白いテーマ色に沈まないように。モックで決めた)
+// 即時に効くon / off (44 × 24、押せる範囲は疑似要素で上下に広げて44)。オンはテーマ色、オフはgray-420のトラック。
+// ツマミはダークでオンのときだけon-accentにする (白いテーマ色に沈まないように。モックで決めた)
 export function Switch({ label, checked, onChange }: SwitchProps) {
   return (
     <button

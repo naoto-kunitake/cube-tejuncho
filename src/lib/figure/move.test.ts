@@ -54,7 +54,7 @@ describe('moveFigureView', () => {
     const view = moveFigureView({ base: 'x', isWide: false }, { topColor: 'white', frontColor: 'red' });
     expect(view.u[0]).toBe('W');
     expect(view.f[0]).toBe('R');
-    // 白上では側面の並びが 前 G → 右 R → 後 B → 左 O なので、赤を前にすると右は青
+    // 白上では側面の並びが 前G → 右R → 後B → 左Oなので、赤を前にすると右は青
     expect(view.r[0]).toBe('B');
   });
 });

@@ -14,7 +14,7 @@ export type CurrentMoveInfo = {
   movesStarting: readonly unknown[];
 };
 
-// 再生シートが使う TwistyPlayer の範囲。テストでは 3D を動かせないので、この形を満たす偽の部品で代える
+// 再生シートが使うTwistyPlayerの範囲。テストでは3Dを動かせないので、この形を満たす偽の部品で代える
 export type PlayerLike = HTMLElement & {
   play: () => void;
   pause: () => void;
@@ -30,7 +30,7 @@ export type PlayerLike = HTMLElement & {
 
 export type TwistyModule = { TwistyPlayer: new (config: TwistyPlayerConfig) => PlayerLike };
 
-// 3D (three.js を含む約 1MB) は再生ボタンを押したときだけ読む。失敗したら次の再試行でもう一度読みに行く
+// 3D (three.jsを含む約1MB) は再生ボタンを押したときだけ読む。失敗したら次の再試行でもう一度読みに行く
 let twistyPromise: Promise<TwistyModule> | null = null;
 
 export function loadTwisty(): Promise<TwistyModule> {
@@ -64,7 +64,7 @@ export function playerConfigFor(alg: Alg, settings: PlayerSettings, category?: S
   return config;
 }
 
-// 1 手だけ動かす。標準の操作列と矢印キーが使う仕組みで、cubing.js の版が変わって失敗したら何もしない
+// 1手だけ動かす。標準の操作列と矢印キーが使う仕組みで、cubing.jsの版が変わって失敗したら何もしない
 export function stepPlayer(player: PlayerLike, direction: StepDirection): boolean {
   try {
     player.controller.animationController.play({ direction, untilBoundary: 'move' });

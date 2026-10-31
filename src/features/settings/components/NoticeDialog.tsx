@@ -10,7 +10,7 @@ type NoticeDialogProps = {
   onClose: () => void;
 };
 
-// 知らせるだけの確認 (閉じる 1 つ)。選ぶことがないので、焦点は閉じるに置く
+// 知らせるだけの確認 (閉じる1つ)。選ぶことがないので、焦点は閉じるに置く
 export function NoticeDialog({ title, body, onClose }: NoticeDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);

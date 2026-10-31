@@ -1,8 +1,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
 
-// 自作の型スケール (text-title など) と字間・行間を tailwind-merge に教える。知らないと text-* の色と同じ群に見なして
-// `text-label text-muted` の text-label を捨て、文字の大きさが基本の 15px に戻ってしまう
+// 自作の型スケール (text-titleなど) と字間・行間をtailwind-mergeに教える。知らないとtext-* の色と同じ群に見なして
+// `text-label text-muted`のtext-labelを捨て、文字の大きさが基本の15pxに戻ってしまう
 const twMerge = extendTailwindMerge({
   extend: {
     classGroups: {

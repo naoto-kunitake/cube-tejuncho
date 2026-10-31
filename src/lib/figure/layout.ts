@@ -1,4 +1,4 @@
-// 標準形の寸法 (viewBox は 7 7 86 86)。モックで決めた値をそのまま使う
+// 標準形の寸法 (viewBoxは7 7 86 86)。モックで決めた値をそのまま使う
 export const FIGURE_LAYOUT = {
   viewBox: '7 7 86 86',
   cell: 18,

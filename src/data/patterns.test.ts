@@ -8,7 +8,7 @@ const CUSTOM = { id: 'c1', categoryId: 'cat1', name: 'My Alg', createdAt: '', up
 
 describe('findPattern', () => {
   it('プリセットの id ならプリセット', () => {
-    // 個々のプリセットの名前に依存しないよう、先頭の 1 件をそのまま使う
+    // 個々のプリセットの名前に依存しないよう、先頭の1件をそのまま使う
     const [first] = PLL_PRESETS;
     if (first === undefined) {
       throw new Error('no presets');

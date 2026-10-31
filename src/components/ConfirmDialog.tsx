@@ -18,8 +18,8 @@ export const DIALOG_CLASS =
 export const DIALOG_TITLE_CLASS = 'text-input leading-snug font-bold text-balance text-ink-strong';
 export const DIALOG_BODY_CLASS = 'text-small leading-normal text-muted';
 
-// 破壊的な操作の確認。iOS のアラートと同じ構成: 見出し (何を) + 本文 (自明でない結果だけ) + キャンセル / 赤い動詞のボタン。
-// Esc は取り消し。焦点は安全なキャンセルに置く
+// 破壊的な操作の確認。iOSのアラートと同じ構成: 見出し (何を) + 本文 (自明でない結果だけ) + キャンセル / 赤い動詞のボタン。
+// Escは取り消し。焦点は安全なキャンセルに置く
 export function ConfirmDialog({ title, body, actionLabel, onConfirm, onCancel }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);

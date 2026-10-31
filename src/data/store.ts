@@ -26,7 +26,7 @@ type PersistedShape = { state: { document: Document }; version: number };
 
 type DocumentStorage = StateStorage & { takeIssue: () => LoadIssue | null };
 
-// persist に渡す包み。読み込みで migrate → Zod を通し、壊れた文書は退避して空で始める。保存は前の文書を 1 世代残す
+// persistに渡す包み。読み込みでmigrate → Zodを通し、壊れた文書は退避して空で始める。保存は前の文書を1世代残す
 function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
   let issue: LoadIssue | null = storage.isPersistent ? null : 'storageUnavailable';
   let hasRequestedPersistence = false;
@@ -99,7 +99,7 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
 
 export type CustomPatternFields = Pick<CustomPattern, 'name' | 'categoryId'>;
 
-// 閉じた案内の id。プリセットのタブの初回の案内はカテゴリ id、iOS の「ホーム画面に追加」の案内は固定の id
+// 閉じた案内のid。プリセットのタブの初回の案内はカテゴリid、iOSの「ホーム画面に追加」の案内は固定のid
 export const HOME_SCREEN_BANNER = 'homeScreen';
 export type BannerId = PresetCategoryId | typeof HOME_SCREEN_BANNER;
 
@@ -109,12 +109,12 @@ export type DocumentStore = {
   addRegistration: (patternId: string, mainAlg: AlgEntry) => void;
   saveRegistration: (patternId: string, data: RegistrationData) => void;
   removeRegistration: (patternId: string) => void;
-  // 返り値は新しい id
+  // 返り値は新しいid
   addCategory: (name: string) => string;
   renameCategory: (categoryId: string, name: string) => void;
   // カテゴリと、その中の自作パターン (登録・ピン留めも) をまとめて消す
   removeCategory: (categoryId: string) => void;
-  // タブの並びの中で、そのカテゴリを toIndex の位置へ動かす (範囲外は端に収める)
+  // タブの並びの中で、そのカテゴリをtoIndexの位置へ動かす (範囲外は端に収める)
   moveCategory: (categoryId: string, toIndex: number) => void;
   addCustomPattern: (fields: CustomPatternFields, data: RegistrationData | null) => string;
   updateCustomPattern: (patternId: string, fields: CustomPatternFields) => void;
@@ -140,21 +140,21 @@ export type DocumentStore = {
 
 export function createDocumentStore(storage: KeyValueStorage) {
   const documentStorage = createDocumentStorage(storage);
-  // persist の読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
+  // persistの読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
   void documentStorage.getItem(DOCUMENT_KEY);
   const initialLoadIssue = documentStorage.takeIssue();
 
   const store = create<DocumentStore>()(
     persist(
       (set) => {
-        // 保存は set のたびに起きるので、その直後に問題を拾って知らせる
+        // 保存はsetのたびに起きるので、その直後に問題を拾って知らせる
         const reportStorageIssue = () => {
           const issue = documentStorage.takeIssue();
           if (issue !== null) {
             set({ loadIssue: issue });
           }
         };
-        // 設定の差し替えは 1 か所に。名前のある action (setLastTab など) はここに委ねる
+        // 設定の差し替えは1か所に。名前のあるaction (setLastTabなど) はここに委ねる
         const updateSettings = (patch: Partial<Settings>) => {
           set((state) => ({ document: { ...state.document, settings: { ...state.document.settings, ...patch } } }));
           reportStorageIssue();
@@ -221,14 +221,14 @@ export function createDocumentStore(storage: KeyValueStorage) {
           removeCategory: (categoryId) => {
             set((state) => {
               const { document } = state;
-              // プリセットの id も tabOrder に並ぶので、実在する自作カテゴリ以外では何も触らない
+              // プリセットのidもtabOrderに並ぶので、実在する自作カテゴリ以外では何も触らない
               if (!document.categories.some((category) => category.id === categoryId)) {
                 return state;
               }
               const removedPatternIds = new Set(
                 document.patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
               );
-              // lastTab は一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
+              // lastTabは一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
               return {
                 document: {
                   ...document,
@@ -396,7 +396,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
       },
       {
         name: DOCUMENT_KEY,
-        // persist は保存した版と比べて違えば読み込みを飛ばす。版の移行は包みの側で済ませている
+        // persistは保存した版と比べて違えば読み込みを飛ばす。版の移行は包みの側で済ませている
         version: DOCUMENT_VERSION,
         storage: createJSONStorage(() => documentStorage),
         partialize: (state) => ({ document: state.document }),

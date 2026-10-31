@@ -40,9 +40,9 @@ function PatternDetail({ preset }: PatternDetailProps) {
     <div className="flex flex-col gap-4 px-4 pb-6">
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
-        {/* SVG は viewBox 86 のうち外側 4 (4.65%) が空き。負の余白で打ち消し、ステッカーの外周をカードの余白 16 に揃える。
-            2 枚: ステッカー幅 138 × 2 + 間 24 = カード内側 300 → SVG 幅 152、負の余白 7。1 枚: 240 → 11 */}
-        {/* 手がかりの図は PLL だけ (OLL は上面の向きで見分ける) */}
+        {/* SVGはviewBox 86のうち外側4 (4.65%) が空き。負の余白で打ち消し、ステッカーの外周をカードの余白16に揃える。
+            2枚: ステッカー幅138 × 2 + 間24 = カード内側300 → SVG幅152、負の余白7。1枚: 240 → 11 */}
+        {/* 手がかりの図はPLLだけ (OLLは上面の向きで見分ける) */}
         {preset.category === 'pll' && settings.showCueFigure ? (
           <div className="flex w-full justify-center gap-6">
             <div className="-m-1.75 w-38 flex-none">
@@ -208,7 +208,7 @@ export function DetailScreen() {
   return (
     <section aria-label={copy.a11y.detail} className="mx-auto flex w-full max-w-140 flex-col">
       <TopBar>
-        {/* 戻るの記号を左端 16 に揃えるため 7 引く。戻ると題の間は 10 */}
+        {/* 戻るの記号を左端16に揃えるため7引く。戻ると題の間は10 */}
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <IconLink to="/" label={copy.a11y.backToList} className="-ml-1.75">
             <ChevronLeft size={22} strokeWidth={1.8} aria-hidden="true" />
@@ -219,7 +219,7 @@ export function DetailScreen() {
         </div>
         {ref !== undefined && (
           <>
-            {/* aria-pressed のあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態は aria-pressed が伝える */}
+            {/* aria-pressedのあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態はaria-pressedが伝える */}
             <IconButton
               label={copy.a11y.pin}
               aria-pressed={isPinned}

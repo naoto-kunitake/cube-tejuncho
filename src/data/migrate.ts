@@ -2,7 +2,7 @@ import { DOCUMENT_VERSION } from './document';
 
 type Migration = (document: Record<string, unknown>) => Record<string, unknown>;
 
-// 版 n の文書を n + 1 に上げる関数を n に対応づける。版を上げるときにここへ足す
+// 版nの文書をn + 1に上げる関数をnに対応づける。版を上げるときにここへ足す
 const MIGRATIONS: Record<number, Migration> = {};
 
 function isRecord(value: unknown): value is Record<string, unknown> {

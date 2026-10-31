@@ -1,6 +1,6 @@
 import { useToastStore } from './toast-store';
 
-// 画面の下に出る知らせ。反転色の帯 + 右に取り消しの文字ボタン。読み上げは status (操作を遮らない)
+// 画面の下に出る知らせ。反転色の帯 + 右に取り消しの文字ボタン。読み上げはstatus (操作を遮らない)
 export function Toast() {
   const toast = useToastStore((state) => state.toast);
   const dismiss = useToastStore((state) => state.dismiss);

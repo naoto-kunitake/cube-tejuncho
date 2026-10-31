@@ -8,7 +8,7 @@ type AppearanceSettings = Pick<Settings, 'appearance' | 'themeColor'>;
 
 const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
-// 文書の設定を html 要素に反映する。ダークは .dark (tokens.css が変数を差し替える)、テーマ色は --accent / --on-accent の
+// 文書の設定をhtml要素に反映する。ダークは.dark (tokens.cssが変数を差し替える)、テーマ色は--accent / --on-accentの
 // インラインの変数。墨は既定なので変数を消してトークンに任せる (ライトは墨、ダークは白)
 export function applyAppearance(root: HTMLElement, settings: AppearanceSettings, prefersDark: boolean): void {
   const resolved = resolveAppearance(settings.appearance, prefersDark);
@@ -24,7 +24,7 @@ export function applyAppearance(root: HTMLElement, settings: AppearanceSettings,
 }
 
 function findDarkMediaQuery(): MediaQueryList | null {
-  // jsdom など matchMedia のない環境では端末の設定を読めないので、ライトとして扱う
+  // jsdomなどmatchMediaのない環境では端末の設定を読めないので、ライトとして扱う
   return typeof window.matchMedia === 'function' ? window.matchMedia(DARK_MEDIA_QUERY) : null;
 }
 

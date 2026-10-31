@@ -11,13 +11,13 @@ export type PllPreset = {
   name: string;
   shape: PllShape;
   standardAlg: string;
-  // 図の定義。手順に AUF が含まれても向きが変わらないよう、置換の型が定義と一致する向きで持つ (ノートの AUF 正規化)
+  // 図の定義。手順にAUFが含まれても向きが変わらないよう、置換の型が定義と一致する向きで持つ (ノートのAUF正規化)
   view: TopView;
-  // 上面 9 マスの位置 (0 = 左上、4 = 中央) で、[出発, 行き先]
+  // 上面9マスの位置 (0 = 左上、4 = 中央) で、[出発, 行き先]
   arrows: readonly Arrow[];
 };
 
-// 標準順 (speedsolving wiki の並び)。基本手順は wiki・J Perm・SpeedCubeDB・だーおかの多数決
+// 標準順 (speedsolving wikiの並び)。基本手順はwiki・J Perm・SpeedCubeDB・だーおかの多数決
 export const PLL_PRESETS: readonly PllPreset[] = [
   {
     id: 'pll-ua',

@@ -2,8 +2,8 @@ export type InputModality = 'keyboard' | 'pointer';
 
 const ATTRIBUTE = 'data-input-modality';
 
-// 直前の操作がキーボードかポインタ (マウス・タッチ) かを html に印として持つ。
-// 文字入力欄はクリックで入っても :focus-visible になるので、輪の見た目をこの印で分ける (CSS 側で参照)
+// 直前の操作がキーボードかポインタ (マウス・タッチ) かをhtmlに印として持つ。
+// 文字入力欄はクリックで入っても:focus-visibleになるので、輪の見た目をこの印で分ける (CSS側で参照)
 export function trackInputModality(target: Document): () => void {
   const root = target.documentElement;
   const setModality = (modality: InputModality) => {

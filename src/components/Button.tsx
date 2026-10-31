@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 import { PILL_TAP_AREA_CLASS, TEXT_PILL_TAP_AREA_CLASS } from './tap-area';
 
-// ピル型のボタン。見た目 36、押せる範囲は疑似要素で 44。
+// ピル型のボタン。見た目36、押せる範囲は疑似要素で44。
 // primary = 画面の主役 (保存、この手順を使う)、danger = 確認の実行、quiet = 枠だけ (メインにする)、
 // text / textDanger / textMuted = 文字だけ (自分で登録、削除、案内の閉じる)
 export const buttonVariants = cva(

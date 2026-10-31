@@ -8,7 +8,7 @@ type AlgTextProps = {
   text: string;
   wideStyle: WideStyle;
   isMain?: boolean;
-  // 再生中の手 (手順を展開したときの通し番号)。null なら強調しない
+  // 再生中の手 (手順を展開したときの通し番号)。nullなら強調しない
   currentIndex?: number | null;
   className?: string;
 };
@@ -50,7 +50,7 @@ function MoveSpan({ move, wideStyle, isCurrent, before, after }: MoveSpanProps) 
   );
 }
 
-// 1 動き (M2、U') を 1 語として折り返す。括弧の塊は中も同じ間隔で、括弧だけ薄く
+// 1動き (M2、U') を1語として折り返す。括弧の塊は中も同じ間隔で、括弧だけ薄く
 export function AlgText({ text, wideStyle, isMain = false, currentIndex = null, className }: AlgTextProps) {
   const parsed = parseAlg(text);
   if (!parsed.ok) {
