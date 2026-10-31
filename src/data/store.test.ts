@@ -253,6 +253,17 @@ describe('createDocumentStore', () => {
     expect(storage.getItem(DOCUMENT_KEY)).not.toBe('{not json');
   });
 
+  it('退避に失敗したときは壊れた文書を消さない', () => {
+    const storage = persistedStorage();
+    storage.setItem(DOCUMENT_KEY, '{not json');
+    const write = storage.setItem;
+    storage.setItem = (key, value) =>
+      key === `${DOCUMENT_KEY}.broken` ? { ok: false, error: { kind: 'quotaExceeded' } } : write(key, value);
+    const store = createDocumentStore(storage);
+    expect(store.getState().loadIssue).toBe('brokenDocument');
+    expect(storage.getItem(DOCUMENT_KEY)).toBe('{not json');
+  });
+
   it('形の合わない文書も壊れたものとして扱う', () => {
     const storage = persistedStorage();
     storage.setItem(DOCUMENT_KEY, JSON.stringify({ state: { document: { version: 1 } }, version: 1 }));

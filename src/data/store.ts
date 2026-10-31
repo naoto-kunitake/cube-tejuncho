@@ -61,11 +61,13 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
       }
       const document = readDocument(raw);
       if (document === null) {
+        // 退避できないまま消すと控えが1つも残らないので、退避できたときだけ本体を消す
         const backup = storage.setItem(BROKEN_KEY, raw);
-        if (!backup.ok) {
+        if (backup.ok) {
+          storage.removeItem(key);
+        } else {
           console.error('broken document backup failed', backup.error);
         }
-        storage.removeItem(key);
         issue = 'brokenDocument';
         return null;
       }
