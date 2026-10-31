@@ -4,6 +4,13 @@ import { PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
+// role="tab"は対応するtabpanelを求める。一覧の中身は1つの器で入れ替わるので、器のidを共有する
+export const CATEGORY_PANEL_ID = 'category-panel';
+
+export function categoryTabId(categoryId: string): string {
+  return `category-tab-${categoryId}`;
+}
+
 type CategoryTabsProps = {
   categories: readonly { id: string; label: string }[];
   selectedId: string;
@@ -39,9 +46,11 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
           return (
             <button
               key={id}
+              id={categoryTabId(id)}
               type="button"
               role="tab"
               aria-selected={isSelected}
+              aria-controls={CATEGORY_PANEL_ID}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => {
                 onSelect(id);

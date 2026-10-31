@@ -16,7 +16,7 @@ import { useCategory } from '../hooks/useCategory';
 import { groupByShape } from '../lib/group-by-shape';
 import { homeScreenEnvironmentOf, isHomeScreenHintNeeded } from '../lib/home-screen-hint';
 import { tileNameOf } from '../lib/tile-name';
-import { CategoryTabs } from './CategoryTabs';
+import { CATEGORY_PANEL_ID, categoryTabId, CategoryTabs } from './CategoryTabs';
 import { AddPatternTile, CustomTile } from './CustomTile';
 import { FirstRunBanner } from './FirstRunBanner';
 import { HomeScreenBanner } from './HomeScreenBanner';
@@ -207,7 +207,12 @@ export function ListScreen() {
         </IconLink>
       </TopBar>
       <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
-      <div className="flex flex-col gap-4 px-4 pb-6">
+      <div
+        id={CATEGORY_PANEL_ID}
+        role="tabpanel"
+        aria-labelledby={categoryTabId(categoryId)}
+        className="flex flex-col gap-4 px-4 pb-6"
+      >
         {showsHomeScreenBanner && (
           <HomeScreenBanner
             onDismiss={() => {
