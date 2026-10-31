@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { NoticeDialog } from '@/components/NoticeDialog';
 import { SectionHeading } from '@/components/SectionHeading';
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
@@ -14,7 +15,6 @@ import { cn } from '@/lib/utils';
 
 import { CategoryPickSheet } from './CategoryPickSheet';
 import { ImportSheet } from './ImportSheet';
-import { NoticeDialog } from './NoticeDialog';
 import { ROW_BUTTON_CLASS } from './SettingRow';
 
 const DANGER_ROW_CLASS = cn(ROW_BUTTON_CLASS, 'text-danger');

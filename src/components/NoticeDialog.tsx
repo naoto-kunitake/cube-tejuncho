@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 
-import { Button } from '@/components/Button';
-import { DIALOG_BODY_CLASS, DIALOG_CLASS, DIALOG_TITLE_CLASS } from '@/components/ConfirmDialog';
 import { copy } from '@/copy';
+
+import { Button } from './Button';
+import { DIALOG_BODY_CLASS, DIALOG_CLASS, DIALOG_TITLE_CLASS } from './ConfirmDialog';
 
 type NoticeDialogProps = {
   title: string;
