@@ -178,7 +178,7 @@ export function DataSection() {
           {copy.settings.registerAll}
         </button>
       </div>
-      {/* 破壊的な操作のカードは、区画の間隔8に12を足して離す (モックの決定: カード間12 + 区画内の間隔) */}
+      {/* 破壊的な操作のカードは、区画の間隔8にカード間の12を足して離す */}
       <div className="mt-3 overflow-hidden rounded-md border border-line bg-surface">
         <button
           type="button"
