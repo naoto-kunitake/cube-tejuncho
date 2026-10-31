@@ -109,3 +109,39 @@ export function createEmptyDocument(): Document {
 export function findRegistration(registrations: readonly Registration[], patternId: string): Registration | undefined {
   return registrations.find((entry) => entry.patternId === patternId);
 }
+
+function uniqueBy<T>(entries: readonly T[], idOf: (entry: T) => string): T[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    const id = idOf(entry);
+    if (seen.has(id)) {
+      return false;
+    }
+    seen.add(id);
+    return true;
+  });
+}
+
+// タブ順にないカテゴリはcategoryEntriesOfが辿れず、中のパターンに到達できない。末尾に補う
+function withAllCategories(tabOrder: readonly string[], categories: readonly Category[]): string[] {
+  const missing = categories.filter((category) => !tabOrder.includes(category.id));
+  return [...tabOrder, ...missing.map((category) => category.id)];
+}
+
+// 読み込んだ文書を使える形にそろえる。同じidが2つある参照を落とし、タブ順の取りこぼしを補う
+// (Zodは一意性も参照の整合も見ないので、手で書いたJSONが壊れた形を持ちうる)。
+// 存在しないパターンやカテゴリへの参照は残す (画面側が無視するので害がなく、消すと取り戻せない)
+export function normalizeDocument(document: Document): Document {
+  const categories = uniqueBy(document.categories, (category) => category.id);
+  return {
+    ...document,
+    categories,
+    patterns: uniqueBy(document.patterns, (pattern) => pattern.id),
+    registrations: uniqueBy(document.registrations, (entry) => entry.patternId),
+    pinned: [...new Set(document.pinned)],
+    settings: {
+      ...document.settings,
+      tabOrder: withAllCategories([...new Set(document.settings.tabOrder)], categories),
+    },
+  };
+}

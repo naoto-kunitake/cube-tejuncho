@@ -10,6 +10,7 @@ import {
   type Document,
   DOCUMENT_VERSION,
   DocumentSchema,
+  normalizeDocument,
   type RegistrationData,
   type Settings,
 } from './document';
@@ -52,7 +53,7 @@ function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
         return err('newerDocument');
       }
       const result = DocumentSchema.safeParse(migrateDocument(state.document));
-      return result.success ? ok(result.data) : err('brokenDocument');
+      return result.success ? ok(normalizeDocument(result.data)) : err('brokenDocument');
     } catch {
       return err('brokenDocument');
     }
