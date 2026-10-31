@@ -71,7 +71,7 @@ export type ViewSettings = {
 
 export const FRONT_COLOR_LETTER: Record<FrontColor, StickerColor> = { green: 'G', red: 'R', blue: 'B', orange: 'O' };
 
-// 白上はx2で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
+// 白上はz2で持ち替えた状態。上面の対応 (黄↔白、赤↔橙) を先に当て、側面の並び (前→右→後→左) もそれに合わせる
 const WHITE_TOP: Record<StickerColor, StickerColor> = { Y: 'W', W: 'Y', R: 'O', O: 'R', G: 'G', B: 'B' };
 const SIDE_SEQUENCE: Record<TopColor, readonly StickerColor[]> = {
   yellow: ['G', 'O', 'B', 'R'],
