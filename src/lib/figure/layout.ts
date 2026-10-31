@@ -1,7 +1,8 @@
-// 標準形の寸法 (viewBoxは7 7 86 86)。モックで決めた値をそのまま使う
+// 標準形の寸法。viewBox 86のうち外側4を空け、中身 (側面の帯の外周) を78に収める (F2Lの等角投影と同じ規則)。
+// 中身 = 帯8 × 2 + 空き3 × 2 + セル17.6 × 3 + 隙間1.6 × 2 = 78
 export const FIGURE_LAYOUT = {
   viewBox: '7 7 86 86',
-  cell: 18,
+  cell: 17.6,
   gap: 1.6,
   origin: 22,
   sideThickness: 8,

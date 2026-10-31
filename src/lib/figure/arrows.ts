@@ -9,10 +9,10 @@ const TIP_EXTENSION = 0.2 * cell;
 const CYCLE_SHIFT = 0.25 * cell;
 const EDGE_CYCLE_SHIFT = 0.15 * cell;
 const EDGE_CYCLE_TAIL = 0.25 * cell;
-// 軸の半幅、矢じりの長さ、矢じりの半幅 (参考図の比率)
+// 軸の半幅、矢じりの長さ、矢じりの半幅 (参考図の比率)。矢じりはセルに比例させ、セルを変えても太さの釣り合いを保つ
 const SHAFT_HALF_WIDTH = 0.7;
-const HEAD_LENGTH = 5.4;
-const HEAD_HALF_WIDTH = 2.7;
+const HEAD_LENGTH = 0.3 * cell;
+const HEAD_HALF_WIDTH = 0.15 * cell;
 
 const LOW = cellPosition(0) + INSET;
 const HIGH = cellPosition(2) + cell - INSET;
