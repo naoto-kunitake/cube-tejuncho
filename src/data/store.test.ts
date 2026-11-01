@@ -81,6 +81,16 @@ describe('createDocumentStore', () => {
     expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
   });
 
+  it('知らせを閉じても1世代前の控えを流さない', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addRegistration('pll-ub', UA_ALG);
+    const previous = storage.getItem(`${DOCUMENT_KEY}.prev`);
+    store.getState().dismissLoadIssue();
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
+  });
+
   it('起動後に保存が容量超過で失敗したら知らせる', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);

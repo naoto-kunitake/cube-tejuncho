@@ -122,6 +122,15 @@ describe('createDocumentStorage の保存', () => {
     expect(storage.getItem(PREVIOUS_KEY)).toBe(FIRST);
   });
 
+  it('同じ内容の保存では控えを流さない', () => {
+    const storage = persistedStorage();
+    const documentStorage = createDocumentStorage(storage);
+    documentStorage.setItem(DOCUMENT_KEY, FIRST);
+    documentStorage.setItem(DOCUMENT_KEY, SECOND);
+    documentStorage.setItem(DOCUMENT_KEY, SECOND);
+    expect(storage.getItem(PREVIOUS_KEY)).toBe(FIRST);
+  });
+
   it('最初の保存では控えを作らない', () => {
     const storage = persistedStorage();
     createDocumentStorage(storage).setItem(DOCUMENT_KEY, FIRST);

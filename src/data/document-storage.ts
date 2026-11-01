@@ -95,6 +95,11 @@ export function createDocumentStorage(storage: KeyValueStorage): DocumentStorage
         return;
       }
       const previous = storage.getItem(key);
+      // 同じ内容の保存は捨てる。書いても控えが現在の文書で流れるだけで、1世代前が失われる。
+      // storeのupdateDocumentは文書を変えないactionを止めるが、文書に触れずにsetする知らせの更新はここでしか止まらない
+      if (previous === value) {
+        return;
+      }
       if (previous !== null) {
         const backup = storage.setItem(PREVIOUS_KEY, previous);
         if (!backup.ok) {

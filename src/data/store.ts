@@ -90,7 +90,8 @@ export function createDocumentStore(storage: KeyValueStorage) {
           }
         };
         // 文書を書き換える唯一の道。保存と知らせがsetに付いて回るので、actionごとに書かずここへ集める。
-        // 同じ文書を返したときは何もしない (persistはsetのたびに書き、1世代前の控えが現在の文書で流れてしまう)
+        // 同じ文書を返したときは何もしない (persistはsetのたびに書き、1世代前の控えが現在の文書で流れてしまう)。
+        // 文書に触れないset (dismissLoadIssue) はここを通らないので、その保存はdocument-storage.tsの内容比較が止める
         const updateDocument = (update: (document: Document) => Document) => {
           const current = get().document;
           const next = update(current);
