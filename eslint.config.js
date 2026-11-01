@@ -145,6 +145,9 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
       'no-param-reassign': 'error',
       'max-depth': ['error', 3],
+      // 1ファイル1つの主題 (project-structure)。目安は400行で、ここは機械の上限。
+      // 空行とコメントは数えない (「なぜ」のコメントを書くほど分割を迫られるのは本意でない)
+      'max-lines': ['error', { max: 450, skipBlankLines: true, skipComments: true }],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
     },
   },
@@ -227,6 +230,16 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+
+  // プリセットのデータと文言は表なので、行数で割らない (責務の境界がない)。
+  // 同じ場所にあるテストと見本データは表ではないので、対象に残す
+  {
+    files: ['src/data/presets/**', 'src/copy.ts'],
+    ignores: ['src/data/presets/**/*.test.ts', 'src/data/presets/preset.fixtures.ts'],
+    rules: {
+      'max-lines': 'off',
     },
   },
 
