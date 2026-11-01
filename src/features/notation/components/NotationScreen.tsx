@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { CubeFigure } from '@/components/figures/CubeFigure';
+import { IconButton } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { ROW_CARD_CLASS } from '@/components/row-card';
 import { BackLink, Screen, ScreenBody, ScreenHeader } from '@/components/Screen';
@@ -52,16 +53,16 @@ function NotationRowItem({ row, onPlay }: NotationRowProps) {
         {text.sub !== undefined && <span className="mt-0.5 block text-label text-muted">{text.sub}</span>}
       </span>
       {move !== null && (
-        <button
-          type="button"
-          aria-label={copy.a11y.playMove(row.symbol)}
-          className="relative -mr-2 inline-grid size-9 flex-none place-items-center rounded-full text-ink pressable before:absolute before:-inset-1 before:rounded-full hover:bg-hover active:scale-96 active:bg-press"
+        <IconButton
+          label={copy.a11y.playMove(row.symbol)}
+          on="surface"
+          className="-mr-2"
           onClick={() => {
             onPlay(move.alg);
           }}
         >
           <Play size={16} strokeWidth={2} fill="currentColor" className="ml-0.5" aria-hidden="true" />
-        </button>
+        </IconButton>
       )}
     </div>
   );

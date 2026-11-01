@@ -1,6 +1,8 @@
 import { Menu } from 'lucide-react';
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useState } from 'react';
 
+import { BAR_ICON_PROPS } from '@/components/icon';
+import { ICON_BUTTON_BASE_CLASS } from '@/components/IconButton';
 import { ROW_CARD_CLASS } from '@/components/row-card';
 import { copy } from '@/copy';
 import type { CategoryEntry } from '@/data/categories';
@@ -125,7 +127,8 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
                 aria-label={copy.a11y.reorderHandle(category.label)}
                 aria-describedby={REORDER_HINT_ID}
                 className={cn(
-                  'relative -mr-2.5 inline-grid size-9 flex-none cursor-grab touch-none place-items-center rounded-full text-muted pressable before:absolute before:-inset-1 before:rounded-full hover:bg-hover hover:text-ink',
+                  ICON_BUTTON_BASE_CLASS,
+                  '-mr-2.5 cursor-grab touch-none text-muted hover:bg-hover hover:text-ink',
                   isLifted && 'cursor-grabbing',
                 )}
                 onPointerDown={(event) => {
@@ -138,7 +141,7 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
                   moveByArrow(event, index);
                 }}
               >
-                <Menu size={22} strokeWidth={1.8} aria-hidden="true" />
+                <Menu {...BAR_ICON_PROPS} />
               </button>
             </div>
           );

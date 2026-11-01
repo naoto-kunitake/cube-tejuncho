@@ -1,31 +1,46 @@
+import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentProps } from 'react';
 import { Link } from 'react-router';
 
 import { cn } from '@/lib/utils';
 
-// 見た目36px、押せる範囲は疑似要素で44px。地の上 (トップバー) に置くのでhover / 押下は1段濃い色
-const ICON_BUTTON_CLASS =
-  'pressable relative inline-grid size-9 flex-none place-items-center rounded-full text-ink before:absolute before:-inset-1 before:rounded-full hover:bg-hover-ground active:scale-96 active:bg-press-ground';
+// 36pxの丸の形と、疑似要素で広げた44pxの押せる範囲。色と押下の演出は使う側で決める
+// (並べ替えのハンドルは押すとドラッグに変わるので、縮む演出を付けない)
+export const ICON_BUTTON_BASE_CLASS =
+  'pressable relative inline-grid size-9 flex-none place-items-center rounded-full before:absolute before:-inset-1 before:rounded-full';
 
-type IconButtonProps = ComponentProps<'button'> & {
-  label: string;
-};
+// 置く面でhover / 押下の濃さが変わる。地の上 (トップバー) は1段濃く、白い面の上 (行) は薄く
+const iconButtonVariants = cva(cn(ICON_BUTTON_BASE_CLASS, 'text-ink active:scale-96'), {
+  variants: {
+    on: {
+      ground: 'hover:bg-hover-ground active:bg-press-ground',
+      surface: 'hover:bg-hover active:bg-press',
+    },
+  },
+  defaultVariants: { on: 'ground' },
+});
 
-export function IconButton({ label, className, children, ...props }: IconButtonProps) {
+type IconButtonProps = ComponentProps<'button'> &
+  VariantProps<typeof iconButtonVariants> & {
+    label: string;
+  };
+
+export function IconButton({ label, on, className, children, ...props }: IconButtonProps) {
   return (
-    <button type="button" aria-label={label} className={cn(ICON_BUTTON_CLASS, className)} {...props}>
+    <button type="button" aria-label={label} className={cn(iconButtonVariants({ on }), className)} {...props}>
       {children}
     </button>
   );
 }
 
-type IconLinkProps = ComponentProps<typeof Link> & {
-  label: string;
-};
+type IconLinkProps = ComponentProps<typeof Link> &
+  VariantProps<typeof iconButtonVariants> & {
+    label: string;
+  };
 
-export function IconLink({ label, className, children, ...props }: IconLinkProps) {
+export function IconLink({ label, on, className, children, ...props }: IconLinkProps) {
   return (
-    <Link aria-label={label} className={cn(ICON_BUTTON_CLASS, className)} {...props}>
+    <Link aria-label={label} className={cn(iconButtonVariants({ on }), className)} {...props}>
       {children}
     </Link>
   );

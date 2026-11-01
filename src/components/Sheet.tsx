@@ -4,6 +4,7 @@ import { type ReactNode, useEffect } from 'react';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
+import { BAR_ICON_PROPS } from './icon';
 import { IconButton } from './IconButton';
 import { useModalDialog } from './useModalDialog';
 
@@ -66,7 +67,7 @@ export function SheetHeader({ title, onClose }: SheetHeaderProps) {
     <div className="flex items-center justify-between gap-2">
       <h2 className="min-w-0 flex-1 truncate text-input font-bold text-ink-strong">{title}</h2>
       <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
-        <X size={22} strokeWidth={1.8} aria-hidden="true" />
+        <X {...BAR_ICON_PROPS} />
       </IconButton>
     </div>
   );

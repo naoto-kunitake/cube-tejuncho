@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { BAR_ICON_PROPS } from './icon';
 import { IconLink } from './IconButton';
 
 // 画面の題と操作を1行に。高さと上の余白は端末で変える (スマホ・タブレットは52 / 4、PCは64 / 16。pt-barを参照)。
@@ -84,7 +85,7 @@ type BackLinkProps = {
 export function BackLink({ to, label }: BackLinkProps) {
   return (
     <IconLink to={to} label={label} className="-ml-1.75">
-      <ChevronLeft size={22} strokeWidth={1.8} aria-hidden="true" />
+      <ChevronLeft {...BAR_ICON_PROPS} />
     </IconLink>
   );
 }

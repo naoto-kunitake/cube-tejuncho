@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { PatternFigures } from '@/components/figures/PatternFigures';
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { BackLink, Screen, ScreenHeader } from '@/components/Screen';
@@ -193,10 +194,10 @@ export function DetailScreen() {
                   togglePin(id);
                 }}
               >
-                <Pin size={22} strokeWidth={1.8} fill={isPinned ? 'currentColor' : 'none'} aria-hidden="true" />
+                <Pin {...BAR_ICON_PROPS} fill={isPinned ? 'currentColor' : 'none'} />
               </IconButton>
               <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
-                <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
+                <Pencil {...BAR_ICON_PROPS} />
               </IconLink>
             </>
           )

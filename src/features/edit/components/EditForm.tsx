@@ -6,6 +6,7 @@ import { Button } from '@/components/Button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
 import { PatternFigures } from '@/components/figures/PatternFigures';
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { ScreenBody, ScreenHeader } from '@/components/Screen';
 import { useToastStore } from '@/components/toast/toast-store';
@@ -258,7 +259,7 @@ export function EditForm({
               }
             }}
           >
-            <X size={22} strokeWidth={1.8} aria-hidden="true" />
+            <X {...BAR_ICON_PROPS} />
           </IconButton>
         }
         trailing={

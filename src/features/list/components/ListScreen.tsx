@@ -1,6 +1,7 @@
 import { LayoutGrid, List, Settings as SettingsIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { Screen, ScreenHeader } from '@/components/Screen';
 import { Section } from '@/components/Section';
@@ -209,14 +210,10 @@ export function ListScreen() {
                 setListView(isList ? 'grid' : 'list');
               }}
             >
-              {isList ? (
-                <LayoutGrid size={22} strokeWidth={1.8} aria-hidden="true" />
-              ) : (
-                <List size={22} strokeWidth={1.8} aria-hidden="true" />
-              )}
+              {isList ? <LayoutGrid {...BAR_ICON_PROPS} /> : <List {...BAR_ICON_PROPS} />}
             </IconButton>
             <IconLink to="/settings" label={copy.a11y.openSettings}>
-              <SettingsIcon size={22} strokeWidth={1.8} aria-hidden="true" />
+              <SettingsIcon {...BAR_ICON_PROPS} />
             </IconLink>
           </>
         }

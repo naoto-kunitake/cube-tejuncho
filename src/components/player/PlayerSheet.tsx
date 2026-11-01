@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useRef } from 'react';
 
 import { AlgText } from '@/components/AlgText';
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { Sheet } from '@/components/Sheet';
 import { PILL_TAP_AREA_CLASS } from '@/components/tap-area';
@@ -29,7 +30,7 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
     <Sheet label={copy.a11y.playerSheet} onClose={onClose}>
       <div className="flex items-center justify-end">
         <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
-          <X size={22} strokeWidth={1.8} aria-hidden="true" />
+          <X {...BAR_ICON_PROPS} />
         </IconButton>
       </div>
       <div className="relative mx-auto aspect-square w-full max-w-70 overflow-hidden rounded-lg bg-surface-2">
