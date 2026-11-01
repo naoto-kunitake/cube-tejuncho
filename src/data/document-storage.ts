@@ -8,7 +8,7 @@ export const DOCUMENT_KEY = 'cube-tejuncho:doc';
 const PREVIOUS_KEY = `${DOCUMENT_KEY}.prev`;
 const BROKEN_KEY = `${DOCUMENT_KEY}.broken`;
 
-export type LoadIssue = 'brokenDocument' | 'newerDocument' | 'storageUnavailable' | 'quotaExceeded';
+export type StorageIssue = 'brokenDocument' | 'newerDocument' | 'storageUnavailable' | 'quotaExceeded';
 
 type PersistedShape = { state: { document: Document }; version: number };
 
@@ -21,14 +21,14 @@ type DocumentStorage = {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
   removeItem: (key: string) => void;
-  takeIssue: () => LoadIssue | null;
+  takeIssue: () => StorageIssue | null;
   // 新しい版の文書があるときは書き込みを止めている。下書きの消去も同じ判断に揃えるために外から問える
   isSaveBlocked: () => boolean;
 };
 
 // persistに渡す包み。読み込みでmigrate → Zodを通し、壊れた文書は退避して空で始める。保存は前の文書を1世代残す
 export function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
-  let issue: LoadIssue | null = storage.isPersistent ? null : 'storageUnavailable';
+  let issue: StorageIssue | null = storage.isPersistent ? null : 'storageUnavailable';
   let hasRequestedPersistence = false;
   // issueは1回で消えるので、保存を止め続ける印は別に持つ
   let hasNewerDocument = false;

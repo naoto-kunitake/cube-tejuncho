@@ -13,7 +13,7 @@ import {
   type Settings,
   withRegistration,
 } from './document';
-import { createDocumentStorage, DOCUMENT_KEY, type LoadIssue } from './document-storage';
+import { createDocumentStorage, DOCUMENT_KEY, type StorageIssue } from './document-storage';
 import { createDraftStore } from './draft';
 import { applyImport, type ImportMode } from './import-data';
 import { hasPresets, type PresetCategoryId, presetsOf } from './presets/catalog';
@@ -27,7 +27,7 @@ export type BannerId = PresetCategoryId | typeof HOME_SCREEN_BANNER;
 
 export type DocumentStore = {
   document: Document;
-  loadIssue: LoadIssue | null;
+  storageIssue: StorageIssue | null;
   addRegistration: (patternId: string, mainAlg: AlgEntry) => void;
   saveRegistration: (patternId: string, data: RegistrationData) => void;
   removeRegistration: (patternId: string) => void;
@@ -57,7 +57,7 @@ export type DocumentStore = {
   // 登録・自作・カテゴリ・設定をすべて既定に戻す
   resetDocument: () => void;
   dismissBanner: (banner: BannerId) => void;
-  dismissLoadIssue: () => void;
+  dismissStorageIssue: () => void;
 };
 
 export function createDocumentStore(storage: KeyValueStorage) {
@@ -77,7 +77,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
   };
   // persistの読み込みより先に自分で読んで、読み込みの問題を確定させる (読むだけなので保存は起きない)
   void documentStorage.getItem(DOCUMENT_KEY);
-  const initialLoadIssue = documentStorage.takeIssue();
+  const initialStorageIssue = documentStorage.takeIssue();
 
   const store = create<DocumentStore>()(
     persist(
@@ -86,12 +86,12 @@ export function createDocumentStore(storage: KeyValueStorage) {
         const reportStorageIssue = () => {
           const issue = documentStorage.takeIssue();
           if (issue !== null) {
-            set({ loadIssue: issue });
+            set({ storageIssue: issue });
           }
         };
         // 文書を書き換える唯一の道。保存と知らせがsetに付いて回るので、actionごとに書かずここへ集める。
         // 同じ文書を返したときは何もしない (persistはsetのたびに書き、1世代前の控えが現在の文書で流れてしまう)。
-        // 文書に触れないset (dismissLoadIssue) はここを通らないので、その保存はdocument-storage.tsの内容比較が止める
+        // 文書に触れないset (dismissStorageIssue) はここを通らないので、その保存はdocument-storage.tsの内容比較が止める
         const updateDocument = (update: (document: Document) => Document) => {
           const current = get().document;
           const next = update(current);
@@ -107,7 +107,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
         };
         return {
           document: createEmptyDocument(),
-          loadIssue: initialLoadIssue,
+          storageIssue: initialStorageIssue,
           addRegistration: (patternId, mainAlg) => {
             updateDocument((document) => {
               const existing = findRegistration(document.registrations, patternId);
@@ -287,8 +287,8 @@ export function createDocumentStore(storage: KeyValueStorage) {
           setListView: (listView) => {
             updateSettings({ listView });
           },
-          dismissLoadIssue: () => {
-            set({ loadIssue: null });
+          dismissStorageIssue: () => {
+            set({ storageIssue: null });
           },
         };
       },
