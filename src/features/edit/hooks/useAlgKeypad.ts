@@ -1,7 +1,7 @@
 import { type RefObject, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
-import { applyEdit, clearingFor, deletionFor, insertionFor, type KeypadKey, type TextEdit } from '../keypad';
+import { applyEdit, clearingFor, deletionFor, insertionFor, type KeypadKey, type TextEdit } from '../lib/keypad';
 
 // 手順の欄のinput要素。焦点の制御も同じ表を見るので、画面側のrefを借りる
 type AlgInputs = RefObject<Map<number, HTMLInputElement>>;

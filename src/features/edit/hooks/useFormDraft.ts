@@ -4,7 +4,7 @@ import type { ToastAction } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import type { DraftData, DraftStore } from '@/data/draft';
 
-import { type EditForm, entriesOf, formSnapshot } from '../edit-state';
+import { type EditForm, entriesOf, formSnapshot } from '../lib/edit-state';
 
 // 入力のたびに書く下書きは300msまとめる (打鍵ごとにlocalStorageへ書かない)
 const DRAFT_DEBOUNCE_MS = 300;

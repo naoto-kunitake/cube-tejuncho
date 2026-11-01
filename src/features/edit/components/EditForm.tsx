@@ -21,6 +21,9 @@ import { describeF2l } from '@/lib/figure/describe-f2l';
 import { cueView, recolorView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
+import { useAlgKeypad } from '../hooks/useAlgKeypad';
+import { useFormDraft } from '../hooks/useFormDraft';
+import { useOwnToast } from '../hooks/useOwnToast';
 import {
   type EditCard,
   EMPTY_CARD,
@@ -34,10 +37,7 @@ import {
   registrationDataFrom,
   removeCard,
   standardAlgToAdd,
-} from '../edit-state';
-import { useAlgKeypad } from '../hooks/useAlgKeypad';
-import { useFormDraft } from '../hooks/useFormDraft';
-import { useOwnToast } from '../hooks/useOwnToast';
+} from '../lib/edit-state';
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad } from './AlgKeypad';
 

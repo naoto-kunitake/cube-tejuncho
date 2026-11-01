@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
-import { ACTION_KEYS, type ActionKey, CHARACTER_KEYS, type KeypadKey } from '../keypad';
+import { ACTION_KEYS, type ActionKey, CHARACTER_KEYS, type KeypadKey } from '../lib/keypad';
 
 type AlgKeypadProps = {
   onKey: (key: KeypadKey) => void;

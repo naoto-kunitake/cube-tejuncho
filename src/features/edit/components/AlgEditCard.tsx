@@ -7,7 +7,7 @@ import { SECTION_LABEL_CLASS } from '@/components/SectionHeading';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
-import { algErrorOf, type EditCard } from '../edit-state';
+import { algErrorOf, type EditCard } from '../lib/edit-state';
 
 type AlgEditCardProps = {
   index: number;
