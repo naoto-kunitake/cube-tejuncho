@@ -18,8 +18,9 @@ src/
   features/     画面ごと: list/ detail/ edit/ settings/ notation/
                 各featureはcomponents/とhooks/とlib/ (その画面だけの純粋なロジック) を持ち、
                 外にはindex.tsだけを公開する
-  components/   2つ以上の画面が使うUI。ui/ (shadcnのコピー)、figures/ (図のSVG)、再生シート、確認ダイアログ、トースト
-  lib/          純粋なTypeScript: alg/ (正規化・検証・逆手順)、cube/ (cubing.jsの包み)、figure/ (色の決定)、sort/、result.ts
+  components/   2つ以上の画面が使うUI。figures/ (図のSVG)、再生シート、確認ダイアログ、トースト、知らせ
+  lib/          純粋なTypeScript: alg/ (正規化・検証・逆手順)、cube/ (cubing.jsの包み)、figure/ (色と寸法の決定)、
+                theme/ (テーマ色の計算)、result.ts
   data/         保存文書 (Zod)、storage、移行、書き出し / 読み込み、presets/ (PLL / OLL / F2Lと基本手順)
   copy.ts       画面の文言
 ```
@@ -49,5 +50,4 @@ pages / widgets / entitiesのような層は作らない。必要になったと
 ## ファイル
 
 - Reactの部品は`PascalCase.tsx`、それ以外は`kebab-case.ts`。テストは対象の隣に`*.test.ts`
-- `components/ui/`はshadcnが生成した名前のまま
-- 1ファイル1つの主題。200〜400行を目安にし、超えたら責務の境界で分ける
+- 1ファイル1つの主題。200〜400行を目安にし、超えたら責務の境界で分ける。ESLintは450行で止める (空行とコメントは数えない。プリセットのデータと`copy.ts`は表なので対象外)

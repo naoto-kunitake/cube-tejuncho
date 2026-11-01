@@ -40,7 +40,7 @@
 本文は次のスキルが正。該当するファイルを触ると自動で読まれる。
 
 - `coding-style`: TypeScriptの書き方、コメント、関数設計、エラーの扱い
-- `frontend-patterns`: React、状態 (Zustand)、スタイル (Tailwind v4 + トークン + shadcn)、文言、アクセシビリティ
+- `frontend-patterns`: React、状態 (Zustand)、スタイル (Tailwind v4 + トークン)、文言、アクセシビリティ
 - `project-structure`: ディレクトリ構成と依存の向き、命名、barrelの扱い
 
 ## 用語の対応表
