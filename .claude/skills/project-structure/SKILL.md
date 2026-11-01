@@ -16,7 +16,8 @@ paths:
 src/
   app/          起動、ルーティング、providers、PWAの登録、tokens.css
   features/     画面ごと: list/ detail/ edit/ settings/ notation/
-                各featureはcomponents/とhooks/を持ち、外にはindex.tsだけを公開する
+                各featureはcomponents/とhooks/とlib/ (その画面だけの純粋なロジック) を持ち、
+                外にはindex.tsだけを公開する
   components/   2つ以上の画面が使うUI。ui/ (shadcnのコピー)、figures/ (図のSVG)、再生シート、確認ダイアログ、トースト
   lib/          純粋なTypeScript: alg/ (正規化・検証・逆手順)、cube/ (cubing.jsの包み)、figure/ (色の決定)、sort/、result.ts
   data/         保存文書 (Zod)、storage、移行、書き出し / 読み込み、presets/ (PLL / OLL / F2Lと基本手順)
@@ -34,7 +35,7 @@ pages / widgets / entitiesのような層は作らない。必要になったと
 
 ## 置き場所の判断
 
-- 1つの画面だけが使う部品やhookは、そのfeatureの中に置く
+- 1つの画面だけが使う部品やhookは、そのfeatureの中に置く。部品は`components/`、hookは`hooks/`、画面に依存しない計算は`lib/`
 - 2つ以上の画面が使うようになった時点で`components` (UI) か`lib` (純粋なロジック) へ移す。先回りで移さない
 - 再生シート、確認ダイアログ、トーストは最初から`components` (詳細と回転記号、全画面が使う)
 - キーパッドは`features/edit`の中で始める。2か所目が出たら移す

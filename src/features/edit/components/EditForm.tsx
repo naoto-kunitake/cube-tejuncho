@@ -1,6 +1,5 @@
 import { Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router';
 
 import { Button } from '@/components/Button';
@@ -22,14 +21,14 @@ import { describeF2l } from '@/lib/figure/describe-f2l';
 import { cueView, recolorView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
+import { useAlgKeypad } from '../hooks/useAlgKeypad';
+import { useFormDraft } from '../hooks/useFormDraft';
+import { useOwnToast } from '../hooks/useOwnToast';
 import {
   type EditCard,
-  type EditForm as EditFormValue,
   EMPTY_CARD,
-  entriesOf,
   formFrom,
   formFromEntries,
-  formSnapshot,
   hasInvalidCard,
   insertCard,
   isCardEmpty,
@@ -38,13 +37,10 @@ import {
   registrationDataFrom,
   removeCard,
   standardAlgToAdd,
-} from '../edit-state';
-import { applyEdit, clearingFor, deletionFor, insertionFor, type KeypadKey, type TextEdit } from '../keypad';
+} from '../lib/edit-state';
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad } from './AlgKeypad';
 
-// 入力のたびに書く下書きは300msまとめる (打鍵ごとにlocalStorageへ書かない)
-const DRAFT_DEBOUNCE_MS = 300;
 // 新規の下書きはパターンのidがまだないので固定の鍵
 const NEW_DRAFT_ID = 'new';
 
@@ -61,7 +57,9 @@ type EditFormProps = {
   draftStore?: DraftStore;
 };
 
-type PendingDelete = { index: number; card: EditCard };
+// 同時に1つしか開かない確認。開いていないときはnull
+type EditDialog =
+  { kind: 'deleteCard'; index: number; card: EditCard } | { kind: 'discard' } | { kind: 'deletePattern' };
 
 const ADD_ROW_CLASS =
   'flex min-h-11 w-full items-center gap-2 rounded-md border border-dashed border-line-state bg-surface px-3.5 text-left text-body font-medium text-muted pressable hover:border-line-strong hover:bg-hover';
@@ -132,41 +130,30 @@ export function EditForm({
   const updateCustomPattern = useDocumentStore((state) => state.updateCustomPattern);
   const removeCustomPattern = useDocumentStore((state) => state.removeCustomPattern);
   const replaceDocument = useDocumentStore((state) => state.replaceDocument);
+  // 画面を離れた先で読ませる知らせ (登録を消した、パターンを消した) はストアのshowを直に使う
   const showToast = useToastStore((state) => state.show);
-  const dismissToast = useToastStore((state) => state.dismiss);
+  const showOwnToast = useOwnToast();
   const draftId = draftIdOf(target);
   const isCustom = target.kind !== 'preset';
   const fields = fieldsOf(target);
-  const saved = formFrom(registration, fields);
-  const baseSnapshot = formSnapshot(saved);
-  // 書きかけがあれば復元して知らせる (黙って上書きしない)
-  const [initial] = useState(() => {
-    const draft = draftStore.read(draftId);
-    return draft === null
-      ? { form: saved, isRestored: false }
-      : {
-          form: formFromEntries(
-            isCustom ? { name: draft.name, categoryId: draft.categoryId || fields.categoryId } : fields,
-            draft.recognition,
-            draft.cards,
-          ),
-          isRestored: true,
-        };
+  const draft = useFormDraft({
+    draftStore,
+    draftId,
+    savedForm: formFrom(registration, fields),
+    formFromDraft: (entry) =>
+      formFromEntries(
+        isCustom ? { name: entry.name, categoryId: entry.categoryId || fields.categoryId } : fields,
+        entry.recognition,
+        entry.cards,
+      ),
+    showOwnToast,
   });
-  const [form, setForm] = useState<EditFormValue>(initial.form);
+  const { form, setForm, isDirty } = draft;
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(initialFocus);
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [isDiscarding, setIsDiscarding] = useState(false);
-  const [isDeletingPattern, setIsDeletingPattern] = useState(false);
-  // キーパッドが効く手順の欄。欄を離れたら閉じる。「キーボード」で端末のキーボードに切り替えたら、その欄を離れるまで出さない
-  const [keypadIndex, setKeypadIndex] = useState<number | null>(null);
-  const [usesNativeKeyboard, setUsesNativeKeyboard] = useState(false);
-  const isSwitchingKeyboardRef = useRef(false);
+  const [dialog, setDialog] = useState<EditDialog | null>(null);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
-  // この画面が出した知らせ (復元、手順の削除) は、画面を離れたら消す (取り消しの先がもうない)
-  const ownToastRef = useRef<number | null>(null);
+  const keypad = useAlgKeypad(inputsRef);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
-  const isDirty = formSnapshot(form) !== baseSnapshot;
   // 自作は名前が必須
   const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
@@ -193,47 +180,6 @@ export function EditForm({
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
 
   useEffect(() => {
-    if (!initial.isRestored) {
-      return;
-    }
-    ownToastRef.current = showToast(copy.edit.restoredDraft, {
-      label: copy.edit.discard,
-      run: () => {
-        draftStore.remove(draftId);
-        setForm(formFrom(registration, fields));
-      },
-    });
-    // fieldsはtargetから毎回作られるので、targetを依存に置く
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initial.isRestored, showToast, draftStore, draftId, registration, target]);
-
-  useEffect(() => {
-    return () => {
-      if (ownToastRef.current !== null && useToastStore.getState().toast?.id === ownToastRef.current) {
-        dismissToast();
-      }
-    };
-  }, [dismissToast]);
-
-  useEffect(() => {
-    if (!isDirty) {
-      draftStore.remove(draftId);
-      return;
-    }
-    const timer = setTimeout(() => {
-      draftStore.write(draftId, {
-        name: form.name,
-        categoryId: form.categoryId,
-        recognition: form.recognition,
-        cards: entriesOf(form.cards),
-      });
-    }, DRAFT_DEBOUNCE_MS);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [form, isDirty, draftId, draftStore]);
-
-  useEffect(() => {
     if (focusTarget === null) {
       return;
     }
@@ -251,11 +197,15 @@ export function EditForm({
     setFocusTarget({ kind: 'alg', index: form.cards.length });
   };
 
+  const closeDialog = () => {
+    setDialog(null);
+  };
+
   const deleteCard = (index: number, card: EditCard) => {
-    setPendingDelete(null);
+    closeDialog();
     setFocusTarget(null);
     setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
-    ownToastRef.current = showToast(copy.edit.deletedAlg, {
+    showOwnToast(copy.edit.deletedAlg, {
       label: copy.toast.undo,
       run: () => {
         setForm((current) => ({ ...current, cards: insertCard(current.cards, index, card) }));
@@ -263,49 +213,8 @@ export function EditForm({
     });
   };
 
-  // 欄の値と選択範囲を直接書き換えてinputイベントを投げる。Reactが値を入れ直さないので、カーソルの位置が保てる
-  const editActiveInput = (edit: (value: string, start: number, end: number) => TextEdit) => {
-    if (keypadIndex === null) {
-      return;
-    }
-    const input = inputsRef.current.get(keypadIndex);
-    if (input === undefined) {
-      return;
-    }
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    const next = applyEdit(input.value, edit(input.value, start, end));
-    input.setRangeText(next.value, 0, input.value.length, 'preserve');
-    input.setSelectionRange(next.caret, next.caret);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  };
-
-  const pressKey = (key: KeypadKey) => {
-    if (key === 'keyboard') {
-      const input = keypadIndex === null ? undefined : inputsRef.current.get(keypadIndex);
-      if (input === undefined) {
-        return;
-      }
-      // 焦点のある欄のinputModeを外しただけでは端末のキーボードは開かない。属性を先に反映させてから焦点を入れ直す。
-      // iOSは利用者の操作の中でしかキーボードを開かないので、後回しにせず同じ押下の中で行う
-      isSwitchingKeyboardRef.current = true;
-      flushSync(() => {
-        setUsesNativeKeyboard(true);
-      });
-      input.blur();
-      input.focus();
-      isSwitchingKeyboardRef.current = false;
-    } else if (key === 'backspace') {
-      editActiveInput((_value, start, end) => deletionFor(start, end));
-    } else if (key === 'clear') {
-      editActiveInput((value) => clearingFor(value));
-    } else {
-      editActiveInput((value, start, end) => insertionFor(value, start, end, key));
-    }
-  };
-
   const close = (path = backPath) => {
-    draftStore.remove(draftId);
+    draft.remove();
     void navigate(path, { replace: true });
   };
 
@@ -346,7 +255,7 @@ export function EditForm({
     }
     const before = useDocumentStore.getState().document;
     const { id, name, categoryId } = target.pattern;
-    setIsDeletingPattern(false);
+    closeDialog();
     removeCustomPattern(id);
     close(`/?category=${categoryId}`);
     showToast(copy.edit.deletedPattern(name), {
@@ -366,7 +275,7 @@ export function EditForm({
             className="-ml-1.75"
             onClick={() => {
               if (isDirty) {
-                setIsDiscarding(true);
+                setDialog({ kind: 'discard' });
               } else {
                 close();
               }
@@ -381,7 +290,7 @@ export function EditForm({
         </Button>
       </TopBar>
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
-      <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypadIndex !== null && !usesNativeKeyboard && 'pb-60')}>
+      <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypad.isOpen && 'pb-60')}>
         {target.kind === 'preset' && <EditFigure preset={target.preset} settings={settings} />}
         {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
         {isCustom && (
@@ -439,21 +348,14 @@ export function EditForm({
                   inputsRef.current.set(index, element);
                 }
               }}
-              usesKeypad={!usesNativeKeyboard}
+              usesKeypad={keypad.usesKeypad}
               onChange={(next) => {
                 updateCard(index, next);
               }}
               onFocus={() => {
-                setKeypadIndex(index);
+                keypad.openAt(index);
               }}
-              onBlur={() => {
-                if (isSwitchingKeyboardRef.current) {
-                  return false;
-                }
-                setKeypadIndex(null);
-                setUsesNativeKeyboard(false);
-                return true;
-              }}
+              onBlur={keypad.closeOnBlur}
               onMakeMain={() => {
                 setForm((current) => ({ ...current, cards: moveCardToFront(current.cards, index) }));
               }}
@@ -462,7 +364,7 @@ export function EditForm({
                 if (isCardEmpty(card)) {
                   setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
                 } else {
-                  setPendingDelete({ index, card });
+                  setDialog({ kind: 'deleteCard', index, card });
                 }
               }}
             />
@@ -498,7 +400,7 @@ export function EditForm({
             <Button
               variant="textDanger"
               onClick={() => {
-                setIsDeletingPattern(true);
+                setDialog({ kind: 'deletePattern' });
               }}
             >
               {copy.edit.deletePattern}
@@ -506,43 +408,33 @@ export function EditForm({
           </div>
         )}
       </div>
-      {keypadIndex !== null && !usesNativeKeyboard && <AlgKeypad onKey={pressKey} />}
-      {pendingDelete !== null && (
+      {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
+      {dialog?.kind === 'deleteCard' && (
         <ConfirmDialog
-          title={
-            pendingDelete.index === 0
-              ? copy.edit.deleteMainAlgTitle
-              : copy.edit.deleteAltAlgTitle(pendingDelete.index + 1)
-          }
+          title={dialog.index === 0 ? copy.edit.deleteMainAlgTitle : copy.edit.deleteAltAlgTitle(dialog.index + 1)}
           actionLabel={copy.edit.deleteAlg}
           onConfirm={() => {
-            deleteCard(pendingDelete.index, pendingDelete.card);
+            deleteCard(dialog.index, dialog.card);
           }}
-          onCancel={() => {
-            setPendingDelete(null);
-          }}
+          onCancel={closeDialog}
         />
       )}
-      {isDiscarding && (
+      {dialog?.kind === 'discard' && (
         <ConfirmDialog
           title={copy.edit.discardTitle}
           actionLabel={copy.edit.discard}
           onConfirm={() => {
             close();
           }}
-          onCancel={() => {
-            setIsDiscarding(false);
-          }}
+          onCancel={closeDialog}
         />
       )}
-      {isDeletingPattern && target.kind === 'custom' && (
+      {dialog?.kind === 'deletePattern' && target.kind === 'custom' && (
         <ConfirmDialog
           title={copy.edit.deletePatternTitle(target.pattern.name)}
           actionLabel={copy.edit.deletePatternAction}
           onConfirm={deletePattern}
-          onCancel={() => {
-            setIsDeletingPattern(false);
-          }}
+          onCancel={closeDialog}
         />
       )}
     </>
