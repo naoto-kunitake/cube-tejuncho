@@ -4,11 +4,14 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import {
   type AlgEntry,
   createEmptyDocument,
+  createRegistration,
   type CustomPattern,
   type Document,
   DOCUMENT_VERSION,
+  findRegistration,
   type RegistrationData,
   type Settings,
+  withRegistration,
 } from './document';
 import { createDocumentStorage, DOCUMENT_KEY, type LoadIssue } from './document-storage';
 import { createDraftStore } from './draft';
@@ -96,25 +99,21 @@ export function createDocumentStore(storage: KeyValueStorage) {
           loadIssue: initialLoadIssue,
           addRegistration: (patternId, mainAlg) => {
             set((state) => {
-              const now = new Date().toISOString();
-              const existing = state.document.registrations.find((entry) => entry.patternId === patternId);
+              const { registrations } = state.document;
+              const existing = findRegistration(registrations, patternId);
               // 登録し直しはメイン手順だけを替え、判断とほかの手順は残す
-              const registration =
-                existing === undefined
-                  ? { patternId, recognition: '', mainAlg, altAlgs: [], createdAt: now, updatedAt: now }
-                  : { ...existing, mainAlg, updatedAt: now };
-              const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
-              return { document: { ...state.document, registrations: [...others, registration] } };
+              const data = { recognition: existing?.recognition ?? '', mainAlg, altAlgs: existing?.altAlgs ?? [] };
+              const registration = createRegistration(patternId, data, new Date().toISOString(), existing);
+              return { document: { ...state.document, registrations: withRegistration(registrations, registration) } };
             });
             reportStorageIssue();
           },
           saveRegistration: (patternId, data) => {
             set((state) => {
-              const now = new Date().toISOString();
-              const existing = state.document.registrations.find((entry) => entry.patternId === patternId);
-              const registration = { patternId, ...data, createdAt: existing?.createdAt ?? now, updatedAt: now };
-              const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
-              return { document: { ...state.document, registrations: [...others, registration] } };
+              const { registrations } = state.document;
+              const existing = findRegistration(registrations, patternId);
+              const registration = createRegistration(patternId, data, new Date().toISOString(), existing);
+              return { document: { ...state.document, registrations: withRegistration(registrations, registration) } };
             });
             reportStorageIssue();
           },
@@ -197,7 +196,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
             const id = crypto.randomUUID();
             set((state) => {
               const now = new Date().toISOString();
-              const registration = data === null ? [] : [{ patternId: id, ...data, createdAt: now, updatedAt: now }];
+              const registration = data === null ? [] : [createRegistration(id, data, now)];
               return {
                 document: {
                   ...state.document,
@@ -263,14 +262,17 @@ export function createDocumentStore(storage: KeyValueStorage) {
               const registeredIds = new Set(state.document.registrations.map((entry) => entry.patternId));
               const added = presetsOf(category)
                 .filter((preset) => !registeredIds.has(preset.id))
-                .map((preset) => ({
-                  patternId: preset.id,
-                  recognition: '',
-                  mainAlg: { text: preset.standardAlg, mnemonic: '', fingering: '' },
-                  altAlgs: [],
-                  createdAt: now,
-                  updatedAt: now,
-                }));
+                .map((preset) =>
+                  createRegistration(
+                    preset.id,
+                    {
+                      recognition: '',
+                      mainAlg: { text: preset.standardAlg, mnemonic: '', fingering: '' },
+                      altAlgs: [],
+                    },
+                    now,
+                  ),
+                );
               addedCount = added.length;
               return { document: { ...state.document, registrations: [...state.document.registrations, ...added] } };
             });

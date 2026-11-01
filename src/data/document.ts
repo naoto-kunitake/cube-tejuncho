@@ -110,6 +110,22 @@ export function findRegistration(registrations: readonly Registration[], pattern
   return registrations.find((entry) => entry.patternId === patternId);
 }
 
+// 登録1件。日時はここで付ける (登録を作るactionごとに同じ組み立てを書かない)。
+// 今の時刻を引数で受けるのは、1回の操作で複数の登録を作るとき (一括登録) に同じ値を入れるため
+export function createRegistration(
+  patternId: string,
+  data: RegistrationData,
+  now: string,
+  existing?: Registration,
+): Registration {
+  return { patternId, ...data, createdAt: existing?.createdAt ?? now, updatedAt: now };
+}
+
+// 同じパターンの登録を置き換える (なければ足す)。置き換えた登録は末尾に移る
+export function withRegistration(registrations: readonly Registration[], registration: Registration): Registration[] {
+  return [...registrations.filter((entry) => entry.patternId !== registration.patternId), registration];
+}
+
 function uniqueBy<T>(entries: readonly T[], idOf: (entry: T) => string): T[] {
   const seen = new Set<string>();
   return entries.filter((entry) => {
