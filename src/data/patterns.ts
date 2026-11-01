@@ -16,9 +16,3 @@ export function findPattern(document: Pick<Document, 'patterns'>, id: string): P
 export function patternName(ref: PatternRef): string {
   return ref.kind === 'preset' ? ref.preset.name : ref.pattern.name;
 }
-
-// 同じ名前のカテゴリを作らせない (大文字小文字は同じ扱い)
-export function hasCategoryNamed(names: readonly string[], name: string): boolean {
-  const target = name.trim().toLowerCase();
-  return names.some((entry) => entry.trim().toLowerCase() === target);
-}

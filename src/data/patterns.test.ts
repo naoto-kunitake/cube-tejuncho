@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createEmptyDocument } from './document';
-import { findPattern, hasCategoryNamed, patternName } from './patterns';
+import { findPattern, patternName } from './patterns';
 import { PLL_PRESETS } from './presets/pll';
 
 const CUSTOM = { id: 'c1', categoryId: 'cat1', name: 'My Alg', createdAt: '', updatedAt: '' };
@@ -26,12 +26,5 @@ describe('findPattern', () => {
 
   it('知らない id なら undefined', () => {
     expect(findPattern({ patterns: [CUSTOM] }, 'nope')).toBeUndefined();
-  });
-});
-
-describe('hasCategoryNamed', () => {
-  it('大文字小文字と前後の空白の違いは同じ名前', () => {
-    expect(hasCategoryNamed(['COLL', 'PLL'], ' coll ')).toBe(true);
-    expect(hasCategoryNamed(['COLL'], 'OLL')).toBe(false);
   });
 });

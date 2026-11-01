@@ -19,3 +19,9 @@ export function categoryEntriesOf(document: Pick<Document, 'categories' | 'patte
     return [{ kind: 'custom', id, name: category.name, patternCount }];
   });
 }
+
+// 同じ名前のカテゴリを作らせない (大文字小文字と前後の空白は同じ扱い)
+export function hasCategoryNamed(names: readonly string[], name: string): boolean {
+  const target = name.trim().toLowerCase();
+  return names.some((entry) => entry.trim().toLowerCase() === target);
+}

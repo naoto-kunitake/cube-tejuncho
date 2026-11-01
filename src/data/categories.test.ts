@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { categoryEntriesOf } from './categories';
+import { categoryEntriesOf, hasCategoryNamed } from './categories';
 import { createEmptyDocument } from './document';
 
 describe('categoryEntriesOf', () => {
@@ -15,5 +15,12 @@ describe('categoryEntriesOf', () => {
       { kind: 'preset', id: 'f2l' },
       { kind: 'custom', id: 'c1', name: 'COLL', patternCount: 1 },
     ]);
+  });
+});
+
+describe('hasCategoryNamed', () => {
+  it('大文字小文字と前後の空白の違いは同じ名前', () => {
+    expect(hasCategoryNamed(['COLL', 'PLL'], ' coll ')).toBe(true);
+    expect(hasCategoryNamed(['COLL'], 'OLL')).toBe(false);
   });
 });

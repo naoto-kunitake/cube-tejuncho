@@ -1,8 +1,8 @@
 import { err, ok, type Result } from '@/lib/result';
 
+import { hasCategoryNamed } from './categories';
 import { type Category, type Document, DocumentSchema, normalizeDocument } from './document';
 import { isNewerDocument, migrateDocument } from './migrate';
-import { hasCategoryNamed } from './patterns';
 
 export type ImportMode = 'add' | 'replace';
 export type ImportError =
