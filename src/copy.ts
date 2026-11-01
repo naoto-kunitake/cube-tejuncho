@@ -1,11 +1,11 @@
 import type { CreditId } from '@/data/credits';
 import type { Settings } from '@/data/document';
+import type { LoadIssue } from '@/data/document-storage';
 import type { NotationRowId, NotationSectionId } from '@/data/notation';
 import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
 import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
-import type { LoadIssue } from '@/data/store';
 import type { WideStyle } from '@/lib/alg/format';
 import type { AlgError } from '@/lib/alg/parse';
 import type { SideName, SideRun } from '@/lib/figure/describe';

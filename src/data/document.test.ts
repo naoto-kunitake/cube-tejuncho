@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { createEmptyDocument, DocumentSchema, findRegistration, normalizeDocument } from './document';
+import {
+  createEmptyDocument,
+  createRegistration,
+  DocumentSchema,
+  findRegistration,
+  normalizeDocument,
+  withRegistration,
+} from './document';
 
 describe('DocumentSchema', () => {
   it('空の文書は検証を通る', () => {
@@ -71,6 +78,48 @@ describe('findRegistration', () => {
 
   it('見つからないときは undefined', () => {
     expect(findRegistration([registration], 'pll-ub')).toBeUndefined();
+  });
+});
+
+describe('createRegistration', () => {
+  const DATA = { recognition: 'r', mainAlg: { text: 'R U', mnemonic: '', fingering: '' }, altAlgs: [] };
+  const NOW = '2026-11-01T00:00:00.000Z';
+
+  it('新しい登録は作成日時と更新日時が同じ', () => {
+    expect(createRegistration('pll-ua', DATA, NOW)).toEqual({
+      patternId: 'pll-ua',
+      ...DATA,
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+  });
+
+  it('既にある登録を渡すと作成日時を引き継ぐ', () => {
+    const existing = { patternId: 'pll-ua', ...DATA, createdAt: '2026-10-01T00:00:00.000Z', updatedAt: NOW };
+    const registration = createRegistration('pll-ua', DATA, NOW, existing);
+    expect(registration.createdAt).toBe('2026-10-01T00:00:00.000Z');
+    expect(registration.updatedAt).toBe(NOW);
+  });
+});
+
+describe('withRegistration', () => {
+  const ENTRY_A = {
+    patternId: 'pll-ua',
+    recognition: '',
+    mainAlg: { text: 'R U', mnemonic: '', fingering: '' },
+    altAlgs: [],
+    createdAt: '',
+    updatedAt: '',
+  };
+  const ENTRY_B = { ...ENTRY_A, patternId: 'pll-ub' };
+
+  it('同じパターンの登録を置き換える', () => {
+    const replaced = { ...ENTRY_A, recognition: '前に3連' };
+    expect(withRegistration([ENTRY_A, ENTRY_B], replaced)).toEqual([ENTRY_B, replaced]);
+  });
+
+  it('同じパターンの登録がなければ末尾に足す', () => {
+    expect(withRegistration([ENTRY_A], ENTRY_B)).toEqual([ENTRY_A, ENTRY_B]);
   });
 });
 

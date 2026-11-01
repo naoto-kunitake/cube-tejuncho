@@ -1,133 +1,23 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-
-import { err, ok, type Result } from '@/lib/result';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import {
   type AlgEntry,
   createEmptyDocument,
+  createRegistration,
   type CustomPattern,
   type Document,
   DOCUMENT_VERSION,
-  DocumentSchema,
-  normalizeDocument,
+  findRegistration,
   type RegistrationData,
   type Settings,
+  withRegistration,
 } from './document';
+import { createDocumentStorage, DOCUMENT_KEY, type LoadIssue } from './document-storage';
 import { createDraftStore } from './draft';
 import { applyImport, type ImportMode } from './import-data';
-import { isNewerDocument, migrateDocument } from './migrate';
 import { hasPresets, type PresetCategoryId, presetsOf } from './presets/catalog';
 import { createStorage, type KeyValueStorage } from './storage';
-
-export const DOCUMENT_KEY = 'cube-tejuncho:doc';
-const PREVIOUS_KEY = `${DOCUMENT_KEY}.prev`;
-const BROKEN_KEY = `${DOCUMENT_KEY}.broken`;
-
-export type LoadIssue = 'brokenDocument' | 'newerDocument' | 'storageUnavailable' | 'quotaExceeded';
-
-type PersistedShape = { state: { document: Document }; version: number };
-
-// 読み込めなかった理由。壊れた文書は退避するが、新しい版の文書は動かさない
-type ReadFailure = 'brokenDocument' | 'newerDocument';
-
-type DocumentStorage = StateStorage & {
-  takeIssue: () => LoadIssue | null;
-  // 新しい版の文書があるときは書き込みを止めている。下書きの消去も同じ判断に揃えるために外から問える
-  isSaveBlocked: () => boolean;
-};
-
-// persistに渡す包み。読み込みでmigrate → Zodを通し、壊れた文書は退避して空で始める。保存は前の文書を1世代残す
-function createDocumentStorage(storage: KeyValueStorage): DocumentStorage {
-  let issue: LoadIssue | null = storage.isPersistent ? null : 'storageUnavailable';
-  let hasRequestedPersistence = false;
-  // issueは1回で消えるので、保存を止め続ける印は別に持つ
-  let hasNewerDocument = false;
-
-  const readDocument = (raw: string): Result<Document, ReadFailure> => {
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (typeof parsed !== 'object' || parsed === null || !('state' in parsed)) {
-        return err('brokenDocument');
-      }
-      const state: unknown = parsed.state;
-      if (typeof state !== 'object' || state === null || !('document' in state)) {
-        return err('brokenDocument');
-      }
-      if (isNewerDocument(state.document)) {
-        return err('newerDocument');
-      }
-      const result = DocumentSchema.safeParse(migrateDocument(state.document));
-      return result.success ? ok(normalizeDocument(result.data)) : err('brokenDocument');
-    } catch {
-      return err('brokenDocument');
-    }
-  };
-
-  return {
-    takeIssue: () => {
-      const current = issue;
-      issue = null;
-      return current;
-    },
-    isSaveBlocked: () => hasNewerDocument,
-    getItem: (key) => {
-      const raw = storage.getItem(key);
-      if (raw === null) {
-        return null;
-      }
-      const result = readDocument(raw);
-      if (result.ok) {
-        const document = result.value;
-        const persisted: PersistedShape = { state: { document }, version: document.version };
-        return JSON.stringify(persisted);
-      }
-      // 自分より新しい版の文書は壊れていない。アプリを更新すれば読めるので、動かさずに知らせるだけ
-      if (result.error === 'newerDocument') {
-        hasNewerDocument = true;
-        issue = 'newerDocument';
-        return null;
-      }
-      // 退避できないまま消すと控えが1つも残らないので、退避できたときだけ本体を消す
-      const backup = storage.setItem(BROKEN_KEY, raw);
-      if (backup.ok) {
-        storage.removeItem(key);
-      } else {
-        console.error('broken document backup failed', backup.error);
-      }
-      issue = 'brokenDocument';
-      return null;
-    },
-    setItem: (key, value) => {
-      // 上書きすると新しい版の文書は.prevに移るだけで、戻す画面がないので実質失われる。
-      // アプリを更新するまで保存せず、操作のたびに知らせ直す
-      if (hasNewerDocument) {
-        issue = 'newerDocument';
-        return;
-      }
-      const previous = storage.getItem(key);
-      if (previous !== null) {
-        const backup = storage.setItem(PREVIOUS_KEY, previous);
-        if (!backup.ok) {
-          console.error('previous document backup failed', backup.error);
-        }
-      }
-      const result = storage.setItem(key, value);
-      if (!result.ok) {
-        issue = result.error.kind === 'quotaExceeded' ? 'quotaExceeded' : 'storageUnavailable';
-        console.error('document save failed', result.error);
-        return;
-      }
-      if (!hasRequestedPersistence && typeof navigator !== 'undefined' && navigator.storage !== undefined) {
-        hasRequestedPersistence = true;
-        void navigator.storage.persist();
-      }
-    },
-    removeItem: (key) => {
-      storage.removeItem(key);
-    },
-  };
-}
 
 export type CustomPatternFields = Pick<CustomPattern, 'name' | 'categoryId'>;
 
@@ -191,7 +81,7 @@ export function createDocumentStore(storage: KeyValueStorage) {
 
   const store = create<DocumentStore>()(
     persist(
-      (set) => {
+      (set, get) => {
         // 保存はsetのたびに起きるので、その直後に問題を拾って知らせる
         const reportStorageIssue = () => {
           const issue = documentStorage.takeIssue();
@@ -199,247 +89,199 @@ export function createDocumentStore(storage: KeyValueStorage) {
             set({ loadIssue: issue });
           }
         };
+        // 文書を書き換える唯一の道。保存と知らせがsetに付いて回るので、actionごとに書かずここへ集める。
+        // 同じ文書を返したときは何もしない (persistはsetのたびに書き、1世代前の控えが現在の文書で流れてしまう)。
+        // 文書に触れないset (dismissLoadIssue) はここを通らないので、その保存はdocument-storage.tsの内容比較が止める
+        const updateDocument = (update: (document: Document) => Document) => {
+          const current = get().document;
+          const next = update(current);
+          if (next === current) {
+            return;
+          }
+          set({ document: next });
+          reportStorageIssue();
+        };
         // 設定の差し替えは1か所に。名前のあるaction (setLastTabなど) はここに委ねる
         const updateSettings = (patch: Partial<Settings>) => {
-          set((state) => ({ document: { ...state.document, settings: { ...state.document.settings, ...patch } } }));
-          reportStorageIssue();
+          updateDocument((document) => ({ ...document, settings: { ...document.settings, ...patch } }));
         };
         return {
           document: createEmptyDocument(),
           loadIssue: initialLoadIssue,
           addRegistration: (patternId, mainAlg) => {
-            set((state) => {
-              const now = new Date().toISOString();
-              const existing = state.document.registrations.find((entry) => entry.patternId === patternId);
+            updateDocument((document) => {
+              const existing = findRegistration(document.registrations, patternId);
               // 登録し直しはメイン手順だけを替え、判断とほかの手順は残す
-              const registration =
-                existing === undefined
-                  ? { patternId, recognition: '', mainAlg, altAlgs: [], createdAt: now, updatedAt: now }
-                  : { ...existing, mainAlg, updatedAt: now };
-              const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
-              return { document: { ...state.document, registrations: [...others, registration] } };
+              const data = { recognition: existing?.recognition ?? '', mainAlg, altAlgs: existing?.altAlgs ?? [] };
+              const registration = createRegistration(patternId, data, new Date().toISOString(), existing);
+              return { ...document, registrations: withRegistration(document.registrations, registration) };
             });
-            reportStorageIssue();
           },
           saveRegistration: (patternId, data) => {
-            set((state) => {
-              const now = new Date().toISOString();
-              const existing = state.document.registrations.find((entry) => entry.patternId === patternId);
-              const registration = { patternId, ...data, createdAt: existing?.createdAt ?? now, updatedAt: now };
-              const others = state.document.registrations.filter((entry) => entry.patternId !== patternId);
-              return { document: { ...state.document, registrations: [...others, registration] } };
+            updateDocument((document) => {
+              const existing = findRegistration(document.registrations, patternId);
+              const registration = createRegistration(patternId, data, new Date().toISOString(), existing);
+              return { ...document, registrations: withRegistration(document.registrations, registration) };
             });
-            reportStorageIssue();
           },
           removeRegistration: (patternId) => {
-            set((state) => ({
-              document: {
-                ...state.document,
-                registrations: state.document.registrations.filter((entry) => entry.patternId !== patternId),
-              },
+            updateDocument((document) => ({
+              ...document,
+              registrations: document.registrations.filter((entry) => entry.patternId !== patternId),
             }));
-            reportStorageIssue();
           },
           addCategory: (name) => {
             const id = crypto.randomUUID();
-            set((state) => ({
-              document: {
-                ...state.document,
-                categories: [...state.document.categories, { id, name }],
-                settings: { ...state.document.settings, tabOrder: [...state.document.settings.tabOrder, id] },
-              },
+            updateDocument((document) => ({
+              ...document,
+              categories: [...document.categories, { id, name }],
+              settings: { ...document.settings, tabOrder: [...document.settings.tabOrder, id] },
             }));
-            reportStorageIssue();
             return id;
           },
           renameCategory: (categoryId, name) => {
-            set((state) => ({
-              document: {
-                ...state.document,
-                categories: state.document.categories.map((category) =>
-                  category.id === categoryId ? { ...category, name } : category,
-                ),
-              },
+            updateDocument((document) => ({
+              ...document,
+              categories: document.categories.map((category) =>
+                category.id === categoryId ? { ...category, name } : category,
+              ),
             }));
-            reportStorageIssue();
           },
           removeCategory: (categoryId) => {
-            let removedPatternIds: readonly string[] = [];
-            set((state) => {
-              const { document } = state;
-              // プリセットのidもtabOrderに並ぶので、実在する自作カテゴリ以外では何も触らない
-              if (!document.categories.some((category) => category.id === categoryId)) {
-                return state;
-              }
-              const removed = new Set(
-                document.patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
-              );
-              removedPatternIds = [...removed];
-              // lastTabは一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
-              return {
-                document: {
-                  ...document,
-                  categories: document.categories.filter((category) => category.id !== categoryId),
-                  patterns: document.patterns.filter((pattern) => !removed.has(pattern.id)),
-                  registrations: document.registrations.filter((entry) => !removed.has(entry.patternId)),
-                  pinned: document.pinned.filter((id) => !removed.has(id)),
-                  settings: {
-                    ...document.settings,
-                    tabOrder: document.settings.tabOrder.filter((id) => id !== categoryId),
-                  },
-                },
-              };
-            });
-            removeDrafts(removedPatternIds);
-            reportStorageIssue();
+            const { categories, patterns } = get().document;
+            // プリセットのidもtabOrderに並ぶので、実在する自作カテゴリ以外では何も触らない
+            if (!categories.some((category) => category.id === categoryId)) {
+              return;
+            }
+            const removed = new Set(
+              patterns.filter((pattern) => pattern.categoryId === categoryId).map((pattern) => pattern.id),
+            );
+            // lastTabは一覧側が無効な値を先頭のタブに読み替えるので、ここでは触らない
+            updateDocument((document) => ({
+              ...document,
+              categories: document.categories.filter((category) => category.id !== categoryId),
+              patterns: document.patterns.filter((pattern) => !removed.has(pattern.id)),
+              registrations: document.registrations.filter((entry) => !removed.has(entry.patternId)),
+              pinned: document.pinned.filter((id) => !removed.has(id)),
+              settings: {
+                ...document.settings,
+                tabOrder: document.settings.tabOrder.filter((id) => id !== categoryId),
+              },
+            }));
+            removeDrafts([...removed]);
           },
           moveCategory: (categoryId, toIndex) => {
-            set((state) => {
-              const { tabOrder } = state.document.settings;
+            updateDocument((document) => {
+              const { tabOrder } = document.settings;
               if (!tabOrder.includes(categoryId)) {
-                return state;
+                return document;
               }
               const others = tabOrder.filter((id) => id !== categoryId);
               const index = Math.min(Math.max(toIndex, 0), others.length);
               const moved = [...others.slice(0, index), categoryId, ...others.slice(index)];
-              return { document: { ...state.document, settings: { ...state.document.settings, tabOrder: moved } } };
+              return { ...document, settings: { ...document.settings, tabOrder: moved } };
             });
-            reportStorageIssue();
           },
           addCustomPattern: (fields, data) => {
             const id = crypto.randomUUID();
-            set((state) => {
-              const now = new Date().toISOString();
-              const registration = data === null ? [] : [{ patternId: id, ...data, createdAt: now, updatedAt: now }];
-              return {
-                document: {
-                  ...state.document,
-                  patterns: [...state.document.patterns, { id, ...fields, createdAt: now, updatedAt: now }],
-                  registrations: [...state.document.registrations, ...registration],
-                },
-              };
-            });
-            reportStorageIssue();
+            const now = new Date().toISOString();
+            updateDocument((document) => ({
+              ...document,
+              patterns: [...document.patterns, { id, ...fields, createdAt: now, updatedAt: now }],
+              registrations:
+                data === null ? document.registrations : [...document.registrations, createRegistration(id, data, now)],
+            }));
             return id;
           },
           updateCustomPattern: (patternId, fields) => {
-            set((state) => ({
-              document: {
-                ...state.document,
-                patterns: state.document.patterns.map((pattern) =>
-                  pattern.id === patternId ? { ...pattern, ...fields, updatedAt: new Date().toISOString() } : pattern,
-                ),
-              },
+            updateDocument((document) => ({
+              ...document,
+              patterns: document.patterns.map((pattern) =>
+                pattern.id === patternId ? { ...pattern, ...fields, updatedAt: new Date().toISOString() } : pattern,
+              ),
             }));
-            reportStorageIssue();
           },
           removeCustomPattern: (patternId) => {
             removeDrafts([patternId]);
-            set((state) => ({
-              document: {
-                ...state.document,
-                patterns: state.document.patterns.filter((pattern) => pattern.id !== patternId),
-                registrations: state.document.registrations.filter((entry) => entry.patternId !== patternId),
-                pinned: state.document.pinned.filter((id) => id !== patternId),
-              },
+            updateDocument((document) => ({
+              ...document,
+              patterns: document.patterns.filter((pattern) => pattern.id !== patternId),
+              registrations: document.registrations.filter((entry) => entry.patternId !== patternId),
+              pinned: document.pinned.filter((id) => id !== patternId),
             }));
-            reportStorageIssue();
           },
           importDocument: (imported, mode) => {
             if (mode === 'replace') {
               removeAllDrafts();
             }
-            set((state) => ({ document: applyImport(state.document, imported, mode) }));
-            reportStorageIssue();
+            updateDocument((document) => applyImport(document, imported, mode));
           },
           replaceDocument: (document) => {
-            set({ document });
-            reportStorageIssue();
+            updateDocument(() => document);
           },
           setLastTab: (categoryId) => {
             updateSettings({ lastTab: categoryId });
           },
           togglePin: (patternId) => {
-            set((state) => {
-              const isPinned = state.document.pinned.includes(patternId);
+            updateDocument((document) => {
+              const isPinned = document.pinned.includes(patternId);
               const pinned = isPinned
-                ? state.document.pinned.filter((id) => id !== patternId)
-                : [...state.document.pinned, patternId];
-              return { document: { ...state.document, pinned } };
+                ? document.pinned.filter((id) => id !== patternId)
+                : [...document.pinned, patternId];
+              return { ...document, pinned };
             });
-            reportStorageIssue();
           },
           registerStandardAlgs: (category) => {
             const now = new Date().toISOString();
-            let addedCount = 0;
-            set((state) => {
-              const registeredIds = new Set(state.document.registrations.map((entry) => entry.patternId));
-              const added = presetsOf(category)
-                .filter((preset) => !registeredIds.has(preset.id))
-                .map((preset) => ({
-                  patternId: preset.id,
-                  recognition: '',
-                  mainAlg: { text: preset.standardAlg, mnemonic: '', fingering: '' },
-                  altAlgs: [],
-                  createdAt: now,
-                  updatedAt: now,
-                }));
-              addedCount = added.length;
-              return { document: { ...state.document, registrations: [...state.document.registrations, ...added] } };
-            });
-            reportStorageIssue();
-            return addedCount;
+            const registeredIds = new Set(get().document.registrations.map((entry) => entry.patternId));
+            const added = presetsOf(category)
+              .filter((preset) => !registeredIds.has(preset.id))
+              .map((preset) =>
+                createRegistration(
+                  preset.id,
+                  { recognition: '', mainAlg: { text: preset.standardAlg, mnemonic: '', fingering: '' }, altAlgs: [] },
+                  now,
+                ),
+              );
+            updateDocument((document) => ({ ...document, registrations: [...document.registrations, ...added] }));
+            return added.length;
           },
           clearRegistrations: (categoryIds) => {
-            let removedCount = 0;
-            let removedPatternIds: readonly string[] = [];
-            set((state) => {
-              const { document } = state;
-              const presetIds = new Set(
-                categoryIds.filter(hasPresets).flatMap((category) => presetsOf(category).map((preset) => preset.id)),
-              );
-              const customIds = new Set(
-                document.patterns
-                  .filter((pattern) => categoryIds.includes(pattern.categoryId))
-                  .map((pattern) => pattern.id),
-              );
-              const isRemoved = (patternId: string) => presetIds.has(patternId) || customIds.has(patternId);
-              removedPatternIds = [...presetIds, ...customIds];
-              // 登録のない自作パターンも消えるので、自作はパターンの数で数える
-              removedCount =
-                document.registrations.filter((entry) => presetIds.has(entry.patternId)).length + customIds.size;
-              return {
-                document: {
-                  ...document,
-                  patterns: document.patterns.filter((pattern) => !customIds.has(pattern.id)),
-                  registrations: document.registrations.filter((entry) => !isRemoved(entry.patternId)),
-                  pinned: document.pinned.filter((id) => !isRemoved(id)),
-                },
-              };
-            });
-            removeDrafts(removedPatternIds);
-            reportStorageIssue();
+            const { patterns, registrations } = get().document;
+            const presetIds = new Set(
+              categoryIds.filter(hasPresets).flatMap((category) => presetsOf(category).map((preset) => preset.id)),
+            );
+            const customIds = new Set(
+              patterns.filter((pattern) => categoryIds.includes(pattern.categoryId)).map((pattern) => pattern.id),
+            );
+            const isRemoved = (patternId: string) => presetIds.has(patternId) || customIds.has(patternId);
+            // 登録のない自作パターンも消えるので、自作はパターンの数で数える
+            const removedCount =
+              registrations.filter((entry) => presetIds.has(entry.patternId)).length + customIds.size;
+            updateDocument((document) => ({
+              ...document,
+              patterns: document.patterns.filter((pattern) => !customIds.has(pattern.id)),
+              registrations: document.registrations.filter((entry) => !isRemoved(entry.patternId)),
+              pinned: document.pinned.filter((id) => !isRemoved(id)),
+            }));
+            removeDrafts([...presetIds, ...customIds]);
             return removedCount;
           },
           resetDocument: () => {
             removeAllDrafts();
-            set({ document: createEmptyDocument() });
-            reportStorageIssue();
+            updateDocument(() => createEmptyDocument());
           },
           dismissBanner: (banner) => {
-            set((state) => {
-              const { dismissedBanners } = state.document.settings;
+            updateDocument((document) => {
+              const { dismissedBanners } = document.settings;
               if (dismissedBanners.includes(banner)) {
-                return state;
+                return document;
               }
               return {
-                document: {
-                  ...state.document,
-                  settings: { ...state.document.settings, dismissedBanners: [...dismissedBanners, banner] },
-                },
+                ...document,
+                settings: { ...document.settings, dismissedBanners: [...dismissedBanners, banner] },
               };
             });
-            reportStorageIssue();
           },
           updateSettings,
           setListView: (listView) => {

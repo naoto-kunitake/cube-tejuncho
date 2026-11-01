@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { createEmptyDocument } from './document';
+import { DOCUMENT_KEY } from './document-storage';
 import { createDraftStore } from './draft';
 import { createMemoryStorage, type KeyValueStorage } from './storage';
-import { createDocumentStore, DOCUMENT_KEY, HOME_SCREEN_BANNER } from './store';
+import { createDocumentStore, HOME_SCREEN_BANNER } from './store';
 
 const UA_ALG = { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' };
 
@@ -65,6 +66,29 @@ describe('createDocumentStore', () => {
     storage.removeItem(`${DOCUMENT_KEY}.prev`);
     createDocumentStore(storage);
     expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBeNull();
+  });
+
+  it('変化のない操作では1世代前の控えを流さない', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addRegistration('pll-ub', UA_ALG);
+    store.getState().dismissBanner('pll');
+    const previous = storage.getItem(`${DOCUMENT_KEY}.prev`);
+    store.getState().moveCategory('gone', 1);
+    store.getState().removeCategory('pll');
+    store.getState().dismissBanner('pll');
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
+  });
+
+  it('知らせを閉じても1世代前の控えを流さない', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addRegistration('pll-ub', UA_ALG);
+    const previous = storage.getItem(`${DOCUMENT_KEY}.prev`);
+    store.getState().dismissLoadIssue();
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
   });
 
   it('起動後に保存が容量超過で失敗したら知らせる', () => {
@@ -234,54 +258,24 @@ describe('createDocumentStore', () => {
     expect(reloaded.getState().loadIssue).toBeNull();
   });
 
-  it('保存の前の文書を 1 世代残す', () => {
-    const storage = persistedStorage();
-    const store = createDocumentStore(storage);
-    store.getState().addRegistration('pll-ua', UA_ALG);
-    store.getState().addRegistration('pll-ub', UA_ALG);
-    const previous = storage.getItem(`${DOCUMENT_KEY}.prev`) ?? '';
-    expect(previous).toContain('pll-ua');
-    expect(previous).not.toContain('pll-ub');
-  });
-
-  it('壊れた文書は退避して空で始め、知らせる', () => {
+  // 読み込みと保存の失敗の網羅はdocument-storage.test.tsにある。ここは文書とloadIssueへの結線だけを見る
+  it('壊れた文書なら空で始めて知らせる', () => {
     const storage = persistedStorage();
     storage.setItem(DOCUMENT_KEY, '{not json');
     const store = createDocumentStore(storage);
     expect(store.getState().document).toEqual(createEmptyDocument());
     expect(store.getState().loadIssue).toBe('brokenDocument');
-    expect(storage.getItem(`${DOCUMENT_KEY}.broken`)).toBe('{not json');
-    expect(storage.getItem(DOCUMENT_KEY)).not.toBe('{not json');
   });
 
-  it('退避に失敗したときは壊れた文書を消さない', () => {
+  it('自分より新しい版の文書なら空のまま知らせる', () => {
     const storage = persistedStorage();
-    storage.setItem(DOCUMENT_KEY, '{not json');
-    const write = storage.setItem;
-    storage.setItem = (key, value) =>
-      key === `${DOCUMENT_KEY}.broken` ? { ok: false, error: { kind: 'quotaExceeded' } } : write(key, value);
-    const store = createDocumentStore(storage);
-    expect(store.getState().loadIssue).toBe('brokenDocument');
-    expect(storage.getItem(DOCUMENT_KEY)).toBe('{not json');
-  });
-
-  it('形の合わない文書も壊れたものとして扱う', () => {
-    const storage = persistedStorage();
-    storage.setItem(DOCUMENT_KEY, JSON.stringify({ state: { document: { version: 1 } }, version: 1 }));
-    const store = createDocumentStore(storage);
-    expect(store.getState().loadIssue).toBe('brokenDocument');
-    expect(store.getState().document.registrations).toEqual([]);
-  });
-
-  it('自分より新しい版の文書は退避も削除もせずに知らせる', () => {
-    const storage = persistedStorage();
-    const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
-    storage.setItem(DOCUMENT_KEY, raw);
+    storage.setItem(
+      DOCUMENT_KEY,
+      JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 }),
+    );
     const store = createDocumentStore(storage);
     expect(store.getState().loadIssue).toBe('newerDocument');
     expect(store.getState().document).toEqual(createEmptyDocument());
-    expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
-    expect(storage.getItem(`${DOCUMENT_KEY}.broken`)).toBeNull();
   });
 
   it('自分より新しい版の文書があるときは保存せずに知らせ直す', () => {
