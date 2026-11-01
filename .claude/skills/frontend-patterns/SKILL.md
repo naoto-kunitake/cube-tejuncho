@@ -19,6 +19,7 @@ Reactと見た目の規約。コードの一般的な書き方は`coding-style`�
 - 部品の中で部品を定義しない。Contextのvalueを描画ごとに作らない
 - `useEffect`でstateを同期しない。派生値は描画の中で計算する
 - 状態は必要な部品の近くに置く。複数の画面が使う状態だけストアに上げる
+- 同時に1つしか開かないダイアログ・シートは、真偽値を並べず判別ユニオン1つ (`{ kind: 'xxx'; ... } | null`) で持つ
 - 遅延読み込みは重い部品 (cubing.jsの3D) だけ。`React.lazy`はdefault exportを求めるので、`import('./PlayerSheet').then((m) => ({ default: m.PlayerSheet }))`の形で名前つきexportを包む
 
 ## 状態と保存
