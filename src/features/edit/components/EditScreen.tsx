@@ -2,6 +2,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Screen, ScreenHeader } from '@/components/Screen';
 import { copy } from '@/copy';
+import type { Document } from '@/data/document';
 import { findRegistration } from '@/data/document';
 import { findPattern } from '@/data/patterns';
 import { useDocumentStore } from '@/data/store';
@@ -51,8 +52,8 @@ export function EditScreen() {
 function targetOf(
   id: string | undefined,
   categoryParam: string | null,
-  patterns: Parameters<typeof findPattern>[0]['patterns'],
-  categories: readonly { id: string }[],
+  patterns: Document['patterns'],
+  categories: Document['categories'],
 ): EditTarget | undefined {
   if (id === undefined) {
     const categoryId = categories.some((category) => category.id === categoryParam)
