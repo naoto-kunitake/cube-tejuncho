@@ -28,4 +28,25 @@ describe('useToastStore', () => {
     vi.advanceTimersByTime(TOAST_DURATION_MS - 1);
     expect(useToastStore.getState().toast?.text).toBe('b');
   });
+
+  it('止めている間は消えず、離すと最初から測り直す', () => {
+    useToastStore.getState().show('a');
+    vi.advanceTimersByTime(TOAST_DURATION_MS - 1);
+    useToastStore.getState().pause();
+    vi.advanceTimersByTime(TOAST_DURATION_MS * 2);
+    expect(useToastStore.getState().toast).not.toBeNull();
+    useToastStore.getState().resume();
+    vi.advanceTimersByTime(TOAST_DURATION_MS - 1);
+    expect(useToastStore.getState().toast).not.toBeNull();
+    vi.advanceTimersByTime(1);
+    expect(useToastStore.getState().toast).toBeNull();
+  });
+
+  it('消えたあとに離しても出し直さない', () => {
+    useToastStore.getState().show('a');
+    vi.advanceTimersByTime(TOAST_DURATION_MS);
+    useToastStore.getState().resume();
+    vi.advanceTimersByTime(TOAST_DURATION_MS);
+    expect(useToastStore.getState().toast).toBeNull();
+  });
 });
