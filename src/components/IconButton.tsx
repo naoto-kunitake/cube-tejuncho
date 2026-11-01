@@ -9,7 +9,8 @@ import { cn } from '@/lib/utils';
 export const ICON_BUTTON_BASE_CLASS =
   'pressable relative inline-grid size-9 flex-none place-items-center rounded-full before:absolute before:-inset-1 before:rounded-full';
 
-// 置く面でhover / 押下の濃さが変わる。地の上 (トップバー) は1段濃く、白い面の上 (行) は薄く
+// 置く面でhover / 押下の濃さが変わる。地の上 (トップバー) は1段濃く、白い面の上 (行、シート) は薄く。
+// 既定はトップバーの地の上なので、白い面に置くときはon="surface"を渡す
 const iconButtonVariants = cva(cn(ICON_BUTTON_BASE_CLASS, 'text-ink active:scale-96'), {
   variants: {
     on: {

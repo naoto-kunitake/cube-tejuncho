@@ -28,7 +28,7 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
   return (
     <Sheet label={copy.a11y.playerSheet} onClose={onClose}>
       <div className="flex items-center justify-end">
-        <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
+        <IconButton label={copy.a11y.closeSheet} on="surface" className="-mr-1.75" onClick={onClose}>
           <X {...BAR_ICON_PROPS} />
         </IconButton>
       </div>
