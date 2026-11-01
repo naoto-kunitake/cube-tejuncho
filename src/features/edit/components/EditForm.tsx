@@ -1,6 +1,5 @@
 import { Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router';
 
 import { Button } from '@/components/Button';
@@ -39,7 +38,7 @@ import {
   removeCard,
   standardAlgToAdd,
 } from '../edit-state';
-import { applyEdit, clearingFor, deletionFor, insertionFor, type KeypadKey, type TextEdit } from '../keypad';
+import { useAlgKeypad } from '../hooks/useAlgKeypad';
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad } from './AlgKeypad';
 
@@ -158,11 +157,8 @@ export function EditForm({
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [isDiscarding, setIsDiscarding] = useState(false);
   const [isDeletingPattern, setIsDeletingPattern] = useState(false);
-  // キーパッドが効く手順の欄。欄を離れたら閉じる。「キーボード」で端末のキーボードに切り替えたら、その欄を離れるまで出さない
-  const [keypadIndex, setKeypadIndex] = useState<number | null>(null);
-  const [usesNativeKeyboard, setUsesNativeKeyboard] = useState(false);
-  const isSwitchingKeyboardRef = useRef(false);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
+  const keypad = useAlgKeypad(inputsRef);
   // この画面が出した知らせ (復元、手順の削除) は、画面を離れたら消す (取り消しの先がもうない)
   const ownToastRef = useRef<number | null>(null);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
@@ -263,47 +259,6 @@ export function EditForm({
     });
   };
 
-  // 欄の値と選択範囲を直接書き換えてinputイベントを投げる。Reactが値を入れ直さないので、カーソルの位置が保てる
-  const editActiveInput = (edit: (value: string, start: number, end: number) => TextEdit) => {
-    if (keypadIndex === null) {
-      return;
-    }
-    const input = inputsRef.current.get(keypadIndex);
-    if (input === undefined) {
-      return;
-    }
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    const next = applyEdit(input.value, edit(input.value, start, end));
-    input.setRangeText(next.value, 0, input.value.length, 'preserve');
-    input.setSelectionRange(next.caret, next.caret);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  };
-
-  const pressKey = (key: KeypadKey) => {
-    if (key === 'keyboard') {
-      const input = keypadIndex === null ? undefined : inputsRef.current.get(keypadIndex);
-      if (input === undefined) {
-        return;
-      }
-      // 焦点のある欄のinputModeを外しただけでは端末のキーボードは開かない。属性を先に反映させてから焦点を入れ直す。
-      // iOSは利用者の操作の中でしかキーボードを開かないので、後回しにせず同じ押下の中で行う
-      isSwitchingKeyboardRef.current = true;
-      flushSync(() => {
-        setUsesNativeKeyboard(true);
-      });
-      input.blur();
-      input.focus();
-      isSwitchingKeyboardRef.current = false;
-    } else if (key === 'backspace') {
-      editActiveInput((_value, start, end) => deletionFor(start, end));
-    } else if (key === 'clear') {
-      editActiveInput((value) => clearingFor(value));
-    } else {
-      editActiveInput((value, start, end) => insertionFor(value, start, end, key));
-    }
-  };
-
   const close = (path = backPath) => {
     draftStore.remove(draftId);
     void navigate(path, { replace: true });
@@ -381,7 +336,7 @@ export function EditForm({
         </Button>
       </TopBar>
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
-      <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypadIndex !== null && !usesNativeKeyboard && 'pb-60')}>
+      <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypad.isOpen && 'pb-60')}>
         {target.kind === 'preset' && <EditFigure preset={target.preset} settings={settings} />}
         {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
         {isCustom && (
@@ -439,21 +394,14 @@ export function EditForm({
                   inputsRef.current.set(index, element);
                 }
               }}
-              usesKeypad={!usesNativeKeyboard}
+              usesKeypad={keypad.usesKeypad}
               onChange={(next) => {
                 updateCard(index, next);
               }}
               onFocus={() => {
-                setKeypadIndex(index);
+                keypad.openAt(index);
               }}
-              onBlur={() => {
-                if (isSwitchingKeyboardRef.current) {
-                  return false;
-                }
-                setKeypadIndex(null);
-                setUsesNativeKeyboard(false);
-                return true;
-              }}
+              onBlur={keypad.closeOnBlur}
               onMakeMain={() => {
                 setForm((current) => ({ ...current, cards: moveCardToFront(current.cards, index) }));
               }}
@@ -506,7 +454,7 @@ export function EditForm({
           </div>
         )}
       </div>
-      {keypadIndex !== null && !usesNativeKeyboard && <AlgKeypad onKey={pressKey} />}
+      {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
       {pendingDelete !== null && (
         <ConfirmDialog
           title={
