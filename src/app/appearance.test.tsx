@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createEmptyDocument } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
+import { GROUND_HEX } from '@/lib/theme/color';
 
 import { applyAppearance, useAppearance } from './appearance';
 
@@ -21,13 +22,27 @@ describe('applyAppearance', () => {
     expect(root.classList.contains('dark')).toBe(true);
   });
 
-  it('墨はテーマ色の変数を置かず、選んだ色は --accent と --on-accent を置く', () => {
+  it('ブラウザの枠の色を外観に合わせて差し替える', () => {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.append(meta);
+    const root = document.createElement('div');
+    applyAppearance(root, { appearance: 'dark', themeColor: 'ink' }, false);
+    expect(meta.content).toBe(GROUND_HEX.dark);
+    applyAppearance(root, { appearance: 'light', themeColor: 'ink' }, true);
+    expect(meta.content).toBe(GROUND_HEX.light);
+    meta.remove();
+  });
+
+  it('墨はテーマ色の変数を置かず、選んだ色は塗り・塗りの上の文字・文字の3つを置く', () => {
     const root = document.createElement('div');
     applyAppearance(root, { appearance: 'light', themeColor: '#fdd835' }, false);
     expect(root.style.getPropertyValue('--accent')).toBe('#fdd835');
     expect(root.style.getPropertyValue('--on-accent')).toBe('#1a1a1a');
+    expect(root.style.getPropertyValue('--accent-ink')).toBe('#7f6c1b');
     applyAppearance(root, { appearance: 'light', themeColor: 'ink' }, false);
     expect(root.style.getPropertyValue('--accent')).toBe('');
+    expect(root.style.getPropertyValue('--accent-ink')).toBe('');
   });
 });
 
@@ -68,6 +83,7 @@ describe('useAppearance', () => {
     vi.unstubAllGlobals();
     document.documentElement.classList.remove('dark');
     document.documentElement.style.removeProperty('--accent');
+    document.documentElement.style.removeProperty('--accent-ink');
   });
 
   it('既定 (自動) で端末がダークなら html に dark が付き、設定をライトにすると外れる', () => {

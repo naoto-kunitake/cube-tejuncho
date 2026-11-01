@@ -33,7 +33,7 @@ export function AlgKeypad({ onKey }: AlgKeypadProps) {
     <div
       role="group"
       aria-label={copy.a11y.keypad}
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface-2 px-4 pt-2 pb-4 shadow-4 md:inset-x-auto md:left-1/2 md:w-full md:max-w-140 md:-translate-x-1/2"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface-2 px-4 pt-2 pb-safe-4 shadow-4 md:inset-x-auto md:left-1/2 md:w-full md:max-w-140 md:-translate-x-1/2"
     >
       <div className="grid grid-cols-6 gap-2">
         {CHARACTER_KEYS.map((key) => (

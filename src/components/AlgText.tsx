@@ -30,7 +30,7 @@ export function canHighlight(items: readonly AlgItem[]): boolean {
   return items.every((item) => item.kind === 'move' || item.suffix === '');
 }
 
-const CURRENT_CLASS = 'font-bold text-accent underline decoration-2 underline-offset-4';
+const CURRENT_CLASS = 'font-bold text-accent-ink underline decoration-2 underline-offset-4';
 
 type MoveSpanProps = {
   move: Move;

@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { accentOf, onColorOf, relativeLuminance, resolveAppearance } from './color';
-import { THEME_PRESET_HEX } from './palette';
+import {
+  accentInkOf,
+  accentOf,
+  GROUND_HEX,
+  type HexColor,
+  onColorOf,
+  relativeLuminance,
+  resolveAppearance,
+  SURFACE_HEX,
+} from './color';
+import { THEME_PRESET_HEX, THEME_PRESET_IDS } from './palette';
 
 describe('relativeLuminance', () => {
   it('黒は 0、白は 1', () => {
@@ -45,5 +54,43 @@ describe('accentOf', () => {
 
   it('#rrggbb の形でない値は例外 (保存文書の検証をすり抜けたバグ)', () => {
     expect(() => accentOf('#12', 'light')).toThrow();
+  });
+});
+
+describe('accentInkOf', () => {
+  const contrastOn = (hex: HexColor, background: HexColor) => {
+    const a = relativeLuminance(hex);
+    const b = relativeLuminance(background);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  };
+
+  it('面と地で 4.5:1 に届く色はそのまま', () => {
+    expect(accentInkOf(THEME_PRESET_HEX.purple, 'light')).toBe('#8e24aa');
+  });
+
+  it('ライトで薄い色は黒と混ぜて濃くする', () => {
+    expect(accentInkOf(THEME_PRESET_HEX.yellow, 'light')).toBe('#7f6c1b');
+  });
+
+  it('ダークで暗い色は白と混ぜて明るくする', () => {
+    expect(accentInkOf(THEME_PRESET_HEX.purple, 'dark')).toBe('#c187d0');
+  });
+
+  it('ダークで明るい色はそのまま', () => {
+    expect(accentInkOf(THEME_PRESET_HEX.yellow, 'dark')).toBe('#fdd835');
+  });
+
+  // 見本の8色はどれも文字に使えること (塗りの上の文字とは別の対比)
+  it('どのテーマ色もライトとダークの面と地で 4.5:1 に届く', () => {
+    for (const id of THEME_PRESET_IDS) {
+      if (id === 'ink') {
+        continue;
+      }
+      for (const appearance of ['light', 'dark'] as const) {
+        const ink = accentInkOf(THEME_PRESET_HEX[id], appearance);
+        expect(contrastOn(ink, SURFACE_HEX[appearance])).toBeGreaterThanOrEqual(4.5);
+        expect(contrastOn(ink, GROUND_HEX[appearance])).toBeGreaterThanOrEqual(4.5);
+      }
+    }
   });
 });

@@ -58,6 +58,15 @@
   }
 }
 
+/* ホーム画面から開いたときの下の安全領域 (ホームインジケータ)。画面の底に貼り付く部品 (シート、キーパッド、知らせ) に足す。
+   上 (pt-bar) と同じく足し算ではなく大きい方を採る (34pxの安全領域に既定の余白を足すと空きすぎる) */
+@utility pb-safe-* {
+  padding-bottom: max(--spacing(--value(integer)), env(safe-area-inset-bottom));
+}
+@utility bottom-safe-* {
+  bottom: max(--spacing(--value(integer)), env(safe-area-inset-bottom));
+}
+
 /* 一覧のタイルの格子。狭い幅は3列、広い幅はタイルの幅 (120px) で列数を決める */
 @utility grid-tiles {
   grid-template-columns: repeat(3, minmax(0, 1fr));
