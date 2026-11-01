@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import { copy } from '@/copy';
 
 import { Button } from './Button';
+import { useModalDialog } from './useModalDialog';
 
 type ConfirmDialogProps = {
   title: string;
@@ -21,13 +22,8 @@ export const DIALOG_BODY_CLASS = 'text-small leading-normal text-muted';
 // 破壊的な操作の確認。iOSのアラートと同じ構成: 見出し (何を) + 本文 (自明でない結果だけ) + キャンセル / 赤い動詞のボタン。
 // Escは取り消し。焦点は安全なキャンセルに置く
 export function ConfirmDialog({ title, body, actionLabel, onConfirm, onCancel }: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-    cancelRef.current?.focus();
-  }, []);
+  const dialogRef = useModalDialog(cancelRef);
 
   return (
     <dialog

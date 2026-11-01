@@ -1,10 +1,11 @@
 import { X } from 'lucide-react';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect } from 'react';
 
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
 import { IconButton } from './IconButton';
+import { useModalDialog } from './useModalDialog';
 
 type SheetProps = {
   label: string;
@@ -17,18 +18,13 @@ type SheetProps = {
 // 狭い幅は親指の届く底のシート。広い幅は窓が縦に長く、底に出すと押した場所から遠いので中央のカードにする。
 // 横はmx-autoで中央に置く (dialogの既定のmargin:autoを消すと、幅の上限に達した画面で左端に寄る)
 export function Sheet({ label, onClose, className, children }: SheetProps) {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  // 焦点の行き先を渡さないので器に移る。× に移ると押したように見え、読み上げも名前ではなく「閉じる」になる
+  const dialogRef = useModalDialog();
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog === null) {
       return;
-    }
-    if (!dialog.open) {
-      dialog.showModal();
-      // showModalは中の最初の押せる要素 (×) に焦点を移すので、押したように見えてしまう。
-      // 読み上げもシートの名前ではなく「閉じる」になる。決める場面ではないので器に移す
-      dialog.focus();
     }
     // 暗幕 (dialog自身) を押したら閉じる。中身の上では閉じない。Escはdialogのcloseで拾う
     const closeOnBackdrop = (event: MouseEvent) => {
@@ -40,7 +36,7 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
     return () => {
       dialog.removeEventListener('click', closeOnBackdrop);
     };
-  }, [onClose]);
+  }, [dialogRef, onClose]);
 
   return (
     <dialog
