@@ -9,7 +9,8 @@ import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { SectionHeading } from '@/components/SectionHeading';
 import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
-import { type CustomPattern, findRegistration, type Registration, type Settings } from '@/data/document';
+import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
+import { findRegistration } from '@/data/document';
 import { findPattern, patternName } from '@/data/patterns';
 import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
@@ -23,18 +24,66 @@ import { StandardAlgCard } from './StandardAlgCard';
 const EMPTY_SLOT_CLASS =
   'w-full rounded-md border border-dashed border-line-state px-3 py-2.75 text-center text-body leading-normal text-muted pressable hover:border-line-strong hover:bg-hover-ground';
 
-type PresetDetailProps = {
-  preset: Preset;
+type RecognitionProps = {
+  recognition: string;
+  editPath: string;
+  // 判断が空のときに「判断を書く」の空枠を出すか。プリセットは未登録のときだけ、自作は常に出す
+  showsEmptySlot: boolean;
 };
 
-function PresetDetail({ preset }: PresetDetailProps) {
-  const settings = useDocumentStore((state) => state.document.settings);
-  const registrations = useDocumentStore((state) => state.document.registrations);
+function Recognition({ recognition, editPath, showsEmptySlot }: RecognitionProps) {
+  if (recognition !== '') {
+    return <p className="w-full text-body leading-normal">{recognition}</p>;
+  }
+  if (!showsEmptySlot) {
+    return null;
+  }
+  return (
+    <Link to={editPath} state={{ focus: 'recognition' }} className={EMPTY_SLOT_CLASS}>
+      {copy.detail.writeRecognition}
+    </Link>
+  );
+}
+
+type AltAlgsSectionProps = {
+  altAlgs: readonly AlgEntry[];
+  wideStyle: Settings['wideStyle'];
+  onPlay: (algText: string) => void;
+};
+
+// ほかの手順。1つもなければ見出しも出さない
+function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
+  if (altAlgs.length === 0) {
+    return null;
+  }
+  return (
+    <section className="flex flex-col gap-2">
+      <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
+      {altAlgs.map((alg, index) => (
+        <AlgCard
+          key={index}
+          alg={alg}
+          wideStyle={wideStyle}
+          isMain={false}
+          onPlay={() => {
+            onPlay(alg.text);
+          }}
+        />
+      ))}
+    </section>
+  );
+}
+
+type PresetDetailProps = {
+  preset: Preset;
+  registration: Registration | undefined;
+  settings: Settings;
+  onPlay: (algText: string) => void;
+};
+
+function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailProps) {
   const addRegistration = useDocumentStore((state) => state.addRegistration);
-  const registration = findRegistration(registrations, preset.id);
   const editPath = `/p/${preset.id}/edit`;
-  // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
-  const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6">
@@ -57,14 +106,11 @@ function PresetDetail({ preset }: PresetDetailProps) {
             <PresetFigure preset={preset} settings={settings} canShowArrows />
           </div>
         )}
-        {registration !== undefined && registration.recognition !== '' && (
-          <p className="w-full text-body leading-normal">{registration.recognition}</p>
-        )}
-        {registration === undefined && (
-          <Link to={editPath} state={{ focus: 'recognition' }} className={EMPTY_SLOT_CLASS}>
-            {copy.detail.writeRecognition}
-          </Link>
-        )}
+        <Recognition
+          recognition={registration?.recognition ?? ''}
+          editPath={editPath}
+          showsEmptySlot={registration === undefined}
+        />
       </div>
       <section className="flex flex-col gap-2">
         <SectionHeading>{copy.detail.alg}</SectionHeading>
@@ -77,7 +123,7 @@ function PresetDetail({ preset }: PresetDetailProps) {
               addRegistration(preset.id, { text: preset.standardAlg, mnemonic: '', fingering: '' });
             }}
             onPlay={() => {
-              setPlayingAlg(preset.standardAlg);
+              onPlay(preset.standardAlg);
             }}
           />
         ) : (
@@ -86,37 +132,12 @@ function PresetDetail({ preset }: PresetDetailProps) {
             wideStyle={settings.wideStyle}
             isMain
             onPlay={() => {
-              setPlayingAlg(registration.mainAlg.text);
+              onPlay(registration.mainAlg.text);
             }}
           />
         )}
       </section>
-      {registration !== undefined && registration.altAlgs.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
-          {registration.altAlgs.map((alg, index) => (
-            <AlgCard
-              key={index}
-              alg={alg}
-              wideStyle={settings.wideStyle}
-              isMain={false}
-              onPlay={() => {
-                setPlayingAlg(alg.text);
-              }}
-            />
-          ))}
-        </section>
-      )}
-      {playingAlg !== null && (
-        <PlayerSheet
-          algText={playingAlg}
-          category={preset.category}
-          settings={settings}
-          onClose={() => {
-            setPlayingAlg(null);
-          }}
-        />
-      )}
+      <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );
 }
@@ -125,13 +146,13 @@ type CustomDetailProps = {
   pattern: CustomPattern;
   registration: Registration | undefined;
   settings: Settings;
+  onPlay: (algText: string) => void;
 };
 
 // 自作は図がないので、図の位置にメイン手順の文字。基本手順の提案もない
-function CustomDetail({ pattern, registration, settings }: CustomDetailProps) {
+function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailProps) {
   const editPath = `/p/${pattern.id}/edit`;
   const mainAlg = registration?.mainAlg.text ?? '';
-  const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6">
@@ -139,58 +160,26 @@ function CustomDetail({ pattern, registration, settings }: CustomDetailProps) {
         {mainAlg !== '' && (
           <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">{mainAlg}</p>
         )}
-        {registration !== undefined && registration.recognition !== '' && (
-          <p className="w-full text-body leading-normal">{registration.recognition}</p>
-        )}
-        {(registration === undefined || registration.recognition === '') && (
-          <Link to={editPath} state={{ focus: 'recognition' }} className={EMPTY_SLOT_CLASS}>
-            {copy.detail.writeRecognition}
-          </Link>
-        )}
+        <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} showsEmptySlot />
       </div>
       <section className="flex flex-col gap-2">
         <SectionHeading>{copy.detail.alg}</SectionHeading>
-        {mainAlg === '' ? (
+        {registration === undefined || mainAlg === '' ? (
           <Link to={editPath} state={{ focus: 'alg' }} className={EMPTY_SLOT_CLASS}>
             {copy.detail.registerAlg}
           </Link>
         ) : (
           <AlgCard
-            alg={registration?.mainAlg ?? { text: mainAlg, mnemonic: '', fingering: '' }}
+            alg={registration.mainAlg}
             wideStyle={settings.wideStyle}
             isMain
             onPlay={() => {
-              setPlayingAlg(mainAlg);
+              onPlay(mainAlg);
             }}
           />
         )}
       </section>
-      {registration !== undefined && registration.altAlgs.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
-          {registration.altAlgs.map((alg, index) => (
-            <AlgCard
-              key={index}
-              alg={alg}
-              wideStyle={settings.wideStyle}
-              isMain={false}
-              onPlay={() => {
-                setPlayingAlg(alg.text);
-              }}
-            />
-          ))}
-        </section>
-      )}
-      {playingAlg !== null && (
-        <PlayerSheet
-          algText={playingAlg}
-          category={undefined}
-          settings={settings}
-          onClose={() => {
-            setPlayingAlg(null);
-          }}
-        />
-      )}
+      <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );
 }
@@ -204,6 +193,8 @@ export function DetailScreen() {
   const togglePin = useDocumentStore((state) => state.togglePin);
   const ref = findPattern({ patterns }, id);
   const isPinned = pinned.includes(id);
+  // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
+  const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
     <section aria-label={copy.a11y.detail} className="mx-auto flex w-full max-w-140 flex-col">
@@ -236,12 +227,31 @@ export function DetailScreen() {
           </>
         )}
       </TopBar>
-      {ref?.kind === 'preset' && <PresetDetail preset={ref.preset} />}
+      {ref?.kind === 'preset' && (
+        <PresetDetail
+          preset={ref.preset}
+          registration={findRegistration(registrations, ref.preset.id)}
+          settings={settings}
+          onPlay={setPlayingAlg}
+        />
+      )}
       {ref?.kind === 'custom' && (
         <CustomDetail
           pattern={ref.pattern}
           registration={findRegistration(registrations, ref.pattern.id)}
           settings={settings}
+          onPlay={setPlayingAlg}
+        />
+      )}
+      {/* 灰にする指定はプリセットのカテゴリごと。自作は図がないので全色で出す */}
+      {playingAlg !== null && (
+        <PlayerSheet
+          algText={playingAlg}
+          category={ref?.kind === 'preset' ? ref.preset.category : undefined}
+          settings={settings}
+          onClose={() => {
+            setPlayingAlg(null);
+          }}
         />
       )}
     </section>
