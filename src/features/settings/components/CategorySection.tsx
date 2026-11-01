@@ -1,6 +1,5 @@
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { SectionHeading } from '@/components/SectionHeading';
@@ -19,12 +18,12 @@ type Deleting = { id: string; name: string; patternCount: number };
 // 設定のカテゴリの区画。タブの並び順で全カテゴリを行に出し、末尾に「カテゴリを追加」。
 // 自作の行を押すと同じシートが編集 (名前の変更 + 削除) で開く
 export function CategorySection() {
-  const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
   const addCategory = useDocumentStore((state) => state.addCategory);
   const renameCategory = useDocumentStore((state) => state.renameCategory);
   const removeCategory = useDocumentStore((state) => state.removeCategory);
   const moveCategory = useDocumentStore((state) => state.moveCategory);
+  const setLastTab = useDocumentStore((state) => state.setLastTab);
   const replaceDocument = useDocumentStore((state) => state.replaceDocument);
   const showToast = useToastStore((state) => state.show);
   const [sheet, setSheet] = useState<SheetState | null>(null);
@@ -89,8 +88,8 @@ export function CategorySection() {
           onSubmit={(name) => {
             const id = addCategory(name);
             closeSheet();
-            // 足したカテゴリの一覧へ (空のタブに「パターンを追加」が出る)
-            void navigate(`/?category=${id}`);
+            // 続けて足せるよう設定に留まり、次に一覧を開いたときに足したカテゴリのタブが出るようにする
+            setLastTab(id);
           }}
           onClose={closeSheet}
         />
