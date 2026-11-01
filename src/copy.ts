@@ -203,6 +203,7 @@ type Copy = {
   a11y: {
     list: string;
     detail: string;
+    settings: string;
     categoryTabs: string;
     firstRun: string;
     homeScreenHint: string;
@@ -392,7 +393,7 @@ export const copy = {
     },
     storageUnavailable: {
       title: 'このブラウザでは保存できません',
-      body: 'プライベートモードでは端末に残せません。閉じると書いたものは消えます。',
+      body: 'プライベートモードや、サイトのデータを残さない設定で起きます。閉じると書いたものは消えます。',
     },
     quotaExceeded: {
       title: '保存できませんでした',
@@ -459,7 +460,7 @@ export const copy = {
     exportData: '書き出す',
     importData: '読み込む',
     importAdd: '追加',
-    importAddHint: '同じパターンは新しい方を残す',
+    importAddHint: '同じパターンは更新が新しい方を残す',
     importReplace: '置き換え',
     importReplaceHint: '今のデータを消してから入れる',
     chooseFile: 'ファイルを選ぶ',
@@ -570,6 +571,7 @@ export const copy = {
   a11y: {
     list: '一覧',
     detail: '詳細',
+    settings: '設定',
     categoryTabs: 'カテゴリ',
     firstRun: '案内',
     homeScreenHint: 'ホーム画面の案内',

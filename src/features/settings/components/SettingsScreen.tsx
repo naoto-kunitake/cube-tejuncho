@@ -15,7 +15,7 @@ export function SettingsScreen() {
   const updateSettings = useDocumentStore((state) => state.updateSettings);
 
   return (
-    <section aria-label={copy.a11y.openSettings} className="mx-auto flex w-full max-w-140 flex-col">
+    <section aria-label={copy.a11y.settings} className="mx-auto flex w-full max-w-140 flex-col">
       <TopBar>
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <IconLink to="/" label={copy.a11y.backToList} className="-ml-1.75">
