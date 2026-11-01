@@ -2,14 +2,13 @@ import { X } from 'lucide-react';
 import { useRef } from 'react';
 
 import { AlgText } from '@/components/AlgText';
+import { Button } from '@/components/Button';
 import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { Sheet } from '@/components/Sheet';
-import { PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
 import type { StickeringCategory } from '@/lib/cube/stickering';
-import { cn } from '@/lib/utils';
 
 import { PlayerControls } from './PlayerControls';
 import { usePlayer } from './usePlayer';
@@ -46,16 +45,9 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
                   <br />
                   {copy.player.failedHint}
                 </p>
-                <button
-                  type="button"
-                  onClick={player.retry}
-                  className={cn(
-                    PILL_TAP_AREA_CLASS,
-                    'inline-flex min-h-9 items-center justify-center rounded-full border border-ink px-4 text-body font-bold text-ink pressable hover:bg-hover active:scale-98 active:bg-press',
-                  )}
-                >
+                <Button variant="quiet" className="border-ink px-4 text-body font-bold" onClick={player.retry}>
                   {copy.player.retry}
-                </button>
+                </Button>
               </div>
             )}
           </div>
