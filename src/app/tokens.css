@@ -44,7 +44,7 @@
   --accent-hover: color-mix(in oklab, var(--accent), var(--on-accent) 12%);
   --accent-press: color-mix(in oklab, var(--accent), var(--on-accent) 24%);
   --accent-tint-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
-  --accent-tint-press: color-mix(in srgb, var(--accent) 20%, #fff);
+  --accent-tint-press: color-mix(in srgb, var(--accent) 20%, var(--surface));
 
   /* 白い面の上のhover / 押下と、地の上 (丸ボタン・タブ・空の枠) の1段濃いhover / 押下 */
   --hover: #f2f2f2;
