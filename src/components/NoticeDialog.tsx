@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import { copy } from '@/copy';
 
 import { Button } from './Button';
 import { DIALOG_BODY_CLASS, DIALOG_CLASS, DIALOG_TITLE_CLASS } from './ConfirmDialog';
+import { useModalDialog } from './useModalDialog';
 
 type NoticeDialogProps = {
   title: string;
@@ -13,13 +14,8 @@ type NoticeDialogProps = {
 
 // 知らせるだけの確認 (閉じる1つ)。選ぶことがないので、焦点は閉じるに置く
 export function NoticeDialog({ title, body, onClose }: NoticeDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-    closeRef.current?.focus();
-  }, []);
+  const dialogRef = useModalDialog(closeRef);
 
   return (
     <dialog

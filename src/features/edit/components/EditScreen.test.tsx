@@ -322,6 +322,30 @@ describe('EditScreen', () => {
     expect(screen.getByText('detail')).toBeInTheDocument();
   });
 
+  it('名前のない自作を開いたときは最初から知らせる', () => {
+    const document = createEmptyDocument();
+    document.categories = [{ id: 'c1', name: 'COLL' }];
+    document.patterns = [{ id: 'p1', categoryId: 'c1', name: '', createdAt: '', updatedAt: '' }];
+    useDocumentStore.setState({ document });
+    renderEdit('/p/p1/edit');
+    expect(screen.getByText(copy.edit.nameRequired)).toBeInTheDocument();
+  });
+
+  it('名前を空のまま欄を離れると知らせ、入れ直すと消える', async () => {
+    const user = userEvent.setup();
+    withCustomCategory();
+    renderEdit('/p/p1/edit');
+    const name = screen.getByLabelText(copy.edit.name);
+    await user.clear(name);
+    expect(screen.queryByText(copy.edit.nameRequired)).not.toBeInTheDocument();
+    await user.tab();
+    expect(screen.getByText(copy.edit.nameRequired)).toBeInTheDocument();
+    expect(name).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('button', { name: copy.edit.save })).toBeDisabled();
+    await user.type(name, 'Sune');
+    expect(screen.queryByText(copy.edit.nameRequired)).not.toBeInTheDocument();
+  });
+
   it('自作は名前を変えて保存できる', async () => {
     const user = userEvent.setup();
     withCustomCategory();

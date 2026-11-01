@@ -60,6 +60,7 @@ type Copy = {
     newTitle: string;
     save: string;
     name: string;
+    nameRequired: string;
     category: string;
     deletePattern: string;
     deletePatternTitle: (name: string) => string;
@@ -202,6 +203,7 @@ type Copy = {
   a11y: {
     list: string;
     detail: string;
+    settings: string;
     categoryTabs: string;
     firstRun: string;
     homeScreenHint: string;
@@ -224,8 +226,12 @@ type Copy = {
     registerAllSheet: string;
     clearSheet: string;
     pickCategories: string;
-    tile: (category: string, name: string, isRegistered: boolean) => string;
+    // リスト表示は手順も見えているので読み上げ名にも入れる (グリッドは渡さない)
+    tile: (category: string, name: string, isRegistered: boolean, alg?: string) => string;
+    customTile: (name: string, alg: string) => string;
     cueFigure: (name: string) => string;
+    // 詳細の判断の文章に付ける見えない見出し
+    recognition: string;
     playerSheet: string;
     closeSheet: string;
     playMove: (symbol: string) => string;
@@ -315,6 +321,7 @@ export const copy = {
     newTitle: '新しいパターン',
     save: '保存',
     name: '名前',
+    nameRequired: '名前を入れてください',
     category: 'カテゴリ',
     deletePattern: 'このパターンを削除',
     deletePatternTitle: (name) => `「${name}」を削除`,
@@ -386,7 +393,7 @@ export const copy = {
     },
     storageUnavailable: {
       title: 'このブラウザでは保存できません',
-      body: 'プライベートモードでは端末に残せません。閉じると書いたものは消えます。',
+      body: 'プライベートモードや、サイトのデータを残さない設定で起きます。閉じると書いたものは消えます。',
     },
     quotaExceeded: {
       title: '保存できませんでした',
@@ -453,7 +460,7 @@ export const copy = {
     exportData: '書き出す',
     importData: '読み込む',
     importAdd: '追加',
-    importAddHint: '同じパターンは新しい方を残す',
+    importAddHint: '同じパターンは更新が新しい方を残す',
     importReplace: '置き換え',
     importReplaceHint: '今のデータを消してから入れる',
     chooseFile: 'ファイルを選ぶ',
@@ -564,6 +571,7 @@ export const copy = {
   a11y: {
     list: '一覧',
     detail: '詳細',
+    settings: '設定',
     categoryTabs: 'カテゴリ',
     firstRun: '案内',
     homeScreenHint: 'ホーム画面の案内',
@@ -586,8 +594,11 @@ export const copy = {
     registerAllSheet: '基本手順を一括登録',
     clearSheet: '登録を消す',
     pickCategories: 'カテゴリ',
-    tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
+    tile: (category, name, isRegistered, alg = '') =>
+      `${category} ${name}${isRegistered ? '' : '、未登録'}${alg === '' ? '' : `、${alg}`}`,
+    customTile: (name, alg) => `${name}${alg === '' ? '' : `、${alg}`}`,
     cueFigure: (name) => `${name}の判断の手がかり`,
+    recognition: '判断',
     playerSheet: '手順の再生',
     closeSheet: '閉じる',
     playMove: (symbol) => `${symbol}を再生`,

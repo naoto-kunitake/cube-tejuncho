@@ -59,6 +59,8 @@ type EditFormProps = {
 type EditDialog =
   { kind: 'deleteCard'; index: number; card: EditCard } | { kind: 'discard' } | { kind: 'deletePattern' };
 
+const NAME_ERROR_ID = 'pattern-name-error';
+
 const ADD_ROW_CLASS =
   'flex min-h-11 w-full items-center gap-2 rounded-md border border-dashed border-line-state bg-surface px-3.5 text-left text-body font-medium text-muted pressable hover:border-line-strong hover:bg-hover';
 
@@ -133,12 +135,17 @@ export function EditForm({
   });
   const { form, setForm, isDirty } = draft;
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(initialFocus);
+  // 名前の検証は欄を離れたときから (新規は空で始まるので、開いた直後には赤くしない)。
+  // 保存済みの自作が名前なしで開かれたときは、読めない手順と同じく開いた時点で示す
+  const [hasLeftName, setHasLeftName] = useState(target.kind === 'custom' && target.pattern.name.trim() === '');
   const [dialog, setDialog] = useState<EditDialog | null>(null);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
   const keypad = useAlgKeypad(inputsRef);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
   // 自作は名前が必須
-  const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
+  const isNameMissing = isCustom && form.name.trim() === '';
+  const hasNameError = hasLeftName && isNameMissing;
+  const canSave = !hasInvalidCard(form) && !isNameMissing;
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
   // 判断の文章の手がかり: PLLは側面の揃い方、F2Lはパーツの位置と白の向き (OLLは上面の向きで見分けるので出さない)
   const recognitionExamplesOf = (preset: Preset): string[] | null => {
@@ -283,11 +290,21 @@ export function EditForm({
                 id="pattern-name"
                 value={form.name}
                 autoComplete="off"
-                className={cn(INPUT_CLASS, 'h-11 px-3')}
+                aria-invalid={hasNameError}
+                aria-describedby={hasNameError ? NAME_ERROR_ID : undefined}
+                className={cn(INPUT_CLASS, 'h-11 px-3', hasNameError && 'border-danger hover:border-danger-hover')}
                 onChange={(event) => {
                   setForm((current) => ({ ...current, name: event.target.value }));
                 }}
+                onBlur={() => {
+                  setHasLeftName(true);
+                }}
               />
+              {hasNameError && (
+                <p id={NAME_ERROR_ID} className="-mt-0.5 text-label leading-normal text-danger">
+                  {copy.edit.nameRequired}
+                </p>
+              )}
             </Field>
             <Field id="pattern-category" label={copy.edit.category}>
               <select

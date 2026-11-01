@@ -15,7 +15,10 @@ export function App() {
   return (
     <BrowserRouter basename={basename}>
       <ScrollToTop />
-      <AppRoutes />
+      {/* 読み上げの「主要な領域へ」の移動先。知らせと確認は画面の外側なのでmainに入れない */}
+      <main>
+        <AppRoutes />
+      </main>
       <StorageIssueNotice />
       <Toast />
     </BrowserRouter>

@@ -7,6 +7,7 @@ import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
 import { HOME_SCREEN_BANNER, useDocumentStore } from '@/data/store';
+import type { WideStyle } from '@/lib/alg/format';
 
 import { ListScreen } from './ListScreen';
 
@@ -17,16 +18,17 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-function withCustomCategory() {
+function withCustomCategory(mainAlg = "R U R' U R U2 R'", wideStyle: WideStyle = 'r') {
   const document = createEmptyDocument();
   document.categories = [{ id: 'c1', name: 'COLL' }];
   document.settings.tabOrder = ['pll', 'c1'];
+  document.settings.wideStyle = wideStyle;
   document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' }];
   document.registrations = [
     {
       patternId: 'p1',
       recognition: '',
-      mainAlg: { text: "R U R' U R U2 R'", mnemonic: '', fingering: '' },
+      mainAlg: { text: mainAlg, mnemonic: '', fingering: '' },
       altAlgs: [],
       createdAt: '',
       updatedAt: '',
@@ -129,10 +131,23 @@ describe('ListScreen', () => {
     );
     await user.click(screen.getByRole('button', { name: copy.a11y.switchToList }));
     expect(useDocumentStore.getState().document.settings.listView).toBe('list');
-    const row = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    const row = screen.getByRole('link', {
+      name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true, "M2 U M U2 M' U M2"),
+    });
     expect(within(row).getByText('U2')).toBeInTheDocument();
     const unregistered = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ub', false) });
     expect(within(unregistered).queryByText('U2')).not.toBeInTheDocument();
+  });
+
+  it('グリッドのタイルの読み上げ名には手順を入れない', () => {
+    useDocumentStore.getState().addRegistration('pll-ua', { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' });
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    expect(tile).toHaveTextContent(/^Ua$/);
   });
 
   it('リスト表示でもう一度押すとグリッドに戻る', async () => {
@@ -174,7 +189,7 @@ describe('ListScreen', () => {
       </MemoryRouter>,
     );
     await user.click(screen.getByRole('tab', { name: 'COLL' }));
-    const row = screen.getByRole('link', { name: 'Sune' });
+    const row = screen.getByRole('link', { name: copy.a11y.customTile('Sune', "R U R' U R U2 R'") });
     expect(within(row).getByText('U2')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
   });
@@ -275,6 +290,18 @@ describe('ListScreen', () => {
     expect(useDocumentStore.getState().document.registrations).toHaveLength(0);
   });
 
+  it('自作のタイルの手順は2層回しの表記の設定で出る', async () => {
+    const user = userEvent.setup();
+    withCustomCategory("r U R'", 'Rw');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    expect(screen.getByText("Rw U R'")).toBeInTheDocument();
+  });
+
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {
     const user = userEvent.setup();
     withCustomCategory();
@@ -284,7 +311,10 @@ describe('ListScreen', () => {
       </MemoryRouter>,
     );
     await user.click(screen.getByRole('tab', { name: 'COLL' }));
-    expect(screen.getByRole('link', { name: 'Sune' })).toHaveAttribute('href', '/p/p1');
+    expect(screen.getByRole('link', { name: copy.a11y.customTile('Sune', "R U R' U R U2 R'") })).toHaveAttribute(
+      'href',
+      '/p/p1',
+    );
     expect(screen.getByText("R U R' U R U2 R'")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toHaveAttribute('href', '/p/new?category=c1');
     expect(screen.queryByText(/登録済み/)).not.toBeInTheDocument();
