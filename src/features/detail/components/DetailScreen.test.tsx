@@ -86,8 +86,7 @@ describe('DetailScreen', () => {
     expect(screen.getAllByRole('button', { name: copy.detail.play })).toHaveLength(2);
   });
 
-  // 自作は判断が空なら空枠を出す (下の自作のテスト)。プリセットは登録済みなら出さない
-  it('登録済みのプリセットは判断が空でも空枠を出さない', () => {
+  it('登録済みでも判断が空なら空枠を出す', () => {
     const document = createEmptyDocument();
     document.registrations = [
       {
@@ -101,7 +100,7 @@ describe('DetailScreen', () => {
     ];
     useDocumentStore.setState({ document });
     renderDetail('/p/pll-ua');
-    expect(screen.queryByRole('link', { name: copy.detail.writeRecognition })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: copy.detail.writeRecognition })).toHaveAttribute('href', '/p/pll-ua/edit');
     expect(screen.queryByRole('heading', { level: 2, name: copy.detail.altAlgs })).not.toBeInTheDocument();
   });
 
