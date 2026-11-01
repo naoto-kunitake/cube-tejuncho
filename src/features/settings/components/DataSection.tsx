@@ -24,6 +24,15 @@ type ImportFailure = 'invalid' | 'newerVersion';
 
 type Clearing = { ids: string[]; names: string[]; count: number };
 
+// 同時に1つしか開かないシートと確認。開いていないときはnull
+type Overlay =
+  | { kind: 'import' }
+  | { kind: 'importFailed'; failure: ImportFailure }
+  | { kind: 'registerAll' }
+  | { kind: 'pickToClear' }
+  | { kind: 'confirmClear'; clearing: Clearing }
+  | { kind: 'reset' };
+
 // 設定のデータの区画。安全な操作 (書き出す / 読み込む / 基本手順を一括登録) と、
 // 赤字の破壊的な操作 (登録を消す / 初期状態に戻す) は別のカードに分ける (iOSの設定と同じ置き方)
 export function DataSection() {
@@ -35,17 +44,16 @@ export function DataSection() {
   const clearRegistrations = useDocumentStore((state) => state.clearRegistrations);
   const resetDocument = useDocumentStore((state) => state.resetDocument);
   const showToast = useToastStore((state) => state.show);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importFailure, setImportFailure] = useState<ImportFailure | null>(null);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isClearing, setIsClearing] = useState(false);
-  const [clearing, setClearing] = useState<Clearing | null>(null);
-  const [isResetting, setIsResetting] = useState(false);
+  const [overlay, setOverlay] = useState<Overlay | null>(null);
   const registeredIds = new Set(document.registrations.map((entry) => entry.patternId));
   const unregisteredCounts = PRESET_CATEGORY_IDS.map((category) => ({
     category,
     count: presetsOf(category).filter((preset) => !registeredIds.has(preset.id)).length,
   }));
+
+  const closeOverlay = () => {
+    setOverlay(null);
+  };
 
   const exportDocument = async () => {
     const file = createExportFile(document, copy.settings.exportFileName(exportDateOf(new Date())));
@@ -57,13 +65,16 @@ export function DataSection() {
 
   // 読み込みは文書を丸ごと書き換えるので、確認の代わりに「元に戻す」を出す
   const importFile = async (file: File, mode: ImportMode) => {
-    setIsImporting(false);
+    closeOverlay();
     const before = useDocumentStore.getState().document;
     try {
       const result = importData(await file.text());
       if (!result.ok) {
         console.error('import failed', result.error);
-        setImportFailure(result.error.kind === 'newerVersion' ? 'newerVersion' : 'invalid');
+        setOverlay({
+          kind: 'importFailed',
+          failure: result.error.kind === 'newerVersion' ? 'newerVersion' : 'invalid',
+        });
         return;
       }
       importDocument(result.value, mode);
@@ -75,7 +86,7 @@ export function DataSection() {
       });
     } catch (error: unknown) {
       console.error('import file read failed', error);
-      setImportFailure('invalid');
+      setOverlay({ kind: 'importFailed', failure: 'invalid' });
     }
   };
 
@@ -96,7 +107,7 @@ export function DataSection() {
 
   // 一括登録は取り消せるので確認は出さない。選んだカテゴリ全部を1回の「元に戻す」で戻す
   const registerAll = (categoryIds: string[]) => {
-    setIsRegistering(false);
+    closeOverlay();
     const before = useDocumentStore.getState().document;
     const count = categoryIds.filter(hasPresets).reduce((total, category) => total + registerStandardAlgs(category), 0);
     showToast(copy.settings.registeredAll(count), {
@@ -109,21 +120,20 @@ export function DataSection() {
 
   // 消すのは中のパターンまで及ぶので件数つきで確認し、閉じた後に「元に戻す」で文書を丸ごと戻せるようにする
   const askToClear = (categoryIds: string[]) => {
-    setIsClearing(false);
     const chosen = clearOptions.filter((option) => categoryIds.includes(option.id));
-    setClearing({
-      ids: chosen.map((option) => option.id),
-      names: chosen.map((option) => option.label),
-      count: chosen.reduce((total, option) => total + option.count, 0),
+    setOverlay({
+      kind: 'confirmClear',
+      clearing: {
+        ids: chosen.map((option) => option.id),
+        names: chosen.map((option) => option.label),
+        count: chosen.reduce((total, option) => total + option.count, 0),
+      },
     });
   };
-  const clearChosen = () => {
-    if (clearing === null) {
-      return;
-    }
+  const clearChosen = (clearing: Clearing) => {
     const before = useDocumentStore.getState().document;
     const count = clearRegistrations(clearing.ids);
-    setClearing(null);
+    closeOverlay();
     showToast(copy.settings.cleared(count), {
       label: copy.toast.undo,
       run: () => {
@@ -136,7 +146,7 @@ export function DataSection() {
   const reset = () => {
     const before = useDocumentStore.getState().document;
     resetDocument();
-    setIsResetting(false);
+    closeOverlay();
     void navigate('/');
     showToast(copy.settings.resetDone, {
       label: copy.toast.undo,
@@ -163,7 +173,7 @@ export function DataSection() {
           type="button"
           className={ROW_BUTTON_CLASS}
           onClick={() => {
-            setIsImporting(true);
+            setOverlay({ kind: 'import' });
           }}
         >
           {copy.settings.importData}
@@ -172,7 +182,7 @@ export function DataSection() {
           type="button"
           className={ROW_BUTTON_CLASS}
           onClick={() => {
-            setIsRegistering(true);
+            setOverlay({ kind: 'registerAll' });
           }}
         >
           {copy.settings.registerAll}
@@ -184,7 +194,7 @@ export function DataSection() {
           type="button"
           className={DANGER_ROW_CLASS}
           onClick={() => {
-            setIsClearing(true);
+            setOverlay({ kind: 'pickToClear' });
           }}
         >
           {copy.settings.clearRegistrations}
@@ -193,13 +203,13 @@ export function DataSection() {
           type="button"
           className={DANGER_ROW_CLASS}
           onClick={() => {
-            setIsResetting(true);
+            setOverlay({ kind: 'reset' });
           }}
         >
           {copy.settings.reset}
         </button>
       </div>
-      {isRegistering && (
+      {overlay?.kind === 'registerAll' && (
         <CategoryPickSheet
           label={copy.a11y.registerAllSheet}
           title={copy.settings.registerAll}
@@ -214,22 +224,18 @@ export function DataSection() {
           actionLabel={copy.settings.register}
           actionVariant="primary"
           onSubmit={registerAll}
-          onClose={() => {
-            setIsRegistering(false);
-          }}
+          onClose={closeOverlay}
         />
       )}
-      {isImporting && (
+      {overlay?.kind === 'import' && (
         <ImportSheet
           onChoose={(file, mode) => {
             void importFile(file, mode);
           }}
-          onClose={() => {
-            setIsImporting(false);
-          }}
+          onClose={closeOverlay}
         />
       )}
-      {isClearing && (
+      {overlay?.kind === 'pickToClear' && (
         <CategoryPickSheet
           label={copy.a11y.clearSheet}
           title={copy.settings.clearRegistrations}
@@ -239,40 +245,36 @@ export function DataSection() {
           actionLabel={copy.settings.clear}
           actionVariant="danger"
           onSubmit={askToClear}
-          onClose={() => {
-            setIsClearing(false);
-          }}
+          onClose={closeOverlay}
         />
       )}
-      {clearing !== null && (
+      {overlay?.kind === 'confirmClear' && (
         <ConfirmDialog
-          title={copy.settings.clearTitle(clearing.names)}
-          body={copy.settings.clearBody(clearing.count)}
+          title={copy.settings.clearTitle(overlay.clearing.names)}
+          body={copy.settings.clearBody(overlay.clearing.count)}
           actionLabel={copy.settings.clear}
-          onConfirm={clearChosen}
-          onCancel={() => {
-            setClearing(null);
+          onConfirm={() => {
+            clearChosen(overlay.clearing);
           }}
+          onCancel={closeOverlay}
         />
       )}
-      {isResetting && (
+      {overlay?.kind === 'reset' && (
         <ConfirmDialog
           title={copy.settings.reset}
           body={copy.settings.resetBody}
           actionLabel={copy.settings.resetAction}
           onConfirm={reset}
-          onCancel={() => {
-            setIsResetting(false);
-          }}
+          onCancel={closeOverlay}
         />
       )}
-      {importFailure !== null && (
+      {overlay?.kind === 'importFailed' && (
         <NoticeDialog
           title={copy.settings.importFailedTitle}
-          body={importFailure === 'newerVersion' ? copy.settings.importFailedNewerBody : copy.settings.importFailedBody}
-          onClose={() => {
-            setImportFailure(null);
-          }}
+          body={
+            overlay.failure === 'newerVersion' ? copy.settings.importFailedNewerBody : copy.settings.importFailedBody
+          }
+          onClose={closeOverlay}
         />
       )}
     </section>
