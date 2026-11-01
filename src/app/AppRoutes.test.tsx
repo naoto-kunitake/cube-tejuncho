@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
-import { DOCUMENT_KEY, useDocumentStore } from '@/data/store';
+import { DOCUMENT_KEY } from '@/data/document-storage';
+import { useDocumentStore } from '@/data/store';
 
 import { AppRoutes } from './AppRoutes';
 
