@@ -57,7 +57,9 @@ type EditFormProps = {
   draftStore?: DraftStore;
 };
 
-type PendingDelete = { index: number; card: EditCard };
+// 同時に1つしか開かない確認。開いていないときはnull
+type EditDialog =
+  { kind: 'deleteCard'; index: number; card: EditCard } | { kind: 'discard' } | { kind: 'deletePattern' };
 
 const ADD_ROW_CLASS =
   'flex min-h-11 w-full items-center gap-2 rounded-md border border-dashed border-line-state bg-surface px-3.5 text-left text-body font-medium text-muted pressable hover:border-line-strong hover:bg-hover';
@@ -148,9 +150,7 @@ export function EditForm({
   });
   const { form, setForm, isDirty } = draft;
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(initialFocus);
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [isDiscarding, setIsDiscarding] = useState(false);
-  const [isDeletingPattern, setIsDeletingPattern] = useState(false);
+  const [dialog, setDialog] = useState<EditDialog | null>(null);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
   const keypad = useAlgKeypad(inputsRef);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
@@ -197,8 +197,12 @@ export function EditForm({
     setFocusTarget({ kind: 'alg', index: form.cards.length });
   };
 
+  const closeDialog = () => {
+    setDialog(null);
+  };
+
   const deleteCard = (index: number, card: EditCard) => {
-    setPendingDelete(null);
+    closeDialog();
     setFocusTarget(null);
     setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
     showOwnToast(copy.edit.deletedAlg, {
@@ -251,7 +255,7 @@ export function EditForm({
     }
     const before = useDocumentStore.getState().document;
     const { id, name, categoryId } = target.pattern;
-    setIsDeletingPattern(false);
+    closeDialog();
     removeCustomPattern(id);
     close(`/?category=${categoryId}`);
     showToast(copy.edit.deletedPattern(name), {
@@ -271,7 +275,7 @@ export function EditForm({
             className="-ml-1.75"
             onClick={() => {
               if (isDirty) {
-                setIsDiscarding(true);
+                setDialog({ kind: 'discard' });
               } else {
                 close();
               }
@@ -360,7 +364,7 @@ export function EditForm({
                 if (isCardEmpty(card)) {
                   setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
                 } else {
-                  setPendingDelete({ index, card });
+                  setDialog({ kind: 'deleteCard', index, card });
                 }
               }}
             />
@@ -396,7 +400,7 @@ export function EditForm({
             <Button
               variant="textDanger"
               onClick={() => {
-                setIsDeletingPattern(true);
+                setDialog({ kind: 'deletePattern' });
               }}
             >
               {copy.edit.deletePattern}
@@ -405,42 +409,32 @@ export function EditForm({
         )}
       </div>
       {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
-      {pendingDelete !== null && (
+      {dialog?.kind === 'deleteCard' && (
         <ConfirmDialog
-          title={
-            pendingDelete.index === 0
-              ? copy.edit.deleteMainAlgTitle
-              : copy.edit.deleteAltAlgTitle(pendingDelete.index + 1)
-          }
+          title={dialog.index === 0 ? copy.edit.deleteMainAlgTitle : copy.edit.deleteAltAlgTitle(dialog.index + 1)}
           actionLabel={copy.edit.deleteAlg}
           onConfirm={() => {
-            deleteCard(pendingDelete.index, pendingDelete.card);
+            deleteCard(dialog.index, dialog.card);
           }}
-          onCancel={() => {
-            setPendingDelete(null);
-          }}
+          onCancel={closeDialog}
         />
       )}
-      {isDiscarding && (
+      {dialog?.kind === 'discard' && (
         <ConfirmDialog
           title={copy.edit.discardTitle}
           actionLabel={copy.edit.discard}
           onConfirm={() => {
             close();
           }}
-          onCancel={() => {
-            setIsDiscarding(false);
-          }}
+          onCancel={closeDialog}
         />
       )}
-      {isDeletingPattern && target.kind === 'custom' && (
+      {dialog?.kind === 'deletePattern' && target.kind === 'custom' && (
         <ConfirmDialog
           title={copy.edit.deletePatternTitle(target.pattern.name)}
           actionLabel={copy.edit.deletePatternAction}
           onConfirm={deletePattern}
-          onCancel={() => {
-            setIsDeletingPattern(false);
-          }}
+          onCancel={closeDialog}
         />
       )}
     </>
