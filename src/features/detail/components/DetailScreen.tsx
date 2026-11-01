@@ -19,18 +19,17 @@ import { cn } from '@/lib/utils';
 import { AlgCard } from './AlgCard';
 import { StandardAlgCard } from './StandardAlgCard';
 
-// 未登録のときの空枠 (判断を書く / 手順を登録)。押すと編集のその欄へ
+// 判断や手順が空のときの空枠 (判断を書く / 手順を登録)。押すと編集のその欄へ
 const EMPTY_SLOT_CLASS =
   'w-full rounded-md border border-dashed border-line-state px-3 py-2.75 text-center text-body leading-normal text-muted pressable hover:border-line-strong hover:bg-hover-ground';
 
 type RecognitionProps = {
   recognition: string;
   editPath: string;
-  // 判断が空のときに「判断を書く」の空枠を出すか。プリセットは未登録のときだけ、自作は常に出す
-  showsEmptySlot: boolean;
 };
 
-function Recognition({ recognition, editPath, showsEmptySlot }: RecognitionProps) {
+// 判断が空なら、登録済みでも自作でも「判断を書く」の空枠を出す (あとから書き足す入口を同じ場所に置く)
+function Recognition({ recognition, editPath }: RecognitionProps) {
   if (recognition !== '') {
     // 見出しは読み上げだけに出す。図の次に文章が始まるのが音声では分からない (位置で分かる画面には出さない)
     return (
@@ -39,9 +38,6 @@ function Recognition({ recognition, editPath, showsEmptySlot }: RecognitionProps
         <p className="w-full text-body leading-normal">{recognition}</p>
       </>
     );
-  }
-  if (!showsEmptySlot) {
-    return null;
   }
   return (
     <Link to={editPath} state={{ focus: 'recognition' }} className={EMPTY_SLOT_CLASS}>
@@ -95,11 +91,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         <PatternFigures preset={preset} settings={settings} />
-        <Recognition
-          recognition={registration?.recognition ?? ''}
-          editPath={editPath}
-          showsEmptySlot={registration === undefined}
-        />
+        <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
       <section className="flex flex-col gap-2">
         <SectionHeading>{copy.detail.alg}</SectionHeading>
@@ -151,7 +143,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
             {formatAlg(mainAlg, settings.wideStyle)}
           </p>
         )}
-        <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} showsEmptySlot />
+        <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
       <section className="flex flex-col gap-2">
         <SectionHeading>{copy.detail.alg}</SectionHeading>

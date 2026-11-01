@@ -117,7 +117,7 @@ describe('SettingsScreen', () => {
     expect(useDocumentStore.getState().document.settings.appearance).toBe('dark');
   });
 
-  it('カテゴリを追加すると文書に入り、そのカテゴリの一覧へ移る', async () => {
+  it('カテゴリを追加すると文書に入り、設定に留まる', async () => {
     const user = userEvent.setup();
     renderSettings();
     await user.click(screen.getByRole('button', { name: copy.settings.addCategory }));
@@ -129,7 +129,9 @@ describe('SettingsScreen', () => {
     const { categories, settings } = useDocumentStore.getState().document;
     expect(categories).toMatchObject([{ name: 'COLL' }]);
     expect(settings.tabOrder.at(-1)).toBe(categories[0]?.id);
-    expect(screen.getByText('list')).toBeInTheDocument();
+    expect(settings.lastTab).toBe(categories[0]?.id);
+    expect(screen.queryByText('list')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: copy.settings.title })).toBeInTheDocument();
   });
 
   it('同じ名前のカテゴリは追加できない', async () => {
