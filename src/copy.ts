@@ -80,8 +80,6 @@ type Copy = {
     addStandardAlg: string;
     algError: (error: AlgError) => string;
     seeNotation: string;
-    deleteMainAlgTitle: string;
-    deleteAltAlgTitle: (number: number) => string;
     deletedAlg: string;
     discardTitle: string;
     discard: string;
@@ -365,8 +363,6 @@ export const copy = {
       }
     },
     seeNotation: '回転記号を見る',
-    deleteMainAlgTitle: 'メイン手順を削除',
-    deleteAltAlgTitle: (number) => `手順 ${number}を削除`,
     deletedAlg: '手順を削除しました',
     discardTitle: '変更を破棄',
     discard: '破棄',

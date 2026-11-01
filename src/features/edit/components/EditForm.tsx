@@ -56,8 +56,7 @@ type EditFormProps = {
 };
 
 // 同時に1つしか開かない確認。開いていないときはnull
-type EditDialog =
-  { kind: 'deleteCard'; index: number; card: EditCard } | { kind: 'discard' } | { kind: 'deletePattern' };
+type EditDialog = { kind: 'discard' } | { kind: 'deletePattern' };
 
 const NAME_ERROR_ID = 'pattern-name-error';
 
@@ -191,10 +190,15 @@ export function EditForm({
     setDialog(null);
   };
 
+  // 保存するまで文書は変わらず、消したあとも取り消せるので確認は出さない (一括登録や読み込みと同じ扱い)。
+  // 空のカードは戻すものがないので知らせない
   const deleteCard = (index: number, card: EditCard) => {
-    closeDialog();
+    // 焦点の指定も外す (消えた欄に焦点を戻しに行かない)
     setFocusTarget(null);
     setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
+    if (isCardEmpty(card)) {
+      return;
+    }
     showOwnToast(copy.edit.deletedAlg, {
       label: copy.toast.undo,
       run: () => {
@@ -360,12 +364,7 @@ export function EditForm({
                 setForm((current) => ({ ...current, cards: moveCardToFront(current.cards, index) }));
               }}
               onDelete={() => {
-                // 空のカードはそのまま消す。中身があれば確認 + 取り消し
-                if (isCardEmpty(card)) {
-                  setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
-                } else {
-                  setDialog({ kind: 'deleteCard', index, card });
-                }
+                deleteCard(index, card);
               }}
             />
           ))}
@@ -409,16 +408,6 @@ export function EditForm({
         )}
       </div>
       {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
-      {dialog?.kind === 'deleteCard' && (
-        <ConfirmDialog
-          title={dialog.index === 0 ? copy.edit.deleteMainAlgTitle : copy.edit.deleteAltAlgTitle(dialog.index + 1)}
-          actionLabel={copy.edit.deleteAlg}
-          onConfirm={() => {
-            deleteCard(dialog.index, dialog.card);
-          }}
-          onCancel={closeDialog}
-        />
-      )}
       {dialog?.kind === 'discard' && (
         <ConfirmDialog
           title={copy.edit.discardTitle}

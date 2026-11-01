@@ -148,7 +148,7 @@ describe('EditScreen', () => {
     expect(screen.getByText('detail')).toBeInTheDocument();
   });
 
-  it('中身のある手順の削除は確認し、元に戻せる', async () => {
+  it('中身のある手順も確認なしで消え、元に戻せる', async () => {
     const user = userEvent.setup();
     useDocumentStore.setState({ document: { ...createEmptyDocument(), registrations: [REGISTRATION] } });
     renderEdit();
@@ -157,14 +157,25 @@ describe('EditScreen', () => {
       throw new Error('alt card not found');
     }
     await user.click(within(altCard).getByRole('button', { name: copy.edit.deleteAlg }));
-    await user.click(
-      within(screen.getByRole('alertdialog', { name: copy.edit.deleteAltAlgTitle(2) })).getByRole('button', {
-        name: copy.edit.deleteAlg,
-      }),
-    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.queryByLabelText(copy.edit.altAlg(2))).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: copy.toast.undo }));
     expect(screen.getByLabelText(copy.edit.altAlg(2))).toHaveValue(REGISTRATION.altAlgs[0]?.text);
+  });
+
+  it('メイン手順も確認なしで消え、元に戻せる', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.setState({ document: { ...createEmptyDocument(), registrations: [REGISTRATION] } });
+    renderEdit();
+    const mainCard = screen.getByLabelText(copy.edit.mainAlg).closest<HTMLElement>('div.rounded-md');
+    if (mainCard === null) {
+      throw new Error('main card not found');
+    }
+    await user.click(within(mainCard).getByRole('button', { name: copy.edit.deleteAlg }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(copy.edit.mainAlg)).toHaveValue(REGISTRATION.altAlgs[0]?.text);
+    await user.click(screen.getByRole('button', { name: copy.toast.undo }));
+    expect(screen.getByLabelText(copy.edit.mainAlg)).toHaveValue(REGISTRATION.mainAlg.text);
   });
 
   it('メインにすると先頭に来て、基本手順は 1 回だけ足せる', async () => {
@@ -225,7 +236,6 @@ describe('EditScreen', () => {
       throw new Error('alt card not found');
     }
     await user.click(within(altCard).getByRole('button', { name: copy.edit.deleteAlg }));
-    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: copy.edit.deleteAlg }));
     expect(screen.getByText(copy.edit.deletedAlg)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: copy.edit.save }));
     expect(screen.getByText('detail')).toBeInTheDocument();
