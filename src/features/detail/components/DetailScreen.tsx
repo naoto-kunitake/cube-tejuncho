@@ -2,8 +2,7 @@ import { ChevronLeft, Pencil, Pin } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
-import { PresetFigure } from '@/components/figures/PresetFigure';
-import { TopFigure } from '@/components/figures/TopFigure';
+import { PatternFigures } from '@/components/figures/PatternFigures';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { SectionHeading } from '@/components/SectionHeading';
@@ -14,7 +13,6 @@ import { findRegistration } from '@/data/document';
 import { findPattern, patternName } from '@/data/patterns';
 import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
-import { cueView, recolorView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
 import { AlgCard } from './AlgCard';
@@ -89,23 +87,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
     <div className="flex flex-col gap-4 px-4 pb-6">
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
-        {/* SVGはviewBox 86のうち外側4 (4.65%) が空き。負の余白で打ち消し、ステッカーの外周をカードの余白16に揃える。
-            2枚: ステッカー幅138 × 2 + 間24 = カード内側300 → SVG幅152、負の余白7。1枚: 240 → 11 */}
-        {/* 手がかりの図はPLLだけ (OLLは上面の向きで見分ける) */}
-        {preset.category === 'pll' && settings.showCueFigure ? (
-          <div className="flex w-full justify-center gap-6">
-            <div className="-m-1.75 w-38 flex-none">
-              <PresetFigure preset={preset} settings={settings} canShowArrows />
-            </div>
-            <div className="-m-1.75 w-38 flex-none">
-              <TopFigure view={cueView(recolorView(preset.view, settings))} label={copy.a11y.cueFigure(preset.name)} />
-            </div>
-          </div>
-        ) : (
-          <div className="-my-2.75 w-full max-w-60">
-            <PresetFigure preset={preset} settings={settings} canShowArrows />
-          </div>
-        )}
+        <PatternFigures preset={preset} settings={settings} />
         <Recognition
           recognition={registration?.recognition ?? ''}
           editPath={editPath}

@@ -86,6 +86,12 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('img', { name: 'Ua' }).querySelectorAll('path').length).toBeGreaterThan(0);
   });
 
+  it('PLL の詳細は全色の図と手がかりの図を2枚並べる', () => {
+    renderDetail('/p/pll-ua');
+    expect(screen.getByRole('img', { name: 'Ua' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: copy.a11y.cueFigure('Ua') })).toBeInTheDocument();
+  });
+
   it('OLL の図は上面の色のステッカーだけ色があり、他は灰', () => {
     renderDetail('/p/oll-21');
     const stickers = [...screen.getByRole('img', { name: 'OLL 21' }).querySelectorAll('rect')];
