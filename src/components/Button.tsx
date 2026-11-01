@@ -15,11 +15,11 @@ export const buttonVariants = cva(
       variant: {
         primary: cn(
           PILL_TAP_AREA_CLASS,
-          'gap-2 border border-accent bg-accent px-4 text-body font-bold text-on-accent hover:bg-accent-hover active:scale-98 active:bg-accent-press disabled:border-disabled disabled:bg-disabled disabled:text-on-disabled disabled:opacity-45',
+          'gap-2 border border-accent bg-accent px-4 text-body font-bold text-on-accent hover:bg-accent-hover active:scale-98 active:bg-accent-press disabled:border-disabled disabled:bg-disabled disabled:text-on-disabled',
         ),
         danger: cn(
           PILL_TAP_AREA_CLASS,
-          'gap-2 border border-danger bg-danger px-4 text-body font-bold text-on-danger hover:border-danger-hover hover:bg-danger-hover active:scale-98 active:border-danger-active active:bg-danger-active disabled:border-disabled disabled:bg-disabled disabled:text-on-disabled disabled:opacity-45',
+          'gap-2 border border-danger bg-danger px-4 text-body font-bold text-on-danger hover:border-danger-hover hover:bg-danger-hover active:scale-98 active:border-danger-active active:bg-danger-active disabled:border-disabled disabled:bg-disabled disabled:text-on-disabled',
         ),
         quiet: cn(
           PILL_TAP_AREA_CLASS,
