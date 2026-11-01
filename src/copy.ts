@@ -60,6 +60,7 @@ type Copy = {
     newTitle: string;
     save: string;
     name: string;
+    nameRequired: string;
     category: string;
     deletePattern: string;
     deletePatternTitle: (name: string) => string;
@@ -319,6 +320,7 @@ export const copy = {
     newTitle: '新しいパターン',
     save: '保存',
     name: '名前',
+    nameRequired: '名前を入れてください',
     category: 'カテゴリ',
     deletePattern: 'このパターンを削除',
     deletePatternTitle: (name) => `「${name}」を削除`,
