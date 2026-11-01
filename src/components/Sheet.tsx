@@ -49,7 +49,7 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
       aria-label={label}
       onClose={onClose}
       className={cn(
-        'm-0 mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-5 text-ink shadow-5 backdrop:bg-black/60 md:m-auto md:max-w-100 md:rounded-sheet md:border',
+        'm-0 mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-safe-5 text-ink shadow-5 backdrop:bg-black/60 md:m-auto md:max-w-100 md:rounded-sheet md:border',
         className,
       )}
     >

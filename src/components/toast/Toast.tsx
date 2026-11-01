@@ -13,7 +13,7 @@ export function Toast() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-x-4 bottom-4 z-10 md:inset-x-0 md:mx-auto md:max-w-132"
+      className="fixed inset-x-4 bottom-safe-4 z-10 md:inset-x-0 md:mx-auto md:max-w-132"
     >
       {toast !== null && (
         <div className="flex items-center gap-2 rounded-lg bg-inverse py-2.5 pr-2 pl-4 text-small text-on-inverse shadow-4">
