@@ -2,14 +2,10 @@ import type { Alg } from 'cubing/alg';
 
 import { frontColorTurns, sideTurnsOf, TOP_LETTER, type ViewSettings } from '@/lib/figure/view';
 
-import type { Face } from './stickers';
+import { CENTER_POSITIONS, CORNER_POSITIONS, EDGE_POSITIONS, type Face } from './stickers';
 import { frontCenterOf, startStateOf, topCenterOf } from './view';
 
 export type StickeringCategory = 'pll' | 'oll' | 'f2l';
-
-const EDGE_POSITIONS = ['UF', 'UR', 'UB', 'UL', 'DF', 'DR', 'DB', 'DL', 'FR', 'FL', 'BR', 'BL'] as const;
-const CORNER_POSITIONS = ['UFR', 'URB', 'UBL', 'ULF', 'DRF', 'DFL', 'DLB', 'DBR'] as const;
-const CENTER_POSITIONS = ['U', 'L', 'F', 'R', 'B', 'D'] as const;
 
 // yをk回したあとの「図の枠の面」が、持ち替える前のcubing.jsのどの面か
 const Y_TURNED: readonly Record<'F' | 'R' | 'B' | 'L', Face>[] = [

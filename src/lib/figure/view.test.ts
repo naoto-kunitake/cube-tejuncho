@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { cueView, orientationView, pairView, recolorCubeView, recolorView, type TopView } from './view';
+import {
+  cueView,
+  orientationView,
+  pairView,
+  recolorCubeView,
+  recolorView,
+  sideColorAt,
+  sideTurnsOf,
+  type TopView,
+} from './view';
 
 const UA: TopView = {
   u: ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'],
@@ -40,6 +49,25 @@ describe('recolorView', () => {
   it('白上で前面を赤にしても前面の色は赤になる', () => {
     const view = recolorView({ ...UA, f: ['G', 'G', 'G'] }, { topColor: 'white', frontColor: 'red' });
     expect(view.f).toEqual(['R', 'R', 'R']);
+  });
+});
+
+describe('sideColorAt', () => {
+  it('黄上の並びは前から 緑 橙 青 赤', () => {
+    expect([0, 1, 2, 3].map((index) => sideColorAt('yellow', index))).toEqual(['G', 'O', 'B', 'R']);
+  });
+
+  it('白上では赤と橙が入れ替わる', () => {
+    expect([0, 1, 2, 3].map((index) => sideColorAt('white', index))).toEqual(['G', 'R', 'B', 'O']);
+  });
+
+  it('範囲の外は回り込む (y回転は並びの巡回)', () => {
+    expect(sideColorAt('yellow', 4)).toBe('G');
+    expect(sideColorAt('yellow', -1)).toBe('R');
+  });
+
+  it('sideTurnsOfと互いに逆', () => {
+    expect(sideTurnsOf('yellow', sideColorAt('yellow', 2))).toBe(2);
   });
 });
 
