@@ -12,7 +12,7 @@ type ConfirmDialogProps = {
   onCancel: () => void;
 };
 
-// 確認と知らせの共通の見た目。枠線なしで、暗幕と影で浮かせる (シートと同じ)
+// 確認と知らせの共通の見た目。枠線を置かず、暗幕と影だけで浮かせる
 export const DIALOG_CLASS =
   'inset-x-6 m-auto flex w-auto flex-col gap-2 rounded-xl bg-surface px-5 pt-5 pb-4 text-ink shadow-4 backdrop:bg-black/60 md:inset-x-0 md:w-full md:max-w-105';
 export const DIALOG_TITLE_CLASS = 'text-input leading-snug font-bold text-balance text-ink-strong';
