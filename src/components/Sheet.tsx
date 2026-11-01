@@ -14,7 +14,8 @@ type SheetProps = {
 };
 
 // 下から出るシート。nativeのdialogを使い、Escと背景の暗幕で閉じ、背後にフォーカスが行かないようにする。
-// 狭い幅は親指の届く底のシート。広い幅は窓が縦に長く、底に出すと押した場所から遠いので中央のカードにする
+// 狭い幅は親指の届く底のシート。広い幅は窓が縦に長く、底に出すと押した場所から遠いので中央のカードにする。
+// 横はmx-autoで中央に置く (dialogの既定のmargin:autoを消すと、幅の上限に達した画面で左端に寄る)
 export function Sheet({ label, onClose, className, children }: SheetProps) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
@@ -49,7 +50,7 @@ export function Sheet({ label, onClose, className, children }: SheetProps) {
       aria-label={label}
       onClose={onClose}
       className={cn(
-        'm-0 mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-safe-5 text-ink shadow-5 backdrop:bg-black/60 md:m-auto md:max-w-100 md:rounded-sheet md:border',
+        'mx-auto mt-auto mb-0 flex w-full max-w-140 flex-col gap-3 rounded-t-sheet border-t border-line bg-surface px-4 pt-3 pb-safe-5 text-ink shadow-5 backdrop:bg-black/60 md:m-auto md:max-w-100 md:rounded-sheet md:border',
         className,
       )}
     >
