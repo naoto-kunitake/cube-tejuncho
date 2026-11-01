@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { GROUND_HEX } from '@/lib/theme/color';
 import { THEME_PRESET_HEX, THEME_PRESET_IDS } from '@/lib/theme/palette';
 
 import tokensCss from './tokens.css?raw';
@@ -34,5 +35,19 @@ describe('tokens.css のダークの差し替え', () => {
       expect(light).toContain(`${name}:`);
       expect(dark).toContain(`${name}:`);
     }
+  });
+});
+
+describe('tokens.css の地の色', () => {
+  const groundOf = (selector: string) =>
+    new RegExp(`${selector}\\s*\\{[^}]*--ground:\\s*(#[0-9a-f]{6});`).exec(tokensCss)?.[1];
+
+  // ブラウザの枠の色はlib/theme/colorのGROUND_HEXから出すので、トークンとずれたらここで落ちる
+  it('ライトの地は GROUND_HEX.light と同じ値', () => {
+    expect(groundOf(':root')).toBe(GROUND_HEX.light);
+  });
+
+  it('ダークの地は GROUND_HEX.dark と同じ値', () => {
+    expect(groundOf('\\.dark')).toBe(GROUND_HEX.dark);
   });
 });

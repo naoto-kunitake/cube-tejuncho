@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createEmptyDocument } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
+import { GROUND_HEX } from '@/lib/theme/color';
 
 import { applyAppearance, useAppearance } from './appearance';
 
@@ -19,6 +20,18 @@ describe('applyAppearance', () => {
     const root = document.createElement('div');
     applyAppearance(root, { appearance: 'auto', themeColor: 'ink' }, true);
     expect(root.classList.contains('dark')).toBe(true);
+  });
+
+  it('ブラウザの枠の色を外観に合わせて差し替える', () => {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.append(meta);
+    const root = document.createElement('div');
+    applyAppearance(root, { appearance: 'dark', themeColor: 'ink' }, false);
+    expect(meta.content).toBe(GROUND_HEX.dark);
+    applyAppearance(root, { appearance: 'light', themeColor: 'ink' }, true);
+    expect(meta.content).toBe(GROUND_HEX.light);
+    meta.remove();
   });
 
   it('墨はテーマ色の変数を置かず、選んだ色は --accent と --on-accent を置く', () => {

@@ -42,6 +42,9 @@ export const APPEARANCES = ['auto', 'light', 'dark'] as const;
 export type Appearance = (typeof APPEARANCES)[number];
 export type ResolvedAppearance = 'light' | 'dark';
 
+// 地の色。ブラウザの枠の色 (theme-color) はCSSの変数を読めないのでここに持つ (tokens.cssの--groundと同じ値かはtokens.test.tsが見る)
+export const GROUND_HEX: Record<ResolvedAppearance, HexColor> = { light: '#f2f0ea', dark: '#1a1a1a' };
+
 // 自動は端末のダークモードに追従する
 export function resolveAppearance(appearance: Appearance, prefersDark: boolean): ResolvedAppearance {
   if (appearance === 'auto') {
