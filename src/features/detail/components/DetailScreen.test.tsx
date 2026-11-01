@@ -30,6 +30,16 @@ beforeEach(() => {
 });
 
 describe('DetailScreen', () => {
+  it('判断の文章には読み上げ用の見出しが付く', () => {
+    useDocumentStore.getState().saveRegistration('pll-ua', {
+      recognition: '前に3連',
+      mainAlg: { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' },
+      altAlgs: [],
+    });
+    renderDetail('/p/pll-ua');
+    expect(screen.getByRole('heading', { name: copy.a11y.recognition })).toBeInTheDocument();
+  });
+
   it('自作のメイン手順は2層回しの表記の設定で出る', () => {
     const document = createEmptyDocument();
     document.categories = [{ id: 'c1', name: 'COLL' }];

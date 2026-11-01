@@ -32,7 +32,13 @@ type RecognitionProps = {
 
 function Recognition({ recognition, editPath, showsEmptySlot }: RecognitionProps) {
   if (recognition !== '') {
-    return <p className="w-full text-body leading-normal">{recognition}</p>;
+    // 見出しは読み上げだけに出す。図の次に文章が始まるのが音声では分からない (位置で分かる画面には出さない)
+    return (
+      <>
+        <h2 className="sr-only">{copy.a11y.recognition}</h2>
+        <p className="w-full text-body leading-normal">{recognition}</p>
+      </>
+    );
   }
   if (!showsEmptySlot) {
     return null;

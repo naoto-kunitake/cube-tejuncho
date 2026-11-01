@@ -18,12 +18,12 @@ type CustomTileProps = {
 // リストでは名前と手順の行
 export function CustomTile({ patternId, name, mainAlg, settings }: CustomTileProps) {
   const isList = settings.listView === 'list';
-  // グリッドは4行で省略するので折り返しを数える必要があり、AlgTextのflexでは数えられない。文字のまま表記だけ揃える
-  const gridAlg = formatAlg(mainAlg, settings.wideStyle);
+  // 表記を設定に揃えた手順。グリッドは4行で省略するので折り返しを数える必要があり、AlgTextのflexでは数えられない
+  const alg = formatAlg(mainAlg, settings.wideStyle);
   return (
     <Link
       to={`/p/${patternId}`}
-      aria-label={name}
+      aria-label={copy.a11y.customTile(name, alg)}
       className={cn(
         'flex min-w-0 rounded-md border border-line bg-surface pressable hover:-translate-y-px hover:border-line-strong hover:shadow-1 active:scale-98 active:shadow-none',
         isList ? 'min-h-18 flex-col justify-center gap-0.5 px-4 py-2 text-left' : 'flex-col p-2 text-center',
@@ -46,7 +46,7 @@ export function CustomTile({ patternId, name, mainAlg, settings }: CustomTilePro
               mainAlg === '' ? 'text-label text-muted' : 'font-mono text-caption text-ink',
             )}
           >
-            <span className="line-clamp-4 break-words">{mainAlg === '' ? copy.list.noAlg : gridAlg}</span>
+            <span className="line-clamp-4 break-words">{mainAlg === '' ? copy.list.noAlg : alg}</span>
           </span>
           <span className="truncate pt-1 text-label leading-name font-bold text-ink">{name}</span>
         </>

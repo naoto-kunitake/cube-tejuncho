@@ -5,6 +5,7 @@ import { type FigureSettings, PresetFigure } from '@/components/figures/PresetFi
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
 import type { Preset } from '@/data/presets/catalog';
+import { formatAlg } from '@/lib/alg/format';
 import { cn } from '@/lib/utils';
 
 export type TileSettings = FigureSettings & Pick<Settings, 'listView' | 'wideStyle'>;
@@ -24,10 +25,12 @@ type PresetTileProps = {
 // どちらも1枚ずつのカードで、未登録は点線で浮かせない
 export function PresetTile({ preset, settings, categoryLabel, name, isRegistered, mainAlg }: PresetTileProps) {
   const isList = settings.listView === 'list';
+  const alg = formatAlg(mainAlg, settings.wideStyle);
   return (
     <Link
       to={`/p/${preset.id}`}
-      aria-label={copy.a11y.tile(categoryLabel, name, isRegistered)}
+      // グリッドは図と名前だけなので、読み上げ名も見えているものに合わせる
+      aria-label={copy.a11y.tile(categoryLabel, name, isRegistered, isList ? alg : '')}
       className={cn(
         'flex min-w-0 rounded-md border pressable hover:border-line-strong active:scale-98 active:shadow-none',
         // 行の余白8/16/8/6: 図の見た目の左端と文字の右端が16に揃う (図のSVGは外側に空きがある)

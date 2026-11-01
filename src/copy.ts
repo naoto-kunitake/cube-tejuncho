@@ -224,8 +224,12 @@ type Copy = {
     registerAllSheet: string;
     clearSheet: string;
     pickCategories: string;
-    tile: (category: string, name: string, isRegistered: boolean) => string;
+    // リスト表示は手順も見えているので読み上げ名にも入れる (グリッドは渡さない)
+    tile: (category: string, name: string, isRegistered: boolean, alg?: string) => string;
+    customTile: (name: string, alg: string) => string;
     cueFigure: (name: string) => string;
+    // 詳細の判断の文章に付ける見えない見出し
+    recognition: string;
     playerSheet: string;
     closeSheet: string;
     playMove: (symbol: string) => string;
@@ -586,8 +590,11 @@ export const copy = {
     registerAllSheet: '基本手順を一括登録',
     clearSheet: '登録を消す',
     pickCategories: 'カテゴリ',
-    tile: (category, name, isRegistered) => `${category} ${name}${isRegistered ? '' : '、未登録'}`,
+    tile: (category, name, isRegistered, alg = '') =>
+      `${category} ${name}${isRegistered ? '' : '、未登録'}${alg === '' ? '' : `、${alg}`}`,
+    customTile: (name, alg) => `${name}${alg === '' ? '' : `、${alg}`}`,
     cueFigure: (name) => `${name}の判断の手がかり`,
+    recognition: '判断',
     playerSheet: '手順の再生',
     closeSheet: '閉じる',
     playMove: (symbol) => `${symbol}を再生`,

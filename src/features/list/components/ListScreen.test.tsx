@@ -131,10 +131,23 @@ describe('ListScreen', () => {
     );
     await user.click(screen.getByRole('button', { name: copy.a11y.switchToList }));
     expect(useDocumentStore.getState().document.settings.listView).toBe('list');
-    const row = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    const row = screen.getByRole('link', {
+      name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true, "M2 U M U2 M' U M2"),
+    });
     expect(within(row).getByText('U2')).toBeInTheDocument();
     const unregistered = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ub', false) });
     expect(within(unregistered).queryByText('U2')).not.toBeInTheDocument();
+  });
+
+  it('グリッドのタイルの読み上げ名には手順を入れない', () => {
+    useDocumentStore.getState().addRegistration('pll-ua', { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' });
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    const tile = screen.getByRole('link', { name: copy.a11y.tile(copy.list.categories.pll, 'Ua', true) });
+    expect(tile).toHaveTextContent(/^Ua$/);
   });
 
   it('リスト表示でもう一度押すとグリッドに戻る', async () => {
@@ -176,7 +189,7 @@ describe('ListScreen', () => {
       </MemoryRouter>,
     );
     await user.click(screen.getByRole('tab', { name: 'COLL' }));
-    const row = screen.getByRole('link', { name: 'Sune' });
+    const row = screen.getByRole('link', { name: copy.a11y.customTile('Sune', "R U R' U R U2 R'") });
     expect(within(row).getByText('U2')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toBeInTheDocument();
   });
@@ -298,7 +311,10 @@ describe('ListScreen', () => {
       </MemoryRouter>,
     );
     await user.click(screen.getByRole('tab', { name: 'COLL' }));
-    expect(screen.getByRole('link', { name: 'Sune' })).toHaveAttribute('href', '/p/p1');
+    expect(screen.getByRole('link', { name: copy.a11y.customTile('Sune', "R U R' U R U2 R'") })).toHaveAttribute(
+      'href',
+      '/p/p1',
+    );
     expect(screen.getByText("R U R' U R U2 R'")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.list.addPattern })).toHaveAttribute('href', '/p/new?category=c1');
     expect(screen.queryByText(/登録済み/)).not.toBeInTheDocument();
