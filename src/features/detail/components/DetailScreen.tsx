@@ -1,12 +1,12 @@
-import { ChevronLeft, Pencil, Pin } from 'lucide-react';
+import { Pencil, Pin } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { PatternFigures } from '@/components/figures/PatternFigures';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
+import { BackLink, Screen, ScreenHeader } from '@/components/Screen';
 import { SectionHeading } from '@/components/SectionHeading';
-import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
 import { findRegistration } from '@/data/document';
@@ -180,36 +180,31 @@ export function DetailScreen() {
   const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
-    <section aria-label={copy.a11y.detail} className="mx-auto flex w-full max-w-140 flex-col">
-      <TopBar>
-        {/* 戻るの記号を左端16に揃えるため7引く。戻ると題の間は10 */}
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <IconLink to="/" label={copy.a11y.backToList} className="-ml-1.75">
-            <ChevronLeft size={22} strokeWidth={1.8} aria-hidden="true" />
-          </IconLink>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
-            {ref === undefined ? copy.detail.notFound : patternName(ref)}
-          </h1>
-        </div>
-        {ref !== undefined && (
-          <>
-            {/* aria-pressedのあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態はaria-pressedが伝える */}
-            <IconButton
-              label={copy.a11y.pin}
-              aria-pressed={isPinned}
-              className={cn(isPinned && 'text-accent-ink')}
-              onClick={() => {
-                togglePin(id);
-              }}
-            >
-              <Pin size={22} strokeWidth={1.8} fill={isPinned ? 'currentColor' : 'none'} aria-hidden="true" />
-            </IconButton>
-            <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
-              <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
-            </IconLink>
-          </>
-        )}
-      </TopBar>
+    <Screen label={copy.a11y.detail}>
+      <ScreenHeader
+        title={ref === undefined ? copy.detail.notFound : patternName(ref)}
+        leading={<BackLink to="/" label={copy.a11y.backToList} />}
+        trailing={
+          ref !== undefined && (
+            <>
+              {/* aria-pressedのあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態はaria-pressedが伝える */}
+              <IconButton
+                label={copy.a11y.pin}
+                aria-pressed={isPinned}
+                className={cn(isPinned && 'text-accent-ink')}
+                onClick={() => {
+                  togglePin(id);
+                }}
+              >
+                <Pin size={22} strokeWidth={1.8} fill={isPinned ? 'currentColor' : 'none'} aria-hidden="true" />
+              </IconButton>
+              <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
+                <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
+              </IconLink>
+            </>
+          )
+        }
+      />
       {ref?.kind === 'preset' && (
         <PresetDetail
           preset={ref.preset}
@@ -237,6 +232,6 @@ export function DetailScreen() {
           }}
         />
       )}
-    </section>
+    </Screen>
   );
 }

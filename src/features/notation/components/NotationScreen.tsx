@@ -1,12 +1,11 @@
-import { ChevronLeft, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { CubeFigure } from '@/components/figures/CubeFigure';
-import { IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
+import { BackLink, Screen, ScreenBody, ScreenHeader } from '@/components/Screen';
 import { SectionHeading } from '@/components/SectionHeading';
-import { TopBar } from '@/components/TopBar';
 import { copy, type NotationRowText } from '@/copy';
 import { type NotationRow, notationSectionsOf } from '@/data/notation';
 import { useDocumentStore } from '@/data/store';
@@ -77,18 +76,12 @@ export function NotationScreen() {
   const sections = notationSectionsOf(settings.wideStyle);
 
   return (
-    <section aria-label={copy.notation.title} className="mx-auto flex w-full max-w-140 flex-col">
-      <TopBar>
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <IconLink to={backPathOf(location.state)} label={copy.a11y.back} className="-ml-1.75">
-            <ChevronLeft size={22} strokeWidth={1.8} aria-hidden="true" />
-          </IconLink>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
-            {copy.notation.title}
-          </h1>
-        </div>
-      </TopBar>
-      <div className="flex flex-col gap-6 px-4 pt-2 pb-6">
+    <Screen label={copy.notation.title}>
+      <ScreenHeader
+        title={copy.notation.title}
+        leading={<BackLink to={backPathOf(location.state)} label={copy.a11y.back} />}
+      />
+      <ScreenBody>
         {sections.map((section) => {
           const lead = copy.notation.leads[section.id](otherWideStyle);
           return (
@@ -103,7 +96,7 @@ export function NotationScreen() {
             </section>
           );
         })}
-      </div>
+      </ScreenBody>
       {playingAlg !== null && (
         <PlayerSheet
           algText={playingAlg}
@@ -114,6 +107,6 @@ export function NotationScreen() {
           }}
         />
       )}
-    </section>
+    </Screen>
   );
 }

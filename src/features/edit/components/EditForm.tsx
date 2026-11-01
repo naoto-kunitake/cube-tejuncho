@@ -7,8 +7,8 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
 import { PatternFigures } from '@/components/figures/PatternFigures';
 import { IconButton } from '@/components/IconButton';
+import { ScreenBody, ScreenHeader } from '@/components/Screen';
 import { useToastStore } from '@/components/toast/toast-store';
-import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import type { AlgEntry, Category, Registration, Settings } from '@/data/document';
 import { type DraftStore, draftStore as defaultDraftStore } from '@/data/draft';
@@ -262,8 +262,9 @@ export function EditForm({
 
   return (
     <>
-      <TopBar>
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <ScreenHeader
+        title={title}
+        leading={
           <IconButton
             label={copy.a11y.closeEdit}
             className="-ml-1.75"
@@ -277,14 +278,15 @@ export function EditForm({
           >
             <X size={22} strokeWidth={1.8} aria-hidden="true" />
           </IconButton>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">{title}</h1>
-        </div>
-        <Button variant="primary" className="mr-1.75 px-3.5" disabled={!canSave} onClick={save}>
-          {copy.edit.save}
-        </Button>
-      </TopBar>
+        }
+        trailing={
+          <Button variant="primary" className="mr-1.75 px-3.5" disabled={!canSave} onClick={save}>
+            {copy.edit.save}
+          </Button>
+        }
+      />
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
-      <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', keypad.isOpen && 'pb-60')}>
+      <ScreenBody className={cn(keypad.isOpen && 'pb-60')}>
         {target.kind === 'preset' && <EditFigure preset={target.preset} settings={settings} />}
         {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
         {isCustom && (
@@ -406,7 +408,7 @@ export function EditForm({
             </Button>
           </div>
         )}
-      </div>
+      </ScreenBody>
       {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
       {dialog?.kind === 'discard' && (
         <ConfirmDialog
