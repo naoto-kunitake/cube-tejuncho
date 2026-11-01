@@ -83,6 +83,16 @@ export function sideTurnsOf(topColor: TopColor, color: StickerColor): number {
   return SIDE_SEQUENCE[topColor].indexOf(color);
 }
 
+// 側面の色の並びのindex番目の色 (sideTurnsOfの逆)。y回転は並びの巡回なので、範囲の外は回り込ませる
+export function sideColorAt(topColor: TopColor, index: number): StickerColor {
+  const sequence = SIDE_SEQUENCE[topColor];
+  const color = sequence[((index % sequence.length) + sequence.length) % sequence.length];
+  if (color === undefined) {
+    throw new Error(`side sequence is empty: ${topColor}`);
+  }
+  return color;
+}
+
 // 前面の色を正面に持ってくるのに要るy回転の回数 (0〜3)。側面の色の巡回と再生の開始姿勢が同じ値を使う
 export function frontColorTurns(settings: ViewSettings): number {
   return Math.max(0, sideTurnsOf(settings.topColor, FRONT_COLOR_LETTER[settings.frontColor]));

@@ -5,9 +5,9 @@ import type { CubeState } from './kpuzzle';
 export type Face = 'U' | 'D' | 'F' | 'B' | 'R' | 'L';
 
 // cubing.jsの3x3x3のパーツの並び (白が上・緑が前の枠で定義される)
-const EDGE_POSITIONS = ['UF', 'UR', 'UB', 'UL', 'DF', 'DR', 'DB', 'DL', 'FR', 'FL', 'BR', 'BL'] as const;
-const CORNER_POSITIONS = ['UFR', 'URB', 'UBL', 'ULF', 'DRF', 'DFL', 'DLB', 'DBR'] as const;
-const CENTER_POSITIONS = ['U', 'L', 'F', 'R', 'B', 'D'] as const;
+export const EDGE_POSITIONS = ['UF', 'UR', 'UB', 'UL', 'DF', 'DR', 'DB', 'DL', 'FR', 'FL', 'BR', 'BL'] as const;
+export const CORNER_POSITIONS = ['UFR', 'URB', 'UBL', 'ULF', 'DRF', 'DFL', 'DLB', 'DBR'] as const;
+export const CENTER_POSITIONS = ['U', 'L', 'F', 'R', 'B', 'D'] as const;
 
 // cubing.jsの既定の配色 (白上・緑前)
 const FACE_COLOR: Record<Face, StickerColor> = { U: 'W', D: 'Y', F: 'G', B: 'B', R: 'R', L: 'O' };

@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router';
 import { Button } from '@/components/Button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
-import { PresetFigure } from '@/components/figures/PresetFigure';
-import { TopFigure } from '@/components/figures/TopFigure';
+import { PatternFigures } from '@/components/figures/PatternFigures';
 import { IconButton } from '@/components/IconButton';
 import { useToastStore } from '@/components/toast/toast-store';
 import { TopBar } from '@/components/TopBar';
@@ -18,7 +17,6 @@ import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
 import { describeSides } from '@/lib/figure/describe';
 import { describeF2l } from '@/lib/figure/describe-f2l';
-import { cueView, recolorView } from '@/lib/figure/view';
 import { cn } from '@/lib/utils';
 
 import { useAlgKeypad } from '../hooks/useAlgKeypad';
@@ -91,26 +89,11 @@ type EditFigureProps = {
   settings: Settings;
 };
 
-// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて17下げる)。判断を書くときの参考に全色と手がかりを並べる。
-// 手がかりはPLLだけ
+// 図は詳細と同じ大きさ・位置 (上端をカードの中の図に揃えて17下げる)。判断を書くときの参考に出す
 function EditFigure({ preset, settings }: EditFigureProps) {
-  if (preset.category === 'pll' && settings.showCueFigure) {
-    return (
-      <div className="flex w-full justify-center gap-6 pt-4.25">
-        <div className="-m-1.75 w-38 flex-none">
-          <PresetFigure preset={preset} settings={settings} canShowArrows />
-        </div>
-        <div className="-m-1.75 w-38 flex-none">
-          <TopFigure view={cueView(recolorView(preset.view, settings))} label={copy.a11y.cueFigure(preset.name)} />
-        </div>
-      </div>
-    );
-  }
   return (
     <div className="flex justify-center pt-4.25">
-      <div className="-my-2.75 w-full max-w-60">
-        <PresetFigure preset={preset} settings={settings} canShowArrows />
-      </div>
+      <PatternFigures preset={preset} settings={settings} />
     </div>
   );
 }

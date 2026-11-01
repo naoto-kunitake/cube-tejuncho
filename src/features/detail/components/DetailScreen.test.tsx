@@ -37,6 +37,44 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('link', { name: copy.a11y.editPattern('Ua') })).toHaveAttribute('href', '/p/pll-ua/edit');
   });
 
+  it('登録済みのプリセットは判断とほかの手順を並べる', () => {
+    const document = createEmptyDocument();
+    document.registrations = [
+      {
+        patternId: 'pll-ua',
+        recognition: '前に3連',
+        mainAlg: { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' },
+        altAlgs: [{ text: "R U' R U R U R U' R' U' R2", mnemonic: '', fingering: '' }],
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+    useDocumentStore.setState({ document });
+    renderDetail('/p/pll-ua');
+    expect(screen.getByText('前に3連')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: copy.detail.altAlgs })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: copy.detail.play })).toHaveLength(2);
+  });
+
+  // 自作は判断が空なら空枠を出す (下の自作のテスト)。プリセットは登録済みなら出さない
+  it('登録済みのプリセットは判断が空でも空枠を出さない', () => {
+    const document = createEmptyDocument();
+    document.registrations = [
+      {
+        patternId: 'pll-ua',
+        recognition: '',
+        mainAlg: { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' },
+        altAlgs: [],
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+    useDocumentStore.setState({ document });
+    renderDetail('/p/pll-ua');
+    expect(screen.queryByRole('link', { name: copy.detail.writeRecognition })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2, name: copy.detail.altAlgs })).not.toBeInTheDocument();
+  });
+
   it('基本手順の再生を押すとシートが開く', async () => {
     renderDetail('/p/pll-ua');
     await userEvent.click(screen.getByRole('button', { name: copy.detail.play }));
@@ -46,6 +84,12 @@ describe('DetailScreen', () => {
   it('PLL の詳細の図には入れ替えの矢印を描く', () => {
     renderDetail('/p/pll-ua');
     expect(screen.getByRole('img', { name: 'Ua' }).querySelectorAll('path').length).toBeGreaterThan(0);
+  });
+
+  it('PLL の詳細は全色の図と手がかりの図を2枚並べる', () => {
+    renderDetail('/p/pll-ua');
+    expect(screen.getByRole('img', { name: 'Ua' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: copy.a11y.cueFigure('Ua') })).toBeInTheDocument();
   });
 
   it('OLL の図は上面の色のステッカーだけ色があり、他は灰', () => {

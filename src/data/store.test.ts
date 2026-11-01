@@ -87,7 +87,7 @@ describe('createDocumentStore', () => {
     store.getState().addRegistration('pll-ua', UA_ALG);
     store.getState().addRegistration('pll-ub', UA_ALG);
     const previous = storage.getItem(`${DOCUMENT_KEY}.prev`);
-    store.getState().dismissLoadIssue();
+    store.getState().dismissStorageIssue();
     expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
   });
 
@@ -96,7 +96,7 @@ describe('createDocumentStore', () => {
     const store = createDocumentStore(storage);
     storage.setItem = () => ({ ok: false, error: { kind: 'quotaExceeded' } });
     store.getState().addRegistration('pll-ua', UA_ALG);
-    expect(store.getState().loadIssue).toBe('quotaExceeded');
+    expect(store.getState().storageIssue).toBe('quotaExceeded');
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
@@ -255,16 +255,16 @@ describe('createDocumentStore', () => {
     createDocumentStore(storage).getState().addRegistration('pll-ua', UA_ALG);
     const reloaded = createDocumentStore(storage);
     expect(reloaded.getState().document.registrations[0]?.patternId).toBe('pll-ua');
-    expect(reloaded.getState().loadIssue).toBeNull();
+    expect(reloaded.getState().storageIssue).toBeNull();
   });
 
-  // 読み込みと保存の失敗の網羅はdocument-storage.test.tsにある。ここは文書とloadIssueへの結線だけを見る
+  // 読み込みと保存の失敗の網羅はdocument-storage.test.tsにある。ここは文書とstorageIssueへの結線だけを見る
   it('壊れた文書なら空で始めて知らせる', () => {
     const storage = persistedStorage();
     storage.setItem(DOCUMENT_KEY, '{not json');
     const store = createDocumentStore(storage);
     expect(store.getState().document).toEqual(createEmptyDocument());
-    expect(store.getState().loadIssue).toBe('brokenDocument');
+    expect(store.getState().storageIssue).toBe('brokenDocument');
   });
 
   it('自分より新しい版の文書なら空のまま知らせる', () => {
@@ -274,7 +274,7 @@ describe('createDocumentStore', () => {
       JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 }),
     );
     const store = createDocumentStore(storage);
-    expect(store.getState().loadIssue).toBe('newerDocument');
+    expect(store.getState().storageIssue).toBe('newerDocument');
     expect(store.getState().document).toEqual(createEmptyDocument());
   });
 
@@ -283,24 +283,24 @@ describe('createDocumentStore', () => {
     const raw = JSON.stringify({ state: { document: { ...createEmptyDocument(), version: 2 } }, version: 2 });
     storage.setItem(DOCUMENT_KEY, raw);
     const store = createDocumentStore(storage);
-    store.getState().dismissLoadIssue();
+    store.getState().dismissStorageIssue();
     store.getState().addRegistration('pll-ua', UA_ALG);
     expect(storage.getItem(DOCUMENT_KEY)).toBe(raw);
     expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBeNull();
-    expect(store.getState().loadIssue).toBe('newerDocument');
+    expect(store.getState().storageIssue).toBe('newerDocument');
   });
 
   it('localStorage が使えないときは知らせてメモリで動く', () => {
     const store = createDocumentStore(createMemoryStorage());
-    expect(store.getState().loadIssue).toBe('storageUnavailable');
+    expect(store.getState().storageIssue).toBe('storageUnavailable');
     store.getState().addRegistration('pll-ua', UA_ALG);
     expect(store.getState().document.registrations).toHaveLength(1);
   });
 
   it('知らせを閉じると消える', () => {
     const store = createDocumentStore(createMemoryStorage());
-    store.getState().dismissLoadIssue();
-    expect(store.getState().loadIssue).toBeNull();
+    store.getState().dismissStorageIssue();
+    expect(store.getState().storageIssue).toBeNull();
   });
 });
 

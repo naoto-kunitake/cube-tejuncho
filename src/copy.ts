@@ -1,6 +1,6 @@
 import type { CreditId } from '@/data/credits';
 import type { Settings } from '@/data/document';
-import type { LoadIssue } from '@/data/document-storage';
+import type { StorageIssue } from '@/data/document-storage';
 import type { NotationRowId, NotationSectionId } from '@/data/notation';
 import type { PresetCategoryId } from '@/data/presets/catalog';
 import type { F2lShape } from '@/data/presets/f2l';
@@ -96,7 +96,7 @@ type Copy = {
     cancel: string;
     close: string;
   };
-  notice: Record<LoadIssue, { title: string; body: string }>;
+  notice: Record<StorageIssue, { title: string; body: string }>;
   toast: {
     undo: string;
   };

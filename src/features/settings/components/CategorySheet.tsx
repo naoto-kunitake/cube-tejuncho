@@ -4,7 +4,7 @@ import { Button } from '@/components/Button';
 import { Field, INPUT_CLASS } from '@/components/Field';
 import { Sheet, SheetHeader } from '@/components/Sheet';
 import { copy } from '@/copy';
-import { hasCategoryNamed } from '@/data/patterns';
+import { hasCategoryNamed } from '@/data/categories';
 import { cn } from '@/lib/utils';
 
 const NAME_MAX_LENGTH = 20;

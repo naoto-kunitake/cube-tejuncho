@@ -4,7 +4,7 @@ import { type AlgError, cleanAlgText, parseAlg } from '@/lib/alg/parse';
 // 編集中の手順カード。メイン手順も1枚目のカードとして同じ形で扱う。
 // idは並べ替えや削除の取り消しでReactが同じカードを追えるようにする印で、保存しない
 export type EditCard = AlgEntry & { id: number };
-export type EditForm = {
+export type EditFormState = {
   // 名前とカテゴリは自作だけが編集する。プリセットでは空のまま
   name: string;
   categoryId: string;
@@ -12,7 +12,7 @@ export type EditForm = {
   cards: EditCard[];
 };
 
-export type PatternFields = Pick<EditForm, 'name' | 'categoryId'>;
+export type PatternFields = Pick<EditFormState, 'name' | 'categoryId'>;
 
 export const EMPTY_CARD: AlgEntry = { text: '', mnemonic: '', fingering: '' };
 
@@ -30,7 +30,7 @@ function trimCard(card: AlgEntry): AlgEntry {
   return { text: card.text.trim(), mnemonic: card.mnemonic.trim(), fingering: card.fingering.trim() };
 }
 
-export function formFrom(registration: Registration | undefined, fields: PatternFields): EditForm {
+export function formFrom(registration: Registration | undefined, fields: PatternFields): EditFormState {
   if (registration === undefined) {
     return { ...fields, recognition: '', cards: [newCard()] };
   }
@@ -41,7 +41,11 @@ export function formFrom(registration: Registration | undefined, fields: Pattern
   };
 }
 
-export function formFromEntries(fields: PatternFields, recognition: string, entries: readonly AlgEntry[]): EditForm {
+export function formFromEntries(
+  fields: PatternFields,
+  recognition: string,
+  entries: readonly AlgEntry[],
+): EditFormState {
   return { ...fields, recognition, cards: entries.map(newCard) };
 }
 
@@ -50,7 +54,7 @@ export function entriesOf(cards: readonly EditCard[]): AlgEntry[] {
 }
 
 // 変更の有無を比べるための文字列。空のカードを足しただけなら変更とみなさない (保存しても何も残らない)
-export function formSnapshot(form: EditForm): string {
+export function formSnapshot(form: EditFormState): string {
   return JSON.stringify({
     name: form.name.trim(),
     categoryId: form.categoryId,
@@ -60,7 +64,7 @@ export function formSnapshot(form: EditForm): string {
 }
 
 // 保存する形。手順の空いたカードは覚え方だけ書いてあっても残さない。何も残らなければnull (登録を消す)
-export function registrationDataFrom(form: EditForm): RegistrationData | null {
+export function registrationDataFrom(form: EditFormState): RegistrationData | null {
   const [mainAlg, ...altAlgs] = form.cards.map(trimCard).filter((card) => card.text !== '');
   const recognition = form.recognition.trim();
   if (mainAlg === undefined && recognition === '') {
@@ -78,12 +82,12 @@ export function algErrorOf(text: string): AlgError | null {
   return result.error;
 }
 
-export function hasInvalidCard(form: EditForm): boolean {
+export function hasInvalidCard(form: EditFormState): boolean {
   return form.cards.some((card) => algErrorOf(card.text) !== null);
 }
 
 // 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあればnull (もう足せる物がない)
-export function standardAlgToAdd(form: EditForm, standardAlg: string): string | null {
+export function standardAlgToAdd(form: EditFormState, standardAlg: string): string | null {
   const target = cleanAlgText(standardAlg);
   return form.cards.some((card) => cleanAlgText(card.text) === target) ? null : standardAlg;
 }

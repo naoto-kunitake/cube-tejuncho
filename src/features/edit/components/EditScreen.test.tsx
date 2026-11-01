@@ -81,6 +81,12 @@ describe('EditScreen', () => {
     );
   });
 
+  it('PLL の編集では全色の図と手がかりの図を2枚並べる', () => {
+    renderEdit();
+    expect(screen.getByRole('img', { name: 'Ua' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: copy.a11y.cueFigure('Ua') })).toBeInTheDocument();
+  });
+
   it('判断と手順を書いて保存すると登録され、詳細に戻る', async () => {
     const user = userEvent.setup();
     renderEdit();

@@ -22,6 +22,19 @@ import { FirstRunBanner } from './FirstRunBanner';
 import { HomeScreenBanner } from './HomeScreenBanner';
 import { PresetTile } from './PresetTile';
 
+type TileGridProps = {
+  listView: Settings['listView'];
+  className?: string;
+  children: ReactNode;
+};
+
+// タイルの格子。グリッドは幅で列数が決まり、リストは1列の行 (列はトークンのgrid-tiles / grid-list-rows)
+function TileGrid({ listView, className, children }: TileGridProps) {
+  return (
+    <div className={cn('grid gap-2', listView === 'list' ? 'grid-list-rows' : 'grid-tiles', className)}>{children}</div>
+  );
+}
+
 type TileSectionProps = {
   label: string;
   count: number;
@@ -36,7 +49,7 @@ function TileSection({ label, count, listView, children }: TileSectionProps) {
       <SectionHeading trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
         {label}
       </SectionHeading>
-      <div className={cn('grid gap-2', listView === 'list' ? 'grid-list-rows' : 'grid-tiles')}>{children}</div>
+      <TileGrid listView={listView}>{children}</TileGrid>
     </section>
   );
 }
@@ -143,10 +156,10 @@ function CustomList({ categoryId, settings, registrations, pinnedIds }: CustomLi
   const addTile = <AddPatternTile categoryId={categoryId} listView={settings.listView} />;
   if (pinned.length === 0) {
     return (
-      <div className={cn('mt-1 grid gap-2', settings.listView === 'list' ? 'grid-list-rows' : 'grid-tiles')}>
+      <TileGrid listView={settings.listView} className="mt-1">
         {rest.map(tileOf)}
         {addTile}
-      </div>
+      </TileGrid>
     );
   }
   return (
