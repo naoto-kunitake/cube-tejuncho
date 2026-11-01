@@ -229,7 +229,7 @@ export function ListScreen() {
         id={CATEGORY_PANEL_ID}
         role="tabpanel"
         aria-labelledby={categoryTabId(categoryId)}
-        className="flex flex-col gap-4 px-4 pb-6"
+        className="flex flex-col gap-4 px-4 pb-safe-6"
       >
         {showsHomeScreenBanner && (
           <HomeScreenBanner

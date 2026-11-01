@@ -87,7 +87,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
   const editPath = `/p/${preset.id}/edit`;
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6">
+    <div className="flex flex-col gap-4 px-4 pb-safe-6">
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         <PatternFigures preset={preset} settings={settings} />
@@ -136,7 +136,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
   const mainAlg = registration?.mainAlg.text ?? '';
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6">
+    <div className="flex flex-col gap-4 px-4 pb-safe-6">
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {mainAlg !== '' && (
           <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">

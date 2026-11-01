@@ -97,5 +97,5 @@ type ScreenBodyProps = {
 // 区画を縦に積む画面の内容 (設定・回転記号・このアプリについて・編集)。
 // 一覧と詳細は区画の間が16で、タブや図から始まるので自分で持つ
 export function ScreenBody({ className, children }: ScreenBodyProps) {
-  return <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-6', className)}>{children}</div>;
+  return <div className={cn('flex flex-col gap-6 px-4 pt-2 pb-safe-6', className)}>{children}</div>;
 }
