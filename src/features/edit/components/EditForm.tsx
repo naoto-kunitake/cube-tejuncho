@@ -23,12 +23,9 @@ import { cn } from '@/lib/utils';
 
 import {
   type EditCard,
-  type EditForm as EditFormValue,
   EMPTY_CARD,
-  entriesOf,
   formFrom,
   formFromEntries,
-  formSnapshot,
   hasInvalidCard,
   insertCard,
   isCardEmpty,
@@ -39,11 +36,11 @@ import {
   standardAlgToAdd,
 } from '../edit-state';
 import { useAlgKeypad } from '../hooks/useAlgKeypad';
+import { useFormDraft } from '../hooks/useFormDraft';
+import { useOwnToast } from '../hooks/useOwnToast';
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad } from './AlgKeypad';
 
-// 入力のたびに書く下書きは300msまとめる (打鍵ごとにlocalStorageへ書かない)
-const DRAFT_DEBOUNCE_MS = 300;
 // 新規の下書きはパターンのidがまだないので固定の鍵
 const NEW_DRAFT_ID = 'new';
 
@@ -131,38 +128,32 @@ export function EditForm({
   const updateCustomPattern = useDocumentStore((state) => state.updateCustomPattern);
   const removeCustomPattern = useDocumentStore((state) => state.removeCustomPattern);
   const replaceDocument = useDocumentStore((state) => state.replaceDocument);
+  // 画面を離れた先で読ませる知らせ (登録を消した、パターンを消した) はストアのshowを直に使う
   const showToast = useToastStore((state) => state.show);
-  const dismissToast = useToastStore((state) => state.dismiss);
+  const showOwnToast = useOwnToast();
   const draftId = draftIdOf(target);
   const isCustom = target.kind !== 'preset';
   const fields = fieldsOf(target);
-  const saved = formFrom(registration, fields);
-  const baseSnapshot = formSnapshot(saved);
-  // 書きかけがあれば復元して知らせる (黙って上書きしない)
-  const [initial] = useState(() => {
-    const draft = draftStore.read(draftId);
-    return draft === null
-      ? { form: saved, isRestored: false }
-      : {
-          form: formFromEntries(
-            isCustom ? { name: draft.name, categoryId: draft.categoryId || fields.categoryId } : fields,
-            draft.recognition,
-            draft.cards,
-          ),
-          isRestored: true,
-        };
+  const draft = useFormDraft({
+    draftStore,
+    draftId,
+    savedForm: formFrom(registration, fields),
+    formFromDraft: (entry) =>
+      formFromEntries(
+        isCustom ? { name: entry.name, categoryId: entry.categoryId || fields.categoryId } : fields,
+        entry.recognition,
+        entry.cards,
+      ),
+    showOwnToast,
   });
-  const [form, setForm] = useState<EditFormValue>(initial.form);
+  const { form, setForm, isDirty } = draft;
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(initialFocus);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [isDiscarding, setIsDiscarding] = useState(false);
   const [isDeletingPattern, setIsDeletingPattern] = useState(false);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
   const keypad = useAlgKeypad(inputsRef);
-  // この画面が出した知らせ (復元、手順の削除) は、画面を離れたら消す (取り消しの先がもうない)
-  const ownToastRef = useRef<number | null>(null);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
-  const isDirty = formSnapshot(form) !== baseSnapshot;
   // 自作は名前が必須
   const canSave = !hasInvalidCard(form) && (!isCustom || form.name.trim() !== '');
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
@@ -189,47 +180,6 @@ export function EditForm({
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
 
   useEffect(() => {
-    if (!initial.isRestored) {
-      return;
-    }
-    ownToastRef.current = showToast(copy.edit.restoredDraft, {
-      label: copy.edit.discard,
-      run: () => {
-        draftStore.remove(draftId);
-        setForm(formFrom(registration, fields));
-      },
-    });
-    // fieldsはtargetから毎回作られるので、targetを依存に置く
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initial.isRestored, showToast, draftStore, draftId, registration, target]);
-
-  useEffect(() => {
-    return () => {
-      if (ownToastRef.current !== null && useToastStore.getState().toast?.id === ownToastRef.current) {
-        dismissToast();
-      }
-    };
-  }, [dismissToast]);
-
-  useEffect(() => {
-    if (!isDirty) {
-      draftStore.remove(draftId);
-      return;
-    }
-    const timer = setTimeout(() => {
-      draftStore.write(draftId, {
-        name: form.name,
-        categoryId: form.categoryId,
-        recognition: form.recognition,
-        cards: entriesOf(form.cards),
-      });
-    }, DRAFT_DEBOUNCE_MS);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [form, isDirty, draftId, draftStore]);
-
-  useEffect(() => {
     if (focusTarget === null) {
       return;
     }
@@ -251,7 +201,7 @@ export function EditForm({
     setPendingDelete(null);
     setFocusTarget(null);
     setForm((current) => ({ ...current, cards: removeCard(current.cards, index) }));
-    ownToastRef.current = showToast(copy.edit.deletedAlg, {
+    showOwnToast(copy.edit.deletedAlg, {
       label: copy.toast.undo,
       run: () => {
         setForm((current) => ({ ...current, cards: insertCard(current.cards, index, card) }));
@@ -260,7 +210,7 @@ export function EditForm({
   };
 
   const close = (path = backPath) => {
-    draftStore.remove(draftId);
+    draft.remove();
     void navigate(path, { replace: true });
   };
 
