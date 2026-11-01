@@ -27,7 +27,7 @@ export const buttonVariants = cva(
         ),
         text: cn(
           TEXT_PILL_TAP_AREA_CLASS,
-          'px-3 text-small font-medium text-accent hover:bg-accent-tint-hover active:bg-accent-tint-press',
+          'px-3 text-small font-medium text-accent-ink hover:bg-accent-tint-hover active:bg-accent-tint-press',
         ),
         textDanger: cn(
           TEXT_PILL_TAP_AREA_CLASS,

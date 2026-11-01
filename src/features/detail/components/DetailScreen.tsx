@@ -196,7 +196,7 @@ export function DetailScreen() {
             <IconButton
               label={copy.a11y.pin}
               aria-pressed={isPinned}
-              className={cn(isPinned && 'text-accent')}
+              className={cn(isPinned && 'text-accent-ink')}
               onClick={() => {
                 togglePin(id);
               }}

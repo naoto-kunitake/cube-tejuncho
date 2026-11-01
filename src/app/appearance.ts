@@ -2,7 +2,14 @@ import { useEffect } from 'react';
 
 import type { Settings } from '@/data/document';
 import { useDocumentStore } from '@/data/store';
-import { accentOf, GROUND_HEX, onColorOf, resolveAppearance, type ResolvedAppearance } from '@/lib/theme/color';
+import {
+  accentInkOf,
+  accentOf,
+  GROUND_HEX,
+  onColorOf,
+  resolveAppearance,
+  type ResolvedAppearance,
+} from '@/lib/theme/color';
 
 type AppearanceSettings = Pick<Settings, 'appearance' | 'themeColor'>;
 
@@ -13,8 +20,8 @@ function applyThemeColor(target: Document, appearance: ResolvedAppearance): void
   target.querySelector('meta[name="theme-color"]')?.setAttribute('content', GROUND_HEX[appearance]);
 }
 
-// 文書の設定をhtml要素に反映する。ダークは.dark (tokens.cssが変数を差し替える)、テーマ色は--accent / --on-accentの
-// インラインの変数。墨は既定なので変数を消してトークンに任せる (ライトは墨、ダークは白)
+// 文書の設定をhtml要素に反映する。ダークは.dark (tokens.cssが変数を差し替える)、テーマ色は--accent / --on-accent /
+// --accent-inkのインラインの変数。墨は既定なので変数を消してトークンに任せる (ライトは墨、ダークは白)
 export function applyAppearance(root: HTMLElement, settings: AppearanceSettings, prefersDark: boolean): void {
   const resolved = resolveAppearance(settings.appearance, prefersDark);
   root.classList.toggle('dark', resolved === 'dark');
@@ -22,11 +29,13 @@ export function applyAppearance(root: HTMLElement, settings: AppearanceSettings,
   if (settings.themeColor === 'ink') {
     root.style.removeProperty('--accent');
     root.style.removeProperty('--on-accent');
+    root.style.removeProperty('--accent-ink');
     return;
   }
   const accent = accentOf(settings.themeColor, resolved);
   root.style.setProperty('--accent', accent);
   root.style.setProperty('--on-accent', onColorOf(accent));
+  root.style.setProperty('--accent-ink', accentInkOf(accent, resolved));
 }
 
 function findDarkMediaQuery(): MediaQueryList | null {

@@ -27,7 +27,7 @@ export function PrivacyScreen() {
                 href={section.linkParagraph.href}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-0.5 font-bold text-accent underline underline-offset-2"
+                className="inline-flex items-center gap-0.5 font-bold text-accent-ink underline underline-offset-2"
               >
                 {section.linkParagraph.label}
                 <ExternalLink size={14} strokeWidth={2} aria-hidden="true" />

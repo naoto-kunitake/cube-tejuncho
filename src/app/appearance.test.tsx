@@ -34,13 +34,15 @@ describe('applyAppearance', () => {
     meta.remove();
   });
 
-  it('墨はテーマ色の変数を置かず、選んだ色は --accent と --on-accent を置く', () => {
+  it('墨はテーマ色の変数を置かず、選んだ色は塗り・塗りの上の文字・文字の3つを置く', () => {
     const root = document.createElement('div');
     applyAppearance(root, { appearance: 'light', themeColor: '#fdd835' }, false);
     expect(root.style.getPropertyValue('--accent')).toBe('#fdd835');
     expect(root.style.getPropertyValue('--on-accent')).toBe('#1a1a1a');
+    expect(root.style.getPropertyValue('--accent-ink')).toBe('#7f6c1b');
     applyAppearance(root, { appearance: 'light', themeColor: 'ink' }, false);
     expect(root.style.getPropertyValue('--accent')).toBe('');
+    expect(root.style.getPropertyValue('--accent-ink')).toBe('');
   });
 });
 
@@ -81,6 +83,7 @@ describe('useAppearance', () => {
     vi.unstubAllGlobals();
     document.documentElement.classList.remove('dark');
     document.documentElement.style.removeProperty('--accent');
+    document.documentElement.style.removeProperty('--accent-ink');
   });
 
   it('既定 (自動) で端末がダークなら html に dark が付き、設定をライトにすると外れる', () => {

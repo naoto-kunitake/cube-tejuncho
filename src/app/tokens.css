@@ -43,6 +43,8 @@
      どのテーマ色でも見える方向に動く (黒へ寄せると墨では見えない)。文字ボタンはテーマ色を薄く敷く */
   --accent-hover: color-mix(in oklab, var(--accent), var(--on-accent) 12%);
   --accent-press: color-mix(in oklab, var(--accent), var(--on-accent) 24%);
+  /* 文字と記号に使うテーマ色。面と地で4.5:1に届かない色は、濃く / 薄くした値をJSが入れる (既定の墨と白はそのまま読める) */
+  --accent-ink: var(--accent);
   --accent-tint-hover: color-mix(in srgb, var(--accent) 10%, var(--surface));
   --accent-tint-press: color-mix(in srgb, var(--accent) 20%, var(--surface));
 
@@ -176,6 +178,7 @@
   --color-focus-ring: var(--focus-ring);
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
+  --color-accent-ink: var(--accent-ink);
   --color-accent-hover: var(--accent-hover);
   --color-accent-press: var(--accent-press);
   --color-accent-tint-hover: var(--accent-tint-hover);
