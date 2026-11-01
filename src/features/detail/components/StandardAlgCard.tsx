@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 
 import { AlgText } from '@/components/AlgText';
 import { Button, buttonVariants } from '@/components/Button';
-import { SECTION_LABEL_CLASS } from '@/components/SectionHeading';
+import { SECTION_LABEL_CLASS } from '@/components/Section';
 import { copy } from '@/copy';
 import type { WideStyle } from '@/lib/alg/format';
 

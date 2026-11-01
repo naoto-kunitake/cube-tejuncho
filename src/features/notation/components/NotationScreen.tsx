@@ -4,8 +4,9 @@ import { useLocation } from 'react-router';
 
 import { CubeFigure } from '@/components/figures/CubeFigure';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
+import { ROW_CARD_CLASS } from '@/components/row-card';
 import { BackLink, Screen, ScreenBody, ScreenHeader } from '@/components/Screen';
-import { SectionHeading } from '@/components/SectionHeading';
+import { Section } from '@/components/Section';
 import { copy, type NotationRowText } from '@/copy';
 import { type NotationRow, notationSectionsOf } from '@/data/notation';
 import { useDocumentStore } from '@/data/store';
@@ -85,15 +86,14 @@ export function NotationScreen() {
         {sections.map((section) => {
           const lead = copy.notation.leads[section.id](otherWideStyle);
           return (
-            <section key={section.id} className="flex flex-col gap-2">
-              <SectionHeading>{copy.notation.sections[section.id]}</SectionHeading>
+            <Section key={section.id} title={copy.notation.sections[section.id]}>
               {lead !== '' && <p className="text-label leading-relaxed text-muted">{lead}</p>}
-              <div className="overflow-hidden rounded-md border border-line bg-surface">
+              <div className={ROW_CARD_CLASS}>
                 {section.rows.map((row) => (
                   <NotationRowItem key={row.id} row={row} onPlay={setPlayingAlg} />
                 ))}
               </div>
-            </section>
+            </Section>
           );
         })}
       </ScreenBody>

@@ -6,7 +6,7 @@ import { PatternFigures } from '@/components/figures/PatternFigures';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { BackLink, Screen, ScreenHeader } from '@/components/Screen';
-import { SectionHeading } from '@/components/SectionHeading';
+import { Section } from '@/components/Section';
 import { copy } from '@/copy';
 import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
 import { findRegistration } from '@/data/document';
@@ -58,8 +58,7 @@ function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
     return null;
   }
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
+    <Section title={copy.detail.altAlgs}>
       {altAlgs.map((alg, index) => (
         <AlgCard
           key={index}
@@ -71,7 +70,7 @@ function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
           }}
         />
       ))}
-    </section>
+    </Section>
   );
 }
 
@@ -93,8 +92,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
         <PatternFigures preset={preset} settings={settings} />
         <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
-      <section className="flex flex-col gap-2">
-        <SectionHeading>{copy.detail.alg}</SectionHeading>
+      <Section title={copy.detail.alg}>
         {registration === undefined ? (
           <StandardAlgCard
             alg={preset.standardAlg}
@@ -117,7 +115,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
             }}
           />
         )}
-      </section>
+      </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );
@@ -145,8 +143,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
         )}
         <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
-      <section className="flex flex-col gap-2">
-        <SectionHeading>{copy.detail.alg}</SectionHeading>
+      <Section title={copy.detail.alg}>
         {registration === undefined || mainAlg === '' ? (
           <Link to={editPath} state={{ focus: 'alg' }} className={EMPTY_SLOT_CLASS}>
             {copy.detail.registerAlg}
@@ -161,7 +158,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
             }}
           />
         )}
-      </section>
+      </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );

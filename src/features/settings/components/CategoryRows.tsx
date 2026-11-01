@@ -1,6 +1,7 @@
 import { Menu } from 'lucide-react';
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useState } from 'react';
 
+import { ROW_CARD_CLASS } from '@/components/row-card';
 import { copy } from '@/copy';
 import type { CategoryEntry } from '@/data/categories';
 import { cn } from '@/lib/utils';
@@ -81,7 +82,7 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
   return (
     <>
       {/* 角の丸みはoverflowで切るが、持ち上げた行の影と拡大は切らない */}
-      <div className={cn('rounded-md border border-line bg-surface', drag === null && 'overflow-hidden')}>
+      <div className={cn(ROW_CARD_CLASS, drag !== null && 'overflow-visible')}>
         {categories.map((category, index) => {
           const isLifted = drag !== null && drag.index === index;
           const shift = drag === null || targetIndex === null ? 0 : shiftOf(index, drag.index, targetIndex);

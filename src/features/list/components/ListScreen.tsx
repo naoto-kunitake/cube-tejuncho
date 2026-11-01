@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { IconButton, IconLink } from '@/components/IconButton';
 import { Screen, ScreenHeader } from '@/components/Screen';
-import { SectionHeading } from '@/components/SectionHeading';
+import { Section } from '@/components/Section';
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
@@ -45,12 +45,9 @@ type TileSectionProps = {
 // 見出し + 格子。群の間は24 (設定の区画と同じ)、見出しとタイルの間は8
 function TileSection({ label, count, listView, children }: TileSectionProps) {
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
-        {label}
-      </SectionHeading>
+    <Section title={label} trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
       <TileGrid listView={listView}>{children}</TileGrid>
-    </section>
+    </Section>
   );
 }
 
