@@ -7,6 +7,7 @@ import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { createEmptyDocument } from '@/data/document';
 import { HOME_SCREEN_BANNER, useDocumentStore } from '@/data/store';
+import type { WideStyle } from '@/lib/alg/format';
 
 import { ListScreen } from './ListScreen';
 
@@ -17,16 +18,17 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-function withCustomCategory() {
+function withCustomCategory(mainAlg = "R U R' U R U2 R'", wideStyle: WideStyle = 'r') {
   const document = createEmptyDocument();
   document.categories = [{ id: 'c1', name: 'COLL' }];
   document.settings.tabOrder = ['pll', 'c1'];
+  document.settings.wideStyle = wideStyle;
   document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' }];
   document.registrations = [
     {
       patternId: 'p1',
       recognition: '',
-      mainAlg: { text: "R U R' U R U2 R'", mnemonic: '', fingering: '' },
+      mainAlg: { text: mainAlg, mnemonic: '', fingering: '' },
       altAlgs: [],
       createdAt: '',
       updatedAt: '',
@@ -273,6 +275,18 @@ describe('ListScreen', () => {
     expect(useToastStore.getState().toast?.text).toBe(copy.list.registeredAll(21));
     useToastStore.getState().toast?.action?.run();
     expect(useDocumentStore.getState().document.registrations).toHaveLength(0);
+  });
+
+  it('自作のタイルの手順は2層回しの表記の設定で出る', async () => {
+    const user = userEvent.setup();
+    withCustomCategory("r U R'", 'Rw');
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole('tab', { name: 'COLL' }));
+    expect(screen.getByText("Rw U R'")).toBeInTheDocument();
   });
 
   it('利用者のカテゴリのタブには自作のタイルと追加のタイルが並ぶ', async () => {

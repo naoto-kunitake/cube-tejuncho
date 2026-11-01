@@ -13,6 +13,7 @@ import { findRegistration } from '@/data/document';
 import { findPattern, patternName } from '@/data/patterns';
 import type { Preset } from '@/data/presets/catalog';
 import { useDocumentStore } from '@/data/store';
+import { formatAlg } from '@/lib/alg/format';
 import { cn } from '@/lib/utils';
 
 import { AlgCard } from './AlgCard';
@@ -140,7 +141,9 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
     <div className="flex flex-col gap-4 px-4 pb-6">
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {mainAlg !== '' && (
-          <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">{mainAlg}</p>
+          <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">
+            {formatAlg(mainAlg, settings.wideStyle)}
+          </p>
         )}
         <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} showsEmptySlot />
       </div>

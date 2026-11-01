@@ -30,6 +30,26 @@ beforeEach(() => {
 });
 
 describe('DetailScreen', () => {
+  it('自作のメイン手順は2層回しの表記の設定で出る', () => {
+    const document = createEmptyDocument();
+    document.categories = [{ id: 'c1', name: 'COLL' }];
+    document.settings.wideStyle = 'Rw';
+    document.patterns = [{ id: 'p1', categoryId: 'c1', name: 'Sune', createdAt: '', updatedAt: '' }];
+    document.registrations = [
+      {
+        patternId: 'p1',
+        recognition: '',
+        mainAlg: { text: "r U R'", mnemonic: '', fingering: '' },
+        altAlgs: [],
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+    useDocumentStore.setState({ document });
+    renderDetail('/p/p1');
+    expect(screen.getByText("Rw U R'")).toBeInTheDocument();
+  });
+
   it('パターンの名前を見出しに出し、未登録なら基本手順を提案する', () => {
     renderDetail('/p/pll-ua');
     expect(screen.getByRole('heading', { level: 1, name: 'Ua' })).toBeInTheDocument();

@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { AlgText } from '@/components/AlgText';
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
+import { formatAlg } from '@/lib/alg/format';
 import { cn } from '@/lib/utils';
 
 type CustomTileProps = {
@@ -17,6 +18,8 @@ type CustomTileProps = {
 // リストでは名前と手順の行
 export function CustomTile({ patternId, name, mainAlg, settings }: CustomTileProps) {
   const isList = settings.listView === 'list';
+  // グリッドは4行で省略するので折り返しを数える必要があり、AlgTextのflexでは数えられない。文字のまま表記だけ揃える
+  const gridAlg = formatAlg(mainAlg, settings.wideStyle);
   return (
     <Link
       to={`/p/${patternId}`}
@@ -43,7 +46,7 @@ export function CustomTile({ patternId, name, mainAlg, settings }: CustomTilePro
               mainAlg === '' ? 'text-label text-muted' : 'font-mono text-caption text-ink',
             )}
           >
-            <span className="line-clamp-4 break-words">{mainAlg === '' ? copy.list.noAlg : mainAlg}</span>
+            <span className="line-clamp-4 break-words">{mainAlg === '' ? copy.list.noAlg : gridAlg}</span>
           </span>
           <span className="truncate pt-1 text-label leading-name font-bold text-ink">{name}</span>
         </>
