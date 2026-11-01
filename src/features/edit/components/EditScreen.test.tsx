@@ -247,6 +247,19 @@ describe('EditScreen', () => {
     expect(draftStore.read('pll-ua')).toBeNull();
   });
 
+  it('書いた内容を消すと書きかけも消える', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const recognition = screen.getByLabelText(copy.edit.recognition);
+    await user.type(recognition, 'かきかけ');
+    await vi.waitFor(() => {
+      expect(draftStore.read('pll-ua')?.recognition).toBe('かきかけ');
+    });
+    // 消す側は間引きを通らないので待たない (待つと、消すのを遅らせる変更に気づけない)
+    await user.clear(recognition);
+    expect(draftStore.read('pll-ua')).toBeNull();
+  });
+
   it('手順の欄に入るとキーパッドが出て、キーで記号が入り、離れると閉じる', async () => {
     const user = userEvent.setup();
     renderEdit();
