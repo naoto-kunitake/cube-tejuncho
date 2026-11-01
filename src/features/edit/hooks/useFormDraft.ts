@@ -4,7 +4,7 @@ import type { ToastAction } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import type { DraftData, DraftStore } from '@/data/draft';
 
-import { type EditForm, entriesOf, formSnapshot } from '../lib/edit-state';
+import { type EditFormState, entriesOf, formSnapshot } from '../lib/edit-state';
 
 // 入力のたびに書く下書きは300msまとめる (打鍵ごとにlocalStorageへ書かない)
 const DRAFT_DEBOUNCE_MS = 300;
@@ -14,9 +14,9 @@ type UseFormDraftArgs = {
   // 下書きの鍵 (パターンごと)
   draftId: string;
   // 保存済みの内容から作ったフォーム。下書きがないときの初期値で、変更の有無もこれと比べる
-  savedForm: EditForm;
+  savedForm: EditFormState;
   // 下書きから初期値を組む (名前とカテゴリの扱いが自作かどうかで変わる)
-  formFromDraft: (draft: DraftData) => EditForm;
+  formFromDraft: (draft: DraftData) => EditFormState;
   showOwnToast: (text: string, action?: ToastAction) => void;
 };
 
@@ -28,7 +28,7 @@ export function useFormDraft({ draftStore, draftId, savedForm, formFromDraft, sh
     const draft = draftStore.read(draftId);
     return { form: draft === null ? savedForm : formFromDraft(draft), savedForm, isRestored: draft !== null };
   });
-  const [form, setForm] = useState<EditForm>(initial.form);
+  const [form, setForm] = useState<EditFormState>(initial.form);
   const hasShownRestoreRef = useRef(false);
   const isDirty = formSnapshot(form) !== formSnapshot(savedForm);
 
