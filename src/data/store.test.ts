@@ -68,6 +68,19 @@ describe('createDocumentStore', () => {
     expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBeNull();
   });
 
+  it('変化のない操作では1世代前の控えを流さない', () => {
+    const storage = persistedStorage();
+    const store = createDocumentStore(storage);
+    store.getState().addRegistration('pll-ua', UA_ALG);
+    store.getState().addRegistration('pll-ub', UA_ALG);
+    store.getState().dismissBanner('pll');
+    const previous = storage.getItem(`${DOCUMENT_KEY}.prev`);
+    store.getState().moveCategory('gone', 1);
+    store.getState().removeCategory('pll');
+    store.getState().dismissBanner('pll');
+    expect(storage.getItem(`${DOCUMENT_KEY}.prev`)).toBe(previous);
+  });
+
   it('起動後に保存が容量超過で失敗したら知らせる', () => {
     const storage = persistedStorage();
     const store = createDocumentStore(storage);
