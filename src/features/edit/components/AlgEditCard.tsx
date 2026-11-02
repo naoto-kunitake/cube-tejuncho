@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router';
 
 import { Button } from '@/components/Button';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
-import { SECTION_LABEL_CLASS } from '@/components/SectionHeading';
+import { SECTION_LABEL_CLASS } from '@/components/Section';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 

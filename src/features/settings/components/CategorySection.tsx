@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { SectionHeading } from '@/components/SectionHeading';
+import { Section } from '@/components/Section';
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
@@ -55,8 +55,7 @@ export function CategorySection() {
   };
 
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading>{copy.settings.categories}</SectionHeading>
+    <Section title={copy.settings.categories}>
       <CategoryRows
         categories={categories.map((category) => ({
           id: category.id,
@@ -121,6 +120,6 @@ export function CategorySection() {
           }}
         />
       )}
-    </section>
+    </Section>
   );
 }

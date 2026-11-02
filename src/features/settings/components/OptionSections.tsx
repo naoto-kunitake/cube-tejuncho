@@ -1,7 +1,4 @@
-import type { ReactNode } from 'react';
-
 import { STICKER_DOT_CLASS } from '@/components/figures/sticker-color';
-import { SectionHeading } from '@/components/SectionHeading';
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
 import { PRESET_CATEGORY_IDS } from '@/data/presets/catalog';
@@ -12,25 +9,11 @@ import { APPEARANCES } from '@/lib/theme/color';
 import { Segmented } from './Segmented';
 import { SettingLink } from './SettingLink';
 import { SettingRow } from './SettingRow';
+import { SettingsSection } from './SettingsSection';
 import { Switch } from './Switch';
 import { ThemeColorPicker } from './ThemeColorPicker';
 
 const PLAYBACK_SPEEDS = ['slow', 'normal', 'fast'] as const;
-
-type SettingsSectionProps = {
-  title: string;
-  children: ReactNode;
-};
-
-// 区画 = 見出し + 白いカード (行の列)。区画の間は24、見出しとカードの間は8
-function SettingsSection({ title, children }: SettingsSectionProps) {
-  return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading>{title}</SectionHeading>
-      <div className="overflow-hidden rounded-md border border-line bg-surface">{children}</div>
-    </section>
-  );
-}
 
 type OptionSectionsProps = {
   settings: Settings;

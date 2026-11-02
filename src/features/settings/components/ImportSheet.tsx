@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
 import { Button } from '@/components/Button';
+import { ROW_CARD_CLASS } from '@/components/row-card';
 import { Sheet, SheetHeader } from '@/components/Sheet';
 import { copy } from '@/copy';
 import type { ImportMode } from '@/data/import-data';
@@ -24,7 +25,7 @@ export function ImportSheet({ onChoose, onClose }: ImportSheetProps) {
   return (
     <Sheet label={copy.a11y.importSheet} onClose={onClose}>
       <SheetHeader title={copy.settings.importData} onClose={onClose} />
-      <fieldset className="overflow-hidden rounded-md border border-line bg-surface">
+      <fieldset className={ROW_CARD_CLASS}>
         <legend className="sr-only">{copy.a11y.importMode}</legend>
         {IMPORT_MODES.map((entry) => (
           <label

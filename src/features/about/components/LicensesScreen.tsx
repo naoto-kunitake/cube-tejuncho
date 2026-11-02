@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 
+import { ROW_CARD_CLASS } from '@/components/row-card';
 import { copy } from '@/copy';
 import { CREDITS } from '@/data/credits';
 
@@ -36,7 +37,7 @@ function LicenseRow({ name, license, href }: LicenseRowProps) {
 export function LicensesScreen() {
   return (
     <AboutLayout title={copy.about.licenses}>
-      <div className="overflow-hidden rounded-md border border-line bg-surface">
+      <div className={ROW_CARD_CLASS}>
         {CREDITS.map((credit) => (
           <LicenseRow
             key={credit.id}

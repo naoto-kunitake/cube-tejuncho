@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { NoticeDialog } from '@/components/NoticeDialog';
-import { SectionHeading } from '@/components/SectionHeading';
+import { ROW_CARD_CLASS } from '@/components/row-card';
+import { Section } from '@/components/Section';
 import { useToastStore } from '@/components/toast/toast-store';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
@@ -157,9 +158,8 @@ export function DataSection() {
   };
 
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading>{copy.settings.data}</SectionHeading>
-      <div className="overflow-hidden rounded-md border border-line bg-surface">
+    <Section title={copy.settings.data}>
+      <div className={ROW_CARD_CLASS}>
         <button
           type="button"
           className={ROW_BUTTON_CLASS}
@@ -189,7 +189,7 @@ export function DataSection() {
         </button>
       </div>
       {/* 破壊的な操作のカードは、区画の間隔8にカード間の12を足して離す */}
-      <div className="mt-3 overflow-hidden rounded-md border border-line bg-surface">
+      <div className={cn(ROW_CARD_CLASS, 'mt-3')}>
         <button
           type="button"
           className={DANGER_ROW_CLASS}
@@ -277,6 +277,6 @@ export function DataSection() {
           onClose={closeOverlay}
         />
       )}
-    </section>
+    </Section>
   );
 }

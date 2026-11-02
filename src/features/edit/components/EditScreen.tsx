@@ -1,7 +1,8 @@
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
-import { TopBar } from '@/components/TopBar';
+import { Screen, ScreenHeader } from '@/components/Screen';
 import { copy } from '@/copy';
+import type { Document } from '@/data/document';
 import { findRegistration } from '@/data/document';
 import { findPattern } from '@/data/patterns';
 import { useDocumentStore } from '@/data/store';
@@ -30,13 +31,9 @@ export function EditScreen() {
   const target = targetOf(id, searchParams.get('category'), document.patterns, document.categories);
 
   return (
-    <section aria-label={copy.a11y.edit} className="mx-auto flex w-full max-w-140 flex-col">
+    <Screen label={copy.a11y.edit}>
       {target === undefined ? (
-        <TopBar>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
-            {copy.detail.notFound}
-          </h1>
-        </TopBar>
+        <ScreenHeader title={copy.detail.notFound} />
       ) : (
         <EditForm
           key={id ?? 'new'}
@@ -47,7 +44,7 @@ export function EditScreen() {
           initialFocus={focusTargetOf(location.state)}
         />
       )}
-    </section>
+    </Screen>
   );
 }
 
@@ -55,8 +52,8 @@ export function EditScreen() {
 function targetOf(
   id: string | undefined,
   categoryParam: string | null,
-  patterns: Parameters<typeof findPattern>[0]['patterns'],
-  categories: readonly { id: string }[],
+  patterns: Document['patterns'],
+  categories: Document['categories'],
 ): EditTarget | undefined {
   if (id === undefined) {
     const categoryId = categories.some((category) => category.id === categoryParam)

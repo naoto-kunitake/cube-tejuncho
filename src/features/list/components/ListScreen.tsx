@@ -1,10 +1,11 @@
 import { LayoutGrid, List, Settings as SettingsIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton, IconLink } from '@/components/IconButton';
-import { SectionHeading } from '@/components/SectionHeading';
+import { Screen, ScreenHeader } from '@/components/Screen';
+import { Section } from '@/components/Section';
 import { useToastStore } from '@/components/toast/toast-store';
-import { TopBar } from '@/components/TopBar';
 import { copy } from '@/copy';
 import { categoryEntriesOf } from '@/data/categories';
 import { type CustomPattern, findRegistration, type Registration, type Settings } from '@/data/document';
@@ -45,12 +46,9 @@ type TileSectionProps = {
 // 見出し + 格子。群の間は24 (設定の区画と同じ)、見出しとタイルの間は8
 function TileSection({ label, count, listView, children }: TileSectionProps) {
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
-        {label}
-      </SectionHeading>
+    <Section title={label} trailing={<span className="font-normal tracking-normal tabular-nums">{count}</span>}>
       <TileGrid listView={listView}>{children}</TileGrid>
-    </section>
+    </Section>
   );
 }
 
@@ -199,32 +197,33 @@ export function ListScreen() {
   const selected = entries.find((entry) => entry.id === categoryId);
 
   return (
-    <section aria-label={copy.a11y.list} className="mx-auto flex w-full max-w-186 flex-col">
-      <TopBar>
-        <h1 className="flex-1 text-title font-bold tracking-title text-balance text-ink-strong">{copy.list.title}</h1>
-        {/* 押すたびに交互。記号と名前は切り替え先 (ドライブ・Keepと同じ)。全体で1つの設定で、設定画面には置かない */}
-        <IconButton
-          label={isList ? copy.a11y.switchToGrid : copy.a11y.switchToList}
-          onClick={() => {
-            setListView(isList ? 'grid' : 'list');
-          }}
-        >
-          {isList ? (
-            <LayoutGrid size={22} strokeWidth={1.8} aria-hidden="true" />
-          ) : (
-            <List size={22} strokeWidth={1.8} aria-hidden="true" />
-          )}
-        </IconButton>
-        <IconLink to="/settings" label={copy.a11y.openSettings}>
-          <SettingsIcon size={22} strokeWidth={1.8} aria-hidden="true" />
-        </IconLink>
-      </TopBar>
+    <Screen label={copy.a11y.list} isWide>
+      <ScreenHeader
+        title={copy.list.title}
+        canWrapTitle
+        trailing={
+          <>
+            {/* 押すたびに交互。記号と名前は切り替え先 (ドライブ・Keepと同じ)。全体で1つの設定で、設定画面には置かない */}
+            <IconButton
+              label={isList ? copy.a11y.switchToGrid : copy.a11y.switchToList}
+              onClick={() => {
+                setListView(isList ? 'grid' : 'list');
+              }}
+            >
+              {isList ? <LayoutGrid {...BAR_ICON_PROPS} /> : <List {...BAR_ICON_PROPS} />}
+            </IconButton>
+            <IconLink to="/settings" label={copy.a11y.openSettings}>
+              <SettingsIcon {...BAR_ICON_PROPS} />
+            </IconLink>
+          </>
+        }
+      />
       <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
       <div
         id={CATEGORY_PANEL_ID}
         role="tabpanel"
         aria-labelledby={categoryTabId(categoryId)}
-        className="flex flex-col gap-4 px-4 pb-6"
+        className="flex flex-col gap-4 px-4 pb-safe-6"
       >
         {showsHomeScreenBanner && (
           <HomeScreenBanner
@@ -249,6 +248,6 @@ export function ListScreen() {
           />
         )}
       </div>
-    </section>
+    </Screen>
   );
 }

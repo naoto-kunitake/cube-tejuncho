@@ -2,13 +2,13 @@ import { X } from 'lucide-react';
 import { useRef } from 'react';
 
 import { AlgText } from '@/components/AlgText';
+import { Button } from '@/components/Button';
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { Sheet } from '@/components/Sheet';
-import { PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
 import type { StickeringCategory } from '@/lib/cube/stickering';
-import { cn } from '@/lib/utils';
 
 import { PlayerControls } from './PlayerControls';
 import { usePlayer } from './usePlayer';
@@ -28,8 +28,8 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
   return (
     <Sheet label={copy.a11y.playerSheet} onClose={onClose}>
       <div className="flex items-center justify-end">
-        <IconButton label={copy.a11y.closeSheet} className="-mr-1.75" onClick={onClose}>
-          <X size={22} strokeWidth={1.8} aria-hidden="true" />
+        <IconButton label={copy.a11y.closeSheet} on="surface" className="-mr-1.75" onClick={onClose}>
+          <X {...BAR_ICON_PROPS} />
         </IconButton>
       </div>
       <div className="relative mx-auto aspect-square w-full max-w-70 overflow-hidden rounded-lg bg-surface-2">
@@ -45,16 +45,9 @@ export function PlayerSheet({ algText, category, settings, onClose }: PlayerShee
                   <br />
                   {copy.player.failedHint}
                 </p>
-                <button
-                  type="button"
-                  onClick={player.retry}
-                  className={cn(
-                    PILL_TAP_AREA_CLASS,
-                    'inline-flex min-h-9 items-center justify-center rounded-full border border-ink px-4 text-body font-bold text-ink pressable hover:bg-hover active:scale-98 active:bg-press',
-                  )}
-                >
+                <Button variant="quiet" className="border-ink px-4 text-body font-bold" onClick={player.retry}>
                   {copy.player.retry}
-                </button>
+                </Button>
               </div>
             )}
           </div>

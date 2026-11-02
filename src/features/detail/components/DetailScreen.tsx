@@ -1,12 +1,13 @@
-import { ChevronLeft, Pencil, Pin } from 'lucide-react';
+import { Pencil, Pin } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { PatternFigures } from '@/components/figures/PatternFigures';
+import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
-import { SectionHeading } from '@/components/SectionHeading';
-import { TopBar } from '@/components/TopBar';
+import { BackLink, Screen, ScreenHeader } from '@/components/Screen';
+import { Section } from '@/components/Section';
 import { copy } from '@/copy';
 import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
 import { findRegistration } from '@/data/document';
@@ -58,8 +59,7 @@ function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
     return null;
   }
   return (
-    <section className="flex flex-col gap-2">
-      <SectionHeading>{copy.detail.altAlgs}</SectionHeading>
+    <Section title={copy.detail.altAlgs}>
       {altAlgs.map((alg, index) => (
         <AlgCard
           key={index}
@@ -71,7 +71,7 @@ function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
           }}
         />
       ))}
-    </section>
+    </Section>
   );
 }
 
@@ -87,14 +87,13 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
   const editPath = `/p/${preset.id}/edit`;
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6">
+    <div className="flex flex-col gap-4 px-4 pb-safe-6">
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         <PatternFigures preset={preset} settings={settings} />
         <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
-      <section className="flex flex-col gap-2">
-        <SectionHeading>{copy.detail.alg}</SectionHeading>
+      <Section title={copy.detail.alg}>
         {registration === undefined ? (
           <StandardAlgCard
             alg={preset.standardAlg}
@@ -117,7 +116,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
             }}
           />
         )}
-      </section>
+      </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );
@@ -136,7 +135,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
   const mainAlg = registration?.mainAlg.text ?? '';
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6">
+    <div className="flex flex-col gap-4 px-4 pb-safe-6">
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {mainAlg !== '' && (
           <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">
@@ -145,8 +144,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
         )}
         <Recognition recognition={registration?.recognition ?? ''} editPath={editPath} />
       </div>
-      <section className="flex flex-col gap-2">
-        <SectionHeading>{copy.detail.alg}</SectionHeading>
+      <Section title={copy.detail.alg}>
         {registration === undefined || mainAlg === '' ? (
           <Link to={editPath} state={{ focus: 'alg' }} className={EMPTY_SLOT_CLASS}>
             {copy.detail.registerAlg}
@@ -161,7 +159,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
             }}
           />
         )}
-      </section>
+      </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
     </div>
   );
@@ -180,36 +178,31 @@ export function DetailScreen() {
   const [playingAlg, setPlayingAlg] = useState<string | null>(null);
 
   return (
-    <section aria-label={copy.a11y.detail} className="mx-auto flex w-full max-w-140 flex-col">
-      <TopBar>
-        {/* 戻るの記号を左端16に揃えるため7引く。戻ると題の間は10 */}
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <IconLink to="/" label={copy.a11y.backToList} className="-ml-1.75">
-            <ChevronLeft size={22} strokeWidth={1.8} aria-hidden="true" />
-          </IconLink>
-          <h1 className="min-w-0 flex-1 truncate text-title font-bold tracking-title text-ink-strong">
-            {ref === undefined ? copy.detail.notFound : patternName(ref)}
-          </h1>
-        </div>
-        {ref !== undefined && (
-          <>
-            {/* aria-pressedのあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態はaria-pressedが伝える */}
-            <IconButton
-              label={copy.a11y.pin}
-              aria-pressed={isPinned}
-              className={cn(isPinned && 'text-accent-ink')}
-              onClick={() => {
-                togglePin(id);
-              }}
-            >
-              <Pin size={22} strokeWidth={1.8} fill={isPinned ? 'currentColor' : 'none'} aria-hidden="true" />
-            </IconButton>
-            <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
-              <Pencil size={22} strokeWidth={1.8} aria-hidden="true" />
-            </IconLink>
-          </>
-        )}
-      </TopBar>
+    <Screen label={copy.a11y.detail}>
+      <ScreenHeader
+        title={ref === undefined ? copy.detail.notFound : patternName(ref)}
+        leading={<BackLink to="/" label={copy.a11y.backToList} />}
+        trailing={
+          ref !== undefined && (
+            <>
+              {/* aria-pressedのあるトグルなので、名前は状態の名詞「ピン留め」で固定し、押された状態はaria-pressedが伝える */}
+              <IconButton
+                label={copy.a11y.pin}
+                aria-pressed={isPinned}
+                className={cn(isPinned && 'text-accent-ink')}
+                onClick={() => {
+                  togglePin(id);
+                }}
+              >
+                <Pin {...BAR_ICON_PROPS} fill={isPinned ? 'currentColor' : 'none'} />
+              </IconButton>
+              <IconLink to={`/p/${id}/edit`} label={copy.a11y.editPattern(patternName(ref))}>
+                <Pencil {...BAR_ICON_PROPS} />
+              </IconLink>
+            </>
+          )
+        }
+      />
       {ref?.kind === 'preset' && (
         <PresetDetail
           preset={ref.preset}
@@ -237,6 +230,6 @@ export function DetailScreen() {
           }}
         />
       )}
-    </section>
+    </Screen>
   );
 }
