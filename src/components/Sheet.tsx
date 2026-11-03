@@ -4,6 +4,7 @@ import { type ReactNode, useEffect } from 'react';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
+import { useSheetFrameColor } from './frame-color';
 import { BAR_ICON_PROPS } from './icon';
 import { IconButton } from './IconButton';
 import { useModalDialog } from './useModalDialog';
@@ -21,6 +22,7 @@ type SheetProps = {
 export function Sheet({ label, onClose, className, children }: SheetProps) {
   // 焦点の行き先を渡さないので器に移る。× に移ると押したように見え、読み上げも名前ではなく「閉じる」になる
   const dialogRef = useModalDialog();
+  useSheetFrameColor();
 
   useEffect(() => {
     const dialog = dialogRef.current;
