@@ -31,10 +31,17 @@
     box-shadow: 0 0 0 2px var(--color-focus-ring);
   }
 
-  /* 文字入力欄はクリックで入っても:focus-visibleになる。ポインタで入ったときは二重の輪を出さず、
+  /* 直前の操作がポインタなら輪を出さない。Chromeは直前の操作がキーボードのときだけ:focus-visibleにするが、
+     Safariはスクリプトで移した焦点 (確認のキャンセル、ダイアログを閉じて戻した元のボタン) にも付けるので、
+     タップで開いた確認に太い輪が出る。Tabか矢印を押せば印がkeyboardに変わり、輪が戻る */
+  html[data-input-modality='pointer'] :focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* 文字入力欄はクリックで入っても:focus-visibleになる。ポインタで入ったときは輪の代わりに
      枠を墨の2pxにする (枠1 + 影1で太さを変えずに描く)。キーボードで入ったときは上の輪のまま */
   html[data-input-modality='pointer'] :is(input, textarea, select):focus-visible {
-    outline: none;
     border-color: var(--color-ink);
     box-shadow: 0 0 0 1px var(--color-ink);
   }
