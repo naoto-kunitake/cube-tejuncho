@@ -50,6 +50,11 @@ export function useAlgKeypad(inputsRef: AlgInputs) {
       switchToNativeKeyboard();
       return;
     }
+    if (key === 'done') {
+      // 欄を離れれば閉じる (閉じる処理はblurに一本化し、ここで状態を触らない)
+      activeInput()?.blur();
+      return;
+    }
     if (key === 'backspace') {
       editActiveInput((_value, start, end) => deletionFor(start, end));
       return;

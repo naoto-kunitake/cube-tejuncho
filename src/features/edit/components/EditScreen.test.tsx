@@ -308,6 +308,19 @@ describe('EditScreen', () => {
     expect(input).toHaveFocus();
   });
 
+  it('「完了」を押すとキーパッドが閉じて欄の値はそのまま残る', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.click(input);
+    const keypad = screen.getByRole('group', { name: copy.a11y.keypad });
+    await user.click(within(keypad).getByRole('button', { name: 'R' }));
+    await user.click(within(keypad).getByRole('button', { name: copy.keypad.done }));
+    expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
+    expect(input).toHaveValue('R');
+    expect(input).not.toHaveFocus();
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderEdit('/p/nope/edit');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();
