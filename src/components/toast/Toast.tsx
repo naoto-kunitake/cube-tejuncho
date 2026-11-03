@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { type PointerEvent, useRef } from 'react';
 
 import { TEXT_PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,8 @@ export function Toast() {
       resume();
     }
   };
+  // 乗っている判定はマウスだけ。指で触れたときにも入ると、消そうとして触った人のトーストがほかの場所を触るまで消えない
+  const isHoverPointer = (event: PointerEvent) => event.pointerType !== 'touch';
 
   return (
     <div
@@ -31,11 +33,17 @@ export function Toast() {
       {toast !== null && (
         <div
           className="flex items-center gap-2 rounded-lg bg-inverse py-2.5 pr-2 pl-4 text-small text-on-inverse shadow-4"
-          onMouseEnter={() => {
+          onPointerEnter={(event) => {
+            if (!isHoverPointer(event)) {
+              return;
+            }
             isHovering.current = true;
             pause();
           }}
-          onMouseLeave={() => {
+          onPointerLeave={(event) => {
+            if (!isHoverPointer(event)) {
+              return;
+            }
             isHovering.current = false;
             resumeIfLeft();
           }}
