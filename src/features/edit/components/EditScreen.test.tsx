@@ -308,6 +308,15 @@ describe('EditScreen', () => {
     expect(input).toHaveFocus();
   });
 
+  // 欄が実際に見える位置に来るかはjsdomにレイアウトがないので測れない (実機で確かめる)
+  it('手順を追加するとキーパッドが出て、新しい欄に焦点が入る', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    await user.click(screen.getByRole('button', { name: copy.edit.addAlg }));
+    expect(screen.getByLabelText(copy.edit.altAlg(2))).toHaveFocus();
+    expect(screen.getByRole('group', { name: copy.a11y.keypad })).toBeInTheDocument();
+  });
+
   it('「完了」を押すとキーパッドが閉じて欄の値はそのまま残る', async () => {
     const user = userEvent.setup();
     renderEdit();

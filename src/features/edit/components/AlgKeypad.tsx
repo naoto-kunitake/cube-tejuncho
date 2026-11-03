@@ -9,6 +9,9 @@ type AlgKeypadProps = {
   onKey: (key: KeypadKey) => void;
 };
 
+// キーパッドが画面の底を占める高さ。本文の下の余白と、欄を寄せるときの下の余白に同じ値を使う
+export const KEYPAD_SPACE_CLASS = { padding: 'pb-60', scrollMargin: 'scroll-mb-60' } as const;
+
 // キーの地色はトークン (文字キーと操作キーでライトとダークの段が違う。tokens.cssを参照)。
 // 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去・キーボード・完了は最下段を3等分
 const KEY_CLASS =

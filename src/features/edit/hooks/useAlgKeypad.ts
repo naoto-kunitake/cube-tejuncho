@@ -69,6 +69,7 @@ export function useAlgKeypad(inputsRef: AlgInputs) {
   return {
     // キーパッドを出すか。端末のキーボードに切り替えている間は出さない
     isOpen: activeIndex !== null && !usesNativeKeyboard,
+    activeIndex,
     // 手順の欄がキーパッドで打つ状態か (端末のキーボードを抑える)
     usesKeypad: !usesNativeKeyboard,
     pressKey,
