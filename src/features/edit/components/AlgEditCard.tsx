@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 
+import { algLabelOf } from '@/components/alg-label';
 import { Button } from '@/components/Button';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
 import { SECTION_LABEL_CLASS } from '@/components/Section';
@@ -54,7 +55,7 @@ export function AlgEditCard({
     >
       <div className="flex min-h-9 items-center justify-between gap-2">
         <label htmlFor={algId} className={SECTION_LABEL_CLASS}>
-          {isMain ? copy.edit.mainAlg : copy.edit.altAlg(index + 1)}
+          {algLabelOf(index)}
         </label>
         <div className="flex items-center gap-2">
           {!isMain && (

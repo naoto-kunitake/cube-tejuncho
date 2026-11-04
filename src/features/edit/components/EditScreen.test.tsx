@@ -405,4 +405,27 @@ describe('EditScreen', () => {
     await user.click(screen.getByRole('button', { name: copy.toast.undo }));
     expect(useDocumentStore.getState().document.patterns).toMatchObject([{ id: 'p1', name: 'Sune' }]);
   });
+
+  it('焦点の指定に番号があれば、その番号の手順の欄に焦点が入る', () => {
+    useDocumentStore.setState({ document: { ...createEmptyDocument(), registrations: [REGISTRATION] } });
+    renderEdit('/p/pll-ua/edit', { focus: 'alg', index: 1 });
+    expect(screen.getByLabelText(copy.edit.altAlg(2))).toHaveFocus();
+  });
+
+  it('焦点の指定に番号がなければ、メイン手順の欄に焦点が入る', () => {
+    useDocumentStore.setState({ document: { ...createEmptyDocument(), registrations: [REGISTRATION] } });
+    renderEdit('/p/pll-ua/edit', { focus: 'alg' });
+    expect(screen.getByLabelText(copy.edit.mainAlg)).toHaveFocus();
+  });
+
+  // 履歴のstateは型を信用できないので、不正な番号は先頭の欄に戻す
+  it.each([
+    ['負数', -1],
+    ['非整数', 1.5],
+    ['文字列', '1'],
+  ])('焦点の指定の番号が不正 (%s) なら、メイン手順の欄に焦点が入る', (_label, index) => {
+    useDocumentStore.setState({ document: { ...createEmptyDocument(), registrations: [REGISTRATION] } });
+    renderEdit('/p/pll-ua/edit', { focus: 'alg', index });
+    expect(screen.getByLabelText(copy.edit.mainAlg)).toHaveFocus();
+  });
 });
