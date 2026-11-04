@@ -1,6 +1,8 @@
 import { Button } from '@/components/Button';
 import { copy } from '@/copy';
 
+import { BANNER_CLASS } from './banner';
+
 type HomeScreenBannerProps = {
   onDismiss: () => void;
 };
@@ -9,10 +11,7 @@ type HomeScreenBannerProps = {
 // 追加の操作は共有シートから行うので、ここには行動のボタンを置かず閉じるだけ
 export function HomeScreenBanner({ onDismiss }: HomeScreenBannerProps) {
   return (
-    <section
-      aria-label={copy.a11y.homeScreenHint}
-      className="flex flex-col gap-2 rounded-md border border-line bg-surface pt-3 pr-2 pb-2 pl-4"
-    >
+    <section aria-label={copy.a11y.homeScreenHint} className={BANNER_CLASS}>
       <p className="text-small leading-normal text-ink">
         {copy.list.homeScreenTitle}
         <br />
