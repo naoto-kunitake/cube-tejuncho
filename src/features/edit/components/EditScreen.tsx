@@ -9,7 +9,7 @@ import { useDocumentStore } from '@/data/store';
 
 import { EditForm, type EditTarget, type FocusTarget } from './EditForm';
 
-// 詳細の空枠 (判断を書く / 手順を登録) から来たときは、その欄に焦点を当てる。履歴のstateで受け取りURLには持たない
+// 詳細の空枠 (判断を書く / 手順を登録) や手順カードから来たときは、その欄に焦点を当てる。履歴のstateで受け取りURLには持たない
 function focusTargetOf(state: unknown): FocusTarget | null {
   if (typeof state !== 'object' || state === null || !('focus' in state)) {
     return null;
@@ -18,7 +18,9 @@ function focusTargetOf(state: unknown): FocusTarget | null {
     return { kind: 'recognition' };
   }
   if (state.focus === 'alg') {
-    return { kind: 'alg', index: 0 };
+    // 手順カードからは何番目かが添えられる。空枠と基本手順の提案は先頭の欄
+    const index = 'index' in state ? state.index : 0;
+    return { kind: 'alg', index: typeof index === 'number' && Number.isInteger(index) && index >= 0 ? index : 0 };
   }
   return null;
 }
