@@ -213,6 +213,7 @@ type Copy = {
     back: string;
     edit: string;
     editPattern: (name: string) => string;
+    editAlg: (label: string) => string;
     pin: string;
     closeEdit: string;
     keypad: string;
@@ -580,6 +581,7 @@ export const copy = {
     back: '戻る',
     edit: '編集',
     editPattern: (name) => `${name}を編集`,
+    editAlg: (label) => `${label}を編集`,
     pin: 'ピン留め',
     closeEdit: '閉じる',
     keypad: '手順キーパッド',

@@ -50,11 +50,12 @@ function Recognition({ recognition, editPath }: RecognitionProps) {
 type AltAlgsSectionProps = {
   altAlgs: readonly AlgEntry[];
   wideStyle: Settings['wideStyle'];
+  editPath: string;
   onPlay: (algText: string) => void;
 };
 
-// ほかの手順。1つもなければ見出しも出さない
-function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
+// ほかの手順。1つもなければ見出しも出さない。通し番号はメイン手順の次から
+function AltAlgsSection({ altAlgs, wideStyle, editPath, onPlay }: AltAlgsSectionProps) {
   if (altAlgs.length === 0) {
     return null;
   }
@@ -65,7 +66,8 @@ function AltAlgsSection({ altAlgs, wideStyle, onPlay }: AltAlgsSectionProps) {
           key={index}
           alg={alg}
           wideStyle={wideStyle}
-          isMain={false}
+          index={index + 1}
+          editPath={editPath}
           onPlay={() => {
             onPlay(alg.text);
           }}
@@ -110,14 +112,20 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
           <AlgCard
             alg={registration.mainAlg}
             wideStyle={settings.wideStyle}
-            isMain
+            index={0}
+            editPath={editPath}
             onPlay={() => {
               onPlay(registration.mainAlg.text);
             }}
           />
         )}
       </Section>
-      <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
+      <AltAlgsSection
+        altAlgs={registration?.altAlgs ?? []}
+        wideStyle={settings.wideStyle}
+        editPath={editPath}
+        onPlay={onPlay}
+      />
     </ScreenBody>
   );
 }
@@ -153,14 +161,20 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
           <AlgCard
             alg={registration.mainAlg}
             wideStyle={settings.wideStyle}
-            isMain
+            index={0}
+            editPath={editPath}
             onPlay={() => {
               onPlay(mainAlg);
             }}
           />
         )}
       </Section>
-      <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
+      <AltAlgsSection
+        altAlgs={registration?.altAlgs ?? []}
+        wideStyle={settings.wideStyle}
+        editPath={editPath}
+        onPlay={onPlay}
+      />
     </ScreenBody>
   );
 }

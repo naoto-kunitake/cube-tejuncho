@@ -86,6 +86,30 @@ describe('DetailScreen', () => {
     expect(screen.getAllByRole('button', { name: copy.detail.play })).toHaveLength(2);
   });
 
+  it('登録済みの手順カードには編集の入口があり、メインとほかの手順で名前が違う', () => {
+    const document = createEmptyDocument();
+    document.registrations = [
+      {
+        patternId: 'pll-ua',
+        recognition: '前に3連',
+        mainAlg: { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' },
+        altAlgs: [{ text: "R U' R U R U R U' R' U' R2", mnemonic: '', fingering: '' }],
+        createdAt: '',
+        updatedAt: '',
+      },
+    ];
+    useDocumentStore.setState({ document });
+    renderDetail('/p/pll-ua');
+    expect(screen.getByRole('link', { name: copy.a11y.editAlg(copy.edit.mainAlg) })).toHaveAttribute(
+      'href',
+      '/p/pll-ua/edit',
+    );
+    expect(screen.getByRole('link', { name: copy.a11y.editAlg(copy.edit.altAlg(2)) })).toHaveAttribute(
+      'href',
+      '/p/pll-ua/edit',
+    );
+  });
+
   it('登録済みでも判断が空なら空枠を出す', () => {
     const document = createEmptyDocument();
     document.registrations = [
