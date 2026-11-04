@@ -6,7 +6,7 @@ import { PatternFigures } from '@/components/figures/PatternFigures';
 import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
-import { BackLink, Screen, ScreenHeader } from '@/components/Screen';
+import { BackLink, Screen, ScreenBody, ScreenHeader } from '@/components/Screen';
 import { Section } from '@/components/Section';
 import { copy } from '@/copy';
 import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
@@ -87,7 +87,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
   const editPath = `/p/${preset.id}/edit`;
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-safe-6">
+    <ScreenBody>
       {/* 大きな図 = パターンそのもの (全色 + 矢印)、隣の灰色の図 = 何を見るか。ラベルは付けない (並べば自明) */}
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         <PatternFigures preset={preset} settings={settings} />
@@ -118,7 +118,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
         )}
       </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
-    </div>
+    </ScreenBody>
   );
 }
 
@@ -135,7 +135,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
   const mainAlg = registration?.mainAlg.text ?? '';
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-safe-6">
+    <ScreenBody>
       <div className="flex flex-col items-center gap-6 rounded-md border border-line bg-surface p-4">
         {mainAlg !== '' && (
           <p className="w-full text-center font-mono text-title leading-normal break-words text-ink">
@@ -161,7 +161,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
         )}
       </Section>
       <AltAlgsSection altAlgs={registration?.altAlgs ?? []} wideStyle={settings.wideStyle} onPlay={onPlay} />
-    </div>
+    </ScreenBody>
   );
 }
 

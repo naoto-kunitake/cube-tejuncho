@@ -1,6 +1,8 @@
 import { Button } from '@/components/Button';
 import { copy } from '@/copy';
 
+import { BANNER_CLASS } from './banner';
+
 type FirstRunBannerProps = {
   onDismiss: () => void;
   onRegisterAll: () => void;
@@ -10,10 +12,7 @@ type FirstRunBannerProps = {
 // 画面全体が空なのではなくタイルの上に出る文脈つきの案内なので、中央に大きく置く空状態の型は使わない
 export function FirstRunBanner({ onDismiss, onRegisterAll }: FirstRunBannerProps) {
   return (
-    <section
-      aria-label={copy.a11y.firstRun}
-      className="flex flex-col gap-2 rounded-md border border-line bg-surface pt-3 pr-2 pb-2 pl-4"
-    >
+    <section aria-label={copy.a11y.firstRun} className={BANNER_CLASS}>
       <p className="text-small leading-normal text-ink">
         {copy.list.emptyTitle}
         <br />

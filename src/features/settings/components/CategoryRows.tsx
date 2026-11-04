@@ -122,13 +122,14 @@ export function CategoryRows({ categories, onMove, onOpen, children }: CategoryR
                   <span className="text-label whitespace-nowrap text-muted tabular-nums">{category.detail}</span>
                 </>
               )}
+              {/* 36の丸の中の22の記号を行の余白16に揃えるため7引く (件数の文字とトップバーの丸ボタンと同じ右端) */}
               <button
                 type="button"
                 aria-label={copy.a11y.reorderHandle(category.label)}
                 aria-describedby={REORDER_HINT_ID}
                 className={cn(
                   ICON_BUTTON_BASE_CLASS,
-                  '-mr-2.5 cursor-grab touch-none text-muted hover:bg-hover hover:text-ink',
+                  '-mr-1.75 cursor-grab touch-none text-muted hover:bg-hover hover:text-ink',
                   isLifted && 'cursor-grabbing',
                 )}
                 onPointerDown={(event) => {
