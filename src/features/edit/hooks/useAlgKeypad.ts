@@ -50,6 +50,11 @@ export function useAlgKeypad(inputsRef: AlgInputs) {
       switchToNativeKeyboard();
       return;
     }
+    if (key === 'done') {
+      // 欄を離れれば閉じる (閉じる処理はblurに一本化し、ここで状態を触らない)
+      activeInput()?.blur();
+      return;
+    }
     if (key === 'backspace') {
       editActiveInput((_value, start, end) => deletionFor(start, end));
       return;
@@ -64,6 +69,7 @@ export function useAlgKeypad(inputsRef: AlgInputs) {
   return {
     // キーパッドを出すか。端末のキーボードに切り替えている間は出さない
     isOpen: activeIndex !== null && !usesNativeKeyboard,
+    activeIndex,
     // 手順の欄がキーパッドで打つ状態か (端末のキーボードを抑える)
     usesKeypad: !usesNativeKeyboard,
     pressKey,

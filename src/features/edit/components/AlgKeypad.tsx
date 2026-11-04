@@ -9,8 +9,11 @@ type AlgKeypadProps = {
   onKey: (key: KeypadKey) => void;
 };
 
+// キーパッドが画面の底を占める高さ。本文の下の余白と、欄を寄せるときの下の余白に同じ値を使う
+export const KEYPAD_SPACE_CLASS = { padding: 'pb-60', scrollMargin: 'scroll-mb-60' } as const;
+
 // キーの地色はトークン (文字キーと操作キーでライトとダークの段が違う。tokens.cssを参照)。
-// 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去とキーボードは最下段を半分ずつ
+// 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去・キーボード・完了は最下段を3等分
 const KEY_CLASS =
   'h-11 rounded-sm border border-line font-mono text-alg-compact font-semibold text-ink pressable active:bg-press';
 const CHARACTER_KEY_CLASS = cn(KEY_CLASS, 'bg-key-character hover:bg-key-character-hover');
@@ -20,6 +23,7 @@ const ACTION_LABELS: Record<ActionKey, string> = {
   backspace: copy.keypad.backspace,
   clear: copy.keypad.clear,
   keyboard: copy.keypad.keyboard,
+  done: copy.keypad.done,
 };
 
 // キーを押しても欄から焦点を奪わない (mousedownの既定の動きを止める)。欄の選択範囲にそのまま効く
@@ -56,7 +60,7 @@ export function AlgKeypad({ onKey }: AlgKeypadProps) {
             type="button"
             tabIndex={-1}
             onMouseDown={keepFocus}
-            className={cn(ACTION_KEY_CLASS, key === 'backspace' ? 'col-span-1' : 'col-span-3')}
+            className={cn(ACTION_KEY_CLASS, key === 'backspace' ? 'col-span-1' : 'col-span-2')}
             onClick={() => {
               onKey(key);
             }}

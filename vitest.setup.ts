@@ -18,6 +18,9 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
 // jsdomはポインタの捕捉も実装していない (ドラッグの部品がpointerdownで呼ぶ)
 HTMLElement.prototype.setPointerCapture = () => undefined;
 
+// jsdomはスクロールを実装していない (手順の欄をキーパッドの上に寄せる)
+Element.prototype.scrollIntoView = () => undefined;
+
 // jsdomはmatchMediaも実装していない (ホーム画面の案内がdisplay-modeを見る)。常に不一致を返す
 Object.defineProperty(window, 'matchMedia', {
   configurable: true,

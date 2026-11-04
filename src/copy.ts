@@ -90,6 +90,7 @@ type Copy = {
     backspace: string;
     clear: string;
     keyboard: string;
+    done: string;
   };
   dialog: {
     cancel: string;
@@ -373,6 +374,7 @@ export const copy = {
     backspace: '削除',
     clear: '全消去',
     keyboard: 'キーボード',
+    done: '完了',
   },
   dialog: {
     cancel: 'キャンセル',

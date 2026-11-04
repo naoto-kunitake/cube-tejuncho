@@ -308,6 +308,28 @@ describe('EditScreen', () => {
     expect(input).toHaveFocus();
   });
 
+  // 欄が実際に見える位置に来るかはjsdomにレイアウトがないので測れない (実機で確かめる)
+  it('手順を追加するとキーパッドが出て、新しい欄に焦点が入る', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    await user.click(screen.getByRole('button', { name: copy.edit.addAlg }));
+    expect(screen.getByLabelText(copy.edit.altAlg(2))).toHaveFocus();
+    expect(screen.getByRole('group', { name: copy.a11y.keypad })).toBeInTheDocument();
+  });
+
+  it('「完了」を押すとキーパッドが閉じて欄の値はそのまま残る', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.click(input);
+    const keypad = screen.getByRole('group', { name: copy.a11y.keypad });
+    await user.click(within(keypad).getByRole('button', { name: 'R' }));
+    await user.click(within(keypad).getByRole('button', { name: copy.keypad.done }));
+    expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
+    expect(input).toHaveValue('R');
+    expect(input).not.toHaveFocus();
+  });
+
   it('知らない id なら見つからないと出す', () => {
     renderEdit('/p/nope/edit');
     expect(screen.getByRole('heading', { level: 1, name: copy.detail.notFound })).toBeInTheDocument();

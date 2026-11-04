@@ -32,6 +32,9 @@ const SWATCH_CLASS_BASE =
   'relative grid size-10 place-items-center rounded-full pressable before:absolute before:-inset-0.5 before:rounded-full active:scale-96';
 const SELECTED_RING_CLASS = 'ring-2 ring-offset-2 ring-offset-surface';
 const HOVER_RING_CLASS = 'hover:ring-2 hover:ring-line-strong hover:ring-offset-2 hover:ring-offset-surface';
+// 自分で選ぶはポインタを上に重ねた入力部品が受けるので、hoverと押下は包みの.groupから取る
+const CUSTOM_HOVER_RING_CLASS =
+  'group-hover:ring-2 group-hover:ring-line-strong group-hover:ring-offset-2 group-hover:ring-offset-surface';
 
 type ThemeColorPickerProps = {
   value: ThemeColor;
@@ -75,48 +78,52 @@ export function ThemeColorPicker({ value, onChange }: ThemeColorPickerProps) {
           </button>
         );
       })}
-      <button
-        type="button"
-        role="radio"
-        aria-checked={isCustom}
-        aria-label={copy.settings.customColor}
-        className={cn(
-          SWATCH_CLASS_BASE,
-          'bg-rainbow',
-          isCustom ? cn(SELECTED_RING_CLASS, 'ring-accent') : HOVER_RING_CLASS,
-        )}
-        onClick={() => {
-          inputRef.current?.click();
-        }}
-      >
-        {/* 選んだ色は利用者の任意の値なのでトークンにできず、ここだけインラインのstyle */}
-        <span
-          className="grid size-8 place-items-center rounded-full ring-2 ring-surface"
-          style={isCustom ? { backgroundColor: customHex, color: onColorOf(customHex) } : undefined}
-        >
-          {isCustom ? (
-            <Check size={20} strokeWidth={2.4} aria-hidden="true" />
-          ) : (
-            <Plus size={20} strokeWidth={2.2} aria-hidden="true" className="text-white drop-shadow-sm" />
+      {/* iOSのSafariは端末のカラーピッカーを、利用者が入力部品に直接触れたときにだけ開く (スクリプトのclick()では開かない)。
+          透明にした入力部品を見本の上に重ねてタップはそちらで受け、radioはキーボードと読み上げが使う */}
+      <div className="group relative">
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isCustom}
+          aria-label={copy.settings.customColor}
+          className={cn(
+            SWATCH_CLASS_BASE,
+            'bg-rainbow group-active:scale-96',
+            isCustom ? cn(SELECTED_RING_CLASS, 'ring-accent') : CUSTOM_HOVER_RING_CLASS,
           )}
-        </span>
-      </button>
-      {/* 端末のカラーピッカーを開くためだけの入力。選ぶ操作は上のradioが担うので読み上げからは外す */}
-      <input
-        ref={inputRef}
-        type="color"
-        value={customHex}
-        aria-hidden="true"
-        tabIndex={-1}
-        className="pointer-events-none absolute size-px opacity-0"
-        onChange={(event) => {
-          // type="color"の値は常に#rrggbbだが、型のために確かめる
-          const hex = event.target.value;
-          if (isHexColor(hex)) {
-            onChange(hex);
-          }
-        }}
-      />
+          onClick={() => {
+            inputRef.current?.click();
+          }}
+        >
+          {/* 選んだ色は利用者の任意の値なのでトークンにできず、ここだけインラインのstyle */}
+          <span
+            className="grid size-8 place-items-center rounded-full ring-2 ring-surface"
+            style={isCustom ? { backgroundColor: customHex, color: onColorOf(customHex) } : undefined}
+          >
+            {isCustom ? (
+              <Check size={20} strokeWidth={2.4} aria-hidden="true" />
+            ) : (
+              <Plus size={20} strokeWidth={2.2} aria-hidden="true" className="text-white drop-shadow-sm" />
+            )}
+          </span>
+        </button>
+        {/* 選ぶ操作はradioが担うので読み上げとTabの順からは外す。押せる範囲はradioの疑似要素と同じ44 */}
+        <input
+          ref={inputRef}
+          type="color"
+          value={customHex}
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute -inset-0.5 cursor-pointer rounded-full opacity-0"
+          onChange={(event) => {
+            // type="color"の値は常に#rrggbbだが、型のために確かめる
+            const hex = event.target.value;
+            if (isHexColor(hex)) {
+              onChange(hex);
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }

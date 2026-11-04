@@ -8,7 +8,7 @@ import { TOAST_DURATION_MS, useToastStore } from './toast-store';
 
 const TEXT = '手順を削除しました';
 
-// Reactのonmouseenter / onmouseleaveはover / outから作られるので、その2つを起こす
+// ReactのonPointerEnter / onPointerLeaveはover / outから作られるので、その2つを起こす
 function showToast() {
   useToastStore.getState().show(TEXT, { label: copy.toast.undo, run: vi.fn() });
   render(<Toast />);
@@ -25,32 +25,51 @@ afterEach(() => {
 });
 
 describe('Toast', () => {
-  it('ポインタが乗っている間は消えない', () => {
+  it('マウスが乗っている間は消えない', () => {
     const text = showToast();
-    fireEvent.mouseOver(text);
+    fireEvent.pointerOver(text, { pointerType: 'mouse' });
     act(() => {
       vi.advanceTimersByTime(TOAST_DURATION_MS * 2);
     });
     expect(screen.getByText(TEXT)).toBeInTheDocument();
   });
 
-  it('ポインタが離れると消える', () => {
+  it('マウスが離れると消える', () => {
     const text = showToast();
-    fireEvent.mouseOver(text);
-    fireEvent.mouseOut(text);
+    fireEvent.pointerOver(text, { pointerType: 'mouse' });
+    fireEvent.pointerOut(text, { pointerType: 'mouse' });
     act(() => {
       vi.advanceTimersByTime(TOAST_DURATION_MS);
     });
     expect(screen.queryByText(TEXT)).not.toBeInTheDocument();
   });
 
+  it('指で触れても止まらず、時間が来れば消える', () => {
+    const text = showToast();
+    fireEvent.pointerOver(text, { pointerType: 'touch' });
+    act(() => {
+      vi.advanceTimersByTime(TOAST_DURATION_MS);
+    });
+    expect(screen.queryByText(TEXT)).not.toBeInTheDocument();
+  });
+
+  it('マウスが乗っている間は指の離れが来ても消えない', () => {
+    const text = showToast();
+    fireEvent.pointerOver(text, { pointerType: 'mouse' });
+    fireEvent.pointerOut(text, { pointerType: 'touch' });
+    act(() => {
+      vi.advanceTimersByTime(TOAST_DURATION_MS * 2);
+    });
+    expect(screen.getByText(TEXT)).toBeInTheDocument();
+  });
+
   it('マウスが離れても焦点が中にあれば消えない', () => {
     const text = showToast();
-    fireEvent.mouseOver(text);
+    fireEvent.pointerOver(text, { pointerType: 'mouse' });
     act(() => {
       screen.getByRole('button', { name: copy.toast.undo }).focus();
     });
-    fireEvent.mouseOut(text);
+    fireEvent.pointerOut(text, { pointerType: 'mouse' });
     act(() => {
       vi.advanceTimersByTime(TOAST_DURATION_MS * 2);
     });

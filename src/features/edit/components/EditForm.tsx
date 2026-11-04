@@ -37,7 +37,7 @@ import {
 } from '../lib/edit-state';
 import { recognitionHintOf } from '../lib/recognition-hint';
 import { AlgEditCard } from './AlgEditCard';
-import { AlgKeypad } from './AlgKeypad';
+import { AlgKeypad, KEYPAD_SPACE_CLASS } from './AlgKeypad';
 
 // 新規の下書きはパターンのidがまだないので固定の鍵
 const NEW_DRAFT_ID = 'new';
@@ -160,6 +160,15 @@ export function EditForm({
     element?.focus();
   }, [focusTarget]);
 
+  // 焦点が入った時点ではまだキーパッドがなく、下に寄せる余白も足されていないので、
+  // 出てから欄を寄せ直す (欄のscroll-marginがキーパッドの高さを空ける)
+  useEffect(() => {
+    if (keypad.activeIndex === null || !keypad.isOpen) {
+      return;
+    }
+    inputsRef.current.get(keypad.activeIndex)?.scrollIntoView({ block: 'nearest' });
+  }, [keypad.activeIndex, keypad.isOpen]);
+
   const updateCard = (index: number, card: EditCard) => {
     setForm((current) => ({ ...current, cards: current.cards.map((entry, i) => (i === index ? card : entry)) }));
   };
@@ -269,7 +278,7 @@ export function EditForm({
         }
       />
       {/* キーパッドが出ている間は、欄がその裏に隠れないよう下に余白を足す */}
-      <ScreenBody className={cn(keypad.isOpen && 'pb-60')}>
+      <ScreenBody className={cn(keypad.isOpen && KEYPAD_SPACE_CLASS.padding)}>
         {target.kind === 'preset' && <EditFigure preset={target.preset} settings={settings} />}
         {/* 名前とカテゴリはプリセットでは図と結び付いた固定値なので自作のときだけ編集できる */}
         {isCustom && (

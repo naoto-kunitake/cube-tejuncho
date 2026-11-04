@@ -1,4 +1,5 @@
-// 手順入力の専用キーパッド。文字キーは記号を入れ、操作キーは 削除 / 全消去 / キーボード (普通のキーボードに切り替え)。
+// 手順入力の専用キーパッド。文字キーは記号を入れ、操作キーは 削除 / 全消去 / キーボード (普通のキーボードに切り替え) /
+// 完了 (欄を離れて閉じる。ほかの場所を押しても閉じるが、iOSのキーボードと同じく終え方を見せる)。
 // 空白のキーは置かない (文字キーが空白を自動で補い、解析器も空白を読み飛ばす)
 export const CHARACTER_KEYS = [
   'R',
@@ -20,7 +21,7 @@ export const CHARACTER_KEYS = [
   ')',
 ] as const;
 export type CharacterKey = (typeof CHARACTER_KEYS)[number];
-export const ACTION_KEYS = ['backspace', 'clear', 'keyboard'] as const;
+export const ACTION_KEYS = ['backspace', 'clear', 'keyboard', 'done'] as const;
 export type ActionKey = (typeof ACTION_KEYS)[number];
 export type KeypadKey = CharacterKey | ActionKey;
 

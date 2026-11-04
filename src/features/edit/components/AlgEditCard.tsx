@@ -8,6 +8,7 @@ import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
 import { algErrorOf, type EditCard } from '../lib/edit-state';
+import { KEYPAD_SPACE_CLASS } from './AlgKeypad';
 
 type AlgEditCardProps = {
   index: number;
@@ -80,6 +81,9 @@ export function AlgEditCard({
         className={cn(
           INPUT_CLASS,
           'h-11 px-3 font-mono text-alg-compact',
+          // 焦点が入ると画面が欄を見える位置に寄せる。キーパッドで打つ間はその高さを下の余白として渡し、
+          // キーパッドの裏に入らない位置まで寄せる
+          usesKeypad && KEYPAD_SPACE_CLASS.scrollMargin,
           shownError !== null && 'border-danger hover:border-danger-hover',
         )}
         onChange={(event) => {
