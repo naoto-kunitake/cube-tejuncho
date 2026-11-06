@@ -11,9 +11,16 @@ describe('insertionFor', () => {
     expect(typed('R', 1, 'U')).toEqual({ value: 'R U', caret: 3 });
   });
 
-  it("' と 2 は前の手にくっつく", () => {
+  it("' と 2 と w は前の手にくっつく", () => {
     expect(typed('R', 1, "'")).toEqual({ value: "R'", caret: 2 });
     expect(typed('R', 1, '2')).toEqual({ value: 'R2', caret: 2 });
+    expect(typed('R', 1, 'w')).toEqual({ value: 'Rw', caret: 2 });
+  });
+
+  it('x y z は持ち替えで独立した手なので空白を補う', () => {
+    expect(typed('R', 1, 'x')).toEqual({ value: 'R x', caret: 3 });
+    expect(typed('R', 1, 'y')).toEqual({ value: 'R y', caret: 3 });
+    expect(typed('R', 1, 'z')).toEqual({ value: 'R z', caret: 3 });
   });
 
   it('先頭と空白・括弧の後には空白を補わない', () => {

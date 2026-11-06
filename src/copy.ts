@@ -8,8 +8,6 @@ import type { OllShape } from '@/data/presets/oll';
 import type { PllShape } from '@/data/presets/pll';
 import type { WideStyle } from '@/lib/alg/format';
 import type { AlgError } from '@/lib/alg/parse';
-import type { SideName, SideRun } from '@/lib/figure/describe';
-import type { F2lDescription, WhiteFacing } from '@/lib/figure/describe-f2l';
 import type { FrontColor, TopColor } from '@/lib/figure/view';
 import type { Appearance } from '@/lib/theme/color';
 import type { ThemePresetId } from '@/lib/theme/palette';
@@ -67,13 +65,8 @@ type Copy = {
     deletePatternAction: string;
     deletedPattern: (name: string) => string;
     recognition: string;
-    recognitionHint: (runs: string[]) => string;
-    sideRun: (side: SideName, run: SideRun) => string;
-    noRuns: string;
-    f2lRecognition: (description: F2lDescription, cross: string, shapeLabel: string) => string;
     mainAlg: string;
     altAlg: (number: number) => string;
-    algPlaceholder: string;
     makeMain: string;
     deleteAlg: string;
     addAlg: string;
@@ -245,10 +238,6 @@ type Copy = {
   };
 };
 
-const SIDE_NAMES: Record<SideName, string> = { back: '後ろ', front: '前', left: '左', right: '右' };
-const SIDE_RUNS: Record<SideRun, string> = { bar: '3連', headlights: 'ヘッドライト', pair: '2連' };
-const WHITE_FACING_LABEL: Record<WhiteFacing, string> = { down: '下', front: '前', right: '右' };
-
 export const copy = {
   list: {
     title: 'キューブ手順帳',
@@ -328,24 +317,8 @@ export const copy = {
     deletePatternAction: '削除',
     deletedPattern: (name) => `「${name}」を削除しました`,
     recognition: '判断',
-    recognitionHint: (runs) => `例: ${runs.join('、')}`,
-    sideRun: (side, run) => `${SIDE_NAMES[side]}に${SIDE_RUNS[run]}`,
-    noRuns: '揃った塊なし',
-    f2lRecognition: (description, cross, shapeLabel) => {
-      switch (description.kind) {
-        case 'bothUp':
-          return shapeLabel;
-        case 'cornerInSlot':
-          return `コーナーがスロット、${cross}が${WHITE_FACING_LABEL[description.whiteFacing]}、エッジは上面`;
-        case 'edgeInSlot':
-          return `エッジがスロット、コーナーの${cross}が${description.isWhiteUp ? '上' : '横'}`;
-        case 'bothInSlot':
-          return `両方スロット、コーナーの${cross}が${WHITE_FACING_LABEL[description.whiteFacing]}`;
-      }
-    },
     mainAlg: 'メイン手順',
     altAlg: (number) => `手順 ${number}`,
-    algPlaceholder: "例: R U R' U'",
     makeMain: 'メインにする',
     deleteAlg: '削除',
     addAlg: '手順を追加',

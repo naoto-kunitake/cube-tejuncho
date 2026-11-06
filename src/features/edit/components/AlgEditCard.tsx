@@ -17,6 +17,8 @@ type AlgEditCardProps = {
   inputRef: (element: HTMLInputElement | null) => void;
   // 専用キーパッドで入力する間は端末のキーボードを出さない
   usesKeypad: boolean;
+  // 保存を押したあとは、欄を離れていなくても誤りを示す
+  hasTriedToSave: boolean;
   onChange: (card: EditCard) => void;
   onFocus: () => void;
   // 欄を離れたときに呼ぶ。falseを返したら離れていない扱い (キーボードの切り替えで焦点を入れ直す間)
@@ -31,6 +33,7 @@ export function AlgEditCard({
   card,
   inputRef,
   usesKeypad,
+  hasTriedToSave,
   onChange,
   onFocus,
   onBlur,
@@ -42,7 +45,7 @@ export function AlgEditCard({
   const error = algErrorOf(card.text);
   // 検証は欄を離れたときと保存時 (打鍵ごとに赤くしない)。保存済みの手順が読めないときは開いた時点で示す。直した瞬間に消す
   const [hasLeft, setHasLeft] = useState(error !== null);
-  const shownError = hasLeft ? error : null;
+  const shownError = hasLeft || hasTriedToSave ? error : null;
   const algId = `alg-${index}`;
   const errorId = `alg-error-${index}`;
 
@@ -72,7 +75,6 @@ export function AlgEditCard({
         ref={inputRef}
         id={algId}
         value={card.text}
-        placeholder={copy.edit.algPlaceholder}
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"

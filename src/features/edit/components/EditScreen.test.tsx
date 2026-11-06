@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -71,14 +71,9 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('EditScreen', () => {
-  it('F2L の編集画面は 3 面の図と判断のヒントを出す', () => {
+  it('F2L の編集画面は 3 面の図を出す', () => {
     renderEdit('/p/f2l-1/edit');
     expect(screen.getByRole('img', { name: 'F2L 1' })).toBeInTheDocument();
-    const shapeLabel = copy.list.f2lShapes.bothUpSameColor();
-    expect(screen.getByLabelText(copy.edit.recognition)).toHaveAttribute(
-      'placeholder',
-      copy.edit.recognitionHint([shapeLabel]),
-    );
   });
 
   it('PLL の編集では全色の図と手がかりの図を2枚並べる', () => {
@@ -111,7 +106,7 @@ describe('EditScreen', () => {
     expect(screen.getByText(JSON.stringify({ from: '/p/pll-ua/edit' }))).toBeInTheDocument();
   });
 
-  it('読めない記法は欄を離れたときに赤く示し、保存できない', async () => {
+  it('読めない記法は欄を離れたときに赤く示し、直すと消える', async () => {
     const user = userEvent.setup();
     renderEdit();
     const input = screen.getByLabelText(copy.edit.mainAlg);
@@ -120,10 +115,24 @@ describe('EditScreen', () => {
     await user.tab();
     expect(screen.getByText(/読めない記号/)).toBeInTheDocument();
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByRole('button', { name: copy.edit.save })).toBeDisabled();
     await user.type(input, '{backspace}');
     expect(screen.queryByText(/読めない記号/)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: copy.edit.save })).toBeEnabled();
+  });
+
+  it('読めない記法のまま保存を押すと、保存せずに赤く示してその欄に焦点を移す', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    await user.click(screen.getByRole('button', { name: copy.edit.addAlg }));
+    const altInput = screen.getByLabelText(copy.edit.altAlg(2));
+    await user.type(altInput, 'R Q');
+    // 欄を離れずに保存 (ボタンは焦点を奪わない)
+    const save = screen.getByRole('button', { name: copy.edit.save });
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    expect(screen.getByText(/読めない記号/)).toBeInTheDocument();
+    expect(altInput).toHaveFocus();
+    expect(registrationOf('pll-ua')).toBeUndefined();
+    expect(screen.queryByText('detail')).not.toBeInTheDocument();
   });
 
   it('変更があるときの × は確認し、破棄で詳細に戻る', async () => {
@@ -206,7 +215,6 @@ describe('EditScreen', () => {
     await user.tab();
     await user.click(screen.getByRole('button', { name: copy.edit.makeMain }));
     expect(screen.getByLabelText(copy.edit.mainAlg)).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByRole('button', { name: copy.edit.save })).toBeDisabled();
   });
 
   it('全部消して保存すると登録が消え、詳細で元に戻せる', async () => {
@@ -342,10 +350,12 @@ describe('EditScreen', () => {
     expect(screen.getByRole('heading', { level: 1, name: copy.edit.newTitle })).toBeInTheDocument();
     expect(screen.getByLabelText(copy.edit.category)).toHaveValue('c1');
     const save = screen.getByRole('button', { name: copy.edit.save });
-    expect(save).toBeDisabled();
+    await user.click(save);
+    expect(screen.getByText(copy.edit.nameRequired)).toBeInTheDocument();
+    expect(screen.getByLabelText(copy.edit.name)).toHaveFocus();
+    expect(useDocumentStore.getState().document.patterns).toHaveLength(1);
     await user.type(screen.getByLabelText(copy.edit.name), 'Anti-Sune');
     await user.type(screen.getByLabelText(copy.edit.mainAlg), "R U2 R' U' R U' R'");
-    expect(save).toBeEnabled();
     await user.click(save);
     const { patterns, registrations } = useDocumentStore.getState().document;
     expect(patterns).toHaveLength(2);
@@ -373,7 +383,6 @@ describe('EditScreen', () => {
     await user.tab();
     expect(screen.getByText(copy.edit.nameRequired)).toBeInTheDocument();
     expect(name).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByRole('button', { name: copy.edit.save })).toBeDisabled();
     await user.type(name, 'Sune');
     expect(screen.queryByText(copy.edit.nameRequired)).not.toBeInTheDocument();
   });
