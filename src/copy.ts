@@ -67,7 +67,6 @@ type Copy = {
     recognition: string;
     mainAlg: string;
     altAlg: (number: number) => string;
-    algPlaceholder: string;
     makeMain: string;
     deleteAlg: string;
     addAlg: string;
@@ -320,7 +319,6 @@ export const copy = {
     recognition: '判断',
     mainAlg: 'メイン手順',
     altAlg: (number) => `手順 ${number}`,
-    algPlaceholder: "例: R U R' U'",
     makeMain: 'メインにする',
     deleteAlg: '削除',
     addAlg: '手順を追加',

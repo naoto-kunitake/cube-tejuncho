@@ -75,7 +75,6 @@ export function AlgEditCard({
         ref={inputRef}
         id={algId}
         value={card.text}
-        placeholder={copy.edit.algPlaceholder}
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"
