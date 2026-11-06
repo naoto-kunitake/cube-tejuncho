@@ -27,10 +27,13 @@ export type KeypadKey = CharacterKey | ActionKey;
 
 export type TextEdit = { start: number; end: number; insert: string };
 
-// 記号を入れるとき、直前が空白でも括弧でもなければ空白を補う (Rの後にUを押せばR Uになる)。'と2と ) は前の手にくっつく
+// 前の手にくっつくキー (wは2層回しの接尾辞。x y zは持ち替えで独立した手なので入れない)
+const ATTACHED_KEYS: ReadonlySet<CharacterKey> = new Set(["'", '2', 'w', ')']);
+
+// 記号を入れるとき、直前が空白でも括弧でもなければ空白を補う (Rの後にUを押せばR Uになる)。くっつくキーは補わない
 export function insertionFor(value: string, start: number, end: number, key: CharacterKey): TextEdit {
   const before = value.slice(0, start);
-  const needsSpace = /^[A-Za-z(]$/.test(key) && before !== '' && !/[\s(]$/.test(before);
+  const needsSpace = !ATTACHED_KEYS.has(key) && before !== '' && !/[\s(]$/.test(before);
   return { start, end, insert: needsSpace ? ` ${key}` : key };
 }
 
