@@ -82,8 +82,10 @@ export function algErrorOf(text: string): AlgError | null {
   return result.error;
 }
 
-export function hasInvalidCard(form: EditFormState): boolean {
-  return form.cards.some((card) => algErrorOf(card.text) !== null);
+// 読めない手順のカードの位置。なければnull (保存を止め、その欄に焦点を移すのに使う)
+export function firstInvalidCardIndex(form: EditFormState): number | null {
+  const index = form.cards.findIndex((card) => algErrorOf(card.text) !== null);
+  return index === -1 ? null : index;
 }
 
 // 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあればnull (もう足せる物がない)

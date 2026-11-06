@@ -4,9 +4,9 @@ import {
   algErrorOf,
   EMPTY_CARD,
   entriesOf,
+  firstInvalidCardIndex,
   formFrom,
   formSnapshot,
-  hasInvalidCard,
   insertCard,
   moveCardToFront,
   newCard,
@@ -100,9 +100,17 @@ describe('algErrorOf', () => {
 
   it('読めない記号は誤り', () => {
     expect(algErrorOf('R Q')?.kind).toBe('unknownSymbol');
-    expect(
-      hasInvalidCard({ ...FIELDS, recognition: '', cards: [CARD_A, newCard({ ...EMPTY_CARD, text: '(R' })] }),
-    ).toBe(true);
+  });
+});
+
+describe('firstInvalidCardIndex', () => {
+  it('読めない手順のカードの位置を返す', () => {
+    const form = { ...FIELDS, recognition: '', cards: [CARD_A, newCard({ ...EMPTY_CARD, text: '(R' })] };
+    expect(firstInvalidCardIndex(form)).toBe(1);
+  });
+
+  it('読めない手順のカードがなければnull', () => {
+    expect(firstInvalidCardIndex({ ...FIELDS, recognition: '', cards: [CARD_A] })).toBeNull();
   });
 });
 

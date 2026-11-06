@@ -24,9 +24,9 @@ import { useOwnToast } from '../hooks/useOwnToast';
 import {
   type EditCard,
   EMPTY_CARD,
+  firstInvalidCardIndex,
   formFrom,
   formFromEntries,
-  hasInvalidCard,
   insertCard,
   isCardEmpty,
   moveCardToFront,
@@ -42,7 +42,7 @@ import { AlgKeypad, KEYPAD_SPACE_CLASS } from './AlgKeypad';
 // 新規の下書きはパターンのidがまだないので固定の鍵
 const NEW_DRAFT_ID = 'new';
 
-export type FocusTarget = { kind: 'recognition' } | { kind: 'alg'; index: number };
+export type FocusTarget = { kind: 'recognition' } | { kind: 'alg'; index: number } | { kind: 'name' };
 // 編集の対象: プリセット (名前とカテゴリは固定) / 自作 (名前とカテゴリも編集、削除あり) / 新規の自作
 export type EditTarget = PatternRef | { kind: 'new'; categoryId: string };
 
@@ -137,14 +137,16 @@ export function EditForm({
   // 名前の検証は欄を離れたときから (新規は空で始まるので、開いた直後には赤くしない)。
   // 保存済みの自作が名前なしで開かれたときは、読めない手順と同じく開いた時点で示す
   const [hasLeftName, setHasLeftName] = useState(target.kind === 'custom' && target.pattern.name.trim() === '');
+  // 保存を押したら、離れていない欄の誤りも全部示す (無効なボタンは理由を伝えられず、欄に焦点があるままだと離れたことにもならない)
+  const [hasTriedToSave, setHasTriedToSave] = useState(false);
   const [dialog, setDialog] = useState<EditDialog | null>(null);
   const inputsRef = useRef(new Map<number, HTMLInputElement>());
   const keypad = useAlgKeypad(inputsRef);
   const recognitionRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   // 自作は名前が必須
   const isNameMissing = isCustom && form.name.trim() === '';
-  const hasNameError = hasLeftName && isNameMissing;
-  const canSave = !hasInvalidCard(form) && !isNameMissing;
+  const hasNameError = (hasLeftName || hasTriedToSave) && isNameMissing;
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
   const recognitionHint = target.kind === 'preset' ? recognitionHintOf(target.preset, settings.topColor) : undefined;
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
@@ -155,9 +157,15 @@ export function EditForm({
     if (focusTarget === null) {
       return;
     }
-    const element =
-      focusTarget.kind === 'recognition' ? recognitionRef.current : inputsRef.current.get(focusTarget.index);
-    element?.focus();
+    if (focusTarget.kind === 'recognition') {
+      recognitionRef.current?.focus();
+      return;
+    }
+    if (focusTarget.kind === 'name') {
+      nameRef.current?.focus();
+      return;
+    }
+    inputsRef.current.get(focusTarget.index)?.focus();
   }, [focusTarget]);
 
   // 焦点が入った時点ではまだキーパッドがなく、下に寄せる余白も足されていないので、
@@ -205,6 +213,19 @@ export function EditForm({
   };
 
   const save = () => {
+    // 最初の誤りの欄に焦点を移す。焦点はaria-invalidとaria-describedbyが反映されたあとに動かす (effectで) ので、
+    // 誤りの文言が欄の説明として読み上げられる
+    if (isNameMissing) {
+      setHasTriedToSave(true);
+      setFocusTarget({ kind: 'name' });
+      return;
+    }
+    const invalidIndex = firstInvalidCardIndex(form);
+    if (invalidIndex !== null) {
+      setHasTriedToSave(true);
+      setFocusTarget({ kind: 'alg', index: invalidIndex });
+      return;
+    }
     const data = registrationDataFrom(form);
     const patternFields = { name: form.name.trim(), categoryId: form.categoryId };
     if (target.kind === 'new') {
@@ -272,7 +293,7 @@ export function EditForm({
           </IconButton>
         }
         trailing={
-          <Button variant="primary" className="mr-1.75 px-3.5" disabled={!canSave} onClick={save}>
+          <Button variant="primary" className="mr-1.75 px-3.5" onClick={save}>
             {copy.edit.save}
           </Button>
         }
@@ -285,6 +306,7 @@ export function EditForm({
           <>
             <Field id="pattern-name" label={copy.edit.name}>
               <input
+                ref={nameRef}
                 id="pattern-name"
                 value={form.name}
                 autoComplete="off"
@@ -347,6 +369,7 @@ export function EditForm({
                 }
               }}
               usesKeypad={keypad.usesKeypad}
+              hasTriedToSave={hasTriedToSave}
               onChange={(next) => {
                 updateCard(index, next);
               }}
