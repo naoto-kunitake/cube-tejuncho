@@ -71,14 +71,9 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('EditScreen', () => {
-  it('F2L の編集画面は 3 面の図と判断のヒントを出す', () => {
+  it('F2L の編集画面は 3 面の図を出す', () => {
     renderEdit('/p/f2l-1/edit');
     expect(screen.getByRole('img', { name: 'F2L 1' })).toBeInTheDocument();
-    const shapeLabel = copy.list.f2lShapes.bothUpSameColor();
-    expect(screen.getByLabelText(copy.edit.recognition)).toHaveAttribute(
-      'placeholder',
-      copy.edit.recognitionHint([shapeLabel]),
-    );
   });
 
   it('PLL の編集では全色の図と手がかりの図を2枚並べる', () => {

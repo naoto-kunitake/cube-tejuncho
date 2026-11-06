@@ -35,7 +35,6 @@ import {
   removeCard,
   standardAlgToAdd,
 } from '../lib/edit-state';
-import { recognitionHintOf } from '../lib/recognition-hint';
 import { AlgEditCard } from './AlgEditCard';
 import { AlgKeypad, KEYPAD_SPACE_CLASS } from './AlgKeypad';
 
@@ -148,7 +147,6 @@ export function EditForm({
   const isNameMissing = isCustom && form.name.trim() === '';
   const hasNameError = (hasLeftName || hasTriedToSave) && isNameMissing;
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
-  const recognitionHint = target.kind === 'preset' ? recognitionHintOf(target.preset, settings.topColor) : undefined;
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
   // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
@@ -349,7 +347,6 @@ export function EditForm({
             ref={recognitionRef}
             id="recognition"
             value={form.recognition}
-            placeholder={recognitionHint}
             onChange={(event) => {
               setForm((current) => ({ ...current, recognition: event.target.value }));
             }}
