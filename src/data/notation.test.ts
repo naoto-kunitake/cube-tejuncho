@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { notationSectionsOf } from './notation';
 
 describe('notationSectionsOf', () => {
-  it('6 区画 21 行になる', () => {
+  it('6 区画 22 行になる', () => {
     const sections = notationSectionsOf('r');
     expect(sections.map((section) => section.id)).toEqual(['face', 'direction', 'slice', 'wide', 'rotation', 'group']);
-    expect(sections.flatMap((section) => section.rows)).toHaveLength(21);
+    expect(sections.flatMap((section) => section.rows)).toHaveLength(22);
   });
 
   it('括弧の行だけ再生する手がない', () => {
@@ -23,9 +23,9 @@ describe('notationSectionsOf', () => {
     expect(wideOf('Rw')).toEqual(['Rw', 'Lw', 'Uw', 'Dw', 'Fw', 'Bw']);
   });
 
-  it("向きと回数の行は R' と R2 で、図は R と同じ層", () => {
+  it("向きと回数の行は R' と R2 と R3 で、図は R と同じ層", () => {
     const rows = notationSectionsOf('r').find((section) => section.id === 'direction')?.rows ?? [];
-    expect(rows.map((row) => row.symbol)).toEqual(["R'", 'R2']);
-    expect(rows.map((row) => row.move?.base)).toEqual(['R', 'R']);
+    expect(rows.map((row) => row.symbol)).toEqual(["R'", 'R2', 'R3']);
+    expect(rows.map((row) => row.move?.base)).toEqual(['R', 'R', 'R']);
   });
 });

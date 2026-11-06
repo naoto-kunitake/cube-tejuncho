@@ -519,6 +519,7 @@ export const copy = {
       B: { description: '後面' },
       prime: { description: '反時計回りに90°' },
       double: { description: '180°' },
+      triple: { description: '時計回りに270°', sub: "R'と同じ" },
       M: { description: '左右の間', sub: 'Lと同じ向き' },
       E: { description: '上下の間', sub: 'Dと同じ向き' },
       S: { description: '前後の間', sub: 'Fと同じ向き' },

@@ -68,7 +68,7 @@ function NotationRowItem({ row, onPlay }: NotationRowProps) {
   );
 }
 
-// 回転記号の説明。WCAの記法の構成 (面の回転 / 向きと回数 / 中層 / 2層回し / 持ち替え / 括弧) で21行。
+// 回転記号の説明。WCAの記法の構成 (面の回転 / 向きと回数 / 中層 / 2層回し / 持ち替え / 括弧) で22行。
 // 再生は既存の再生シートで1手だけ動かす
 export function NotationScreen() {
   const location = useLocation();
