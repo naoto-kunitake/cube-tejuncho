@@ -65,6 +65,16 @@
   }
 }
 
+/* 画面の上に固定したトップバーの高さぶん、焦点の移動やscrollIntoViewで寄せた要素をバーの下に止める。
+   高さはTopBar (min-h-13、PCはmin-h-16) と上の余白 (pt-bar) から決まる */
+@utility scroll-pt-bar {
+  scroll-padding-top: max(--spacing(13), calc(--spacing(11) + env(safe-area-inset-top)));
+
+  @media (pointer: fine) {
+    scroll-padding-top: max(--spacing(16), calc(--spacing(11) + env(safe-area-inset-top)));
+  }
+}
+
 /* ホーム画面から開いたときの下の安全領域 (ホームインジケータ)。画面の底に貼り付く部品 (シート、キーパッド、知らせ) に足す。
    上 (pt-bar) と同じく足し算ではなく大きい方を採る (34pxの安全領域に既定の余白を足すと空きすぎる) */
 @utility pb-safe-* {

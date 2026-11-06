@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -8,9 +8,16 @@ import { IconLink } from './IconButton';
 
 // 画面の題と操作を1行に。高さと上の余白は端末で変える (スマホ・タブレットは52 / 4、PCは64 / 16。pt-barを参照)。
 // 下8 (見出し → 内容)。右端は9で、36pxの丸ボタンの中の22pxの記号が端から16に揃う
-function TopBar({ children }: { children: ReactNode }) {
+function TopBar({ isSticky, children }: { isSticky: boolean; children: ReactNode }) {
   return (
-    <div className="flex min-h-13 items-center gap-1.5 pt-bar pr-2.25 pb-2 pl-4 pointer-fine:min-h-16">{children}</div>
+    <div
+      className={cn(
+        'flex min-h-13 items-center gap-1.5 pt-bar pr-2.25 pb-2 pl-4 pointer-fine:min-h-16',
+        isSticky && 'sticky top-0 z-10 bg-ground',
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -57,11 +64,23 @@ type ScreenHeaderProps = {
   trailing?: ReactNode;
   // 一覧の題だけは折り返して全部見せる (ほかはパターンの名前なので省略する)
   canWrapTitle?: boolean;
+  // 画面の上に固定する。編集だけ (×と保存を常に手元に置く。参照が主の画面は縦の空きを図に使う)
+  isSticky?: boolean;
 };
 
-export function ScreenHeader({ title, leading, trailing, canWrapTitle = false }: ScreenHeaderProps) {
+export function ScreenHeader({ title, leading, trailing, canWrapTitle = false, isSticky = false }: ScreenHeaderProps) {
+  // 固定している間は、焦点の移動やscrollIntoViewで寄せた要素がバーの裏に入らないよう、スクロールの器 (html) に上の余白を持たせる
+  useEffect(() => {
+    if (!isSticky) {
+      return;
+    }
+    document.documentElement.classList.add('scroll-pt-bar');
+    return () => {
+      document.documentElement.classList.remove('scroll-pt-bar');
+    };
+  }, [isSticky]);
   return (
-    <TopBar>
+    <TopBar isSticky={isSticky}>
       {leading === undefined ? (
         <Title title={title} canWrap={canWrapTitle} />
       ) : (

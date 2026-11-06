@@ -275,6 +275,7 @@ export function EditForm({
     <>
       <ScreenHeader
         title={title}
+        isSticky
         leading={
           <IconButton
             label={copy.a11y.closeEdit}
