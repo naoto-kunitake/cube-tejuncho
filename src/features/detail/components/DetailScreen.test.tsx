@@ -40,6 +40,17 @@ describe('DetailScreen', () => {
     expect(screen.getByRole('heading', { name: copy.a11y.recognition })).toBeInTheDocument();
   });
 
+  it('揃わない手順のカードだけに知らせが出る', async () => {
+    useDocumentStore.getState().saveRegistration('pll-ua', {
+      recognition: '',
+      mainAlg: { text: "M2 U M U2 M' U M2", mnemonic: '', fingering: '' },
+      altAlgs: [{ text: "R U R' U' R' F R2 U' R' U' R U R' F'", mnemonic: '', fingering: '' }],
+    });
+    renderDetail('/p/pll-ua');
+    await screen.findByText(copy.detail.algMismatch);
+    expect(screen.getAllByText(copy.detail.algMismatch)).toHaveLength(1);
+  });
+
   it('自作のメイン手順は2層回しの表記の設定で出る', () => {
     const document = createEmptyDocument();
     document.categories = [{ id: 'c1', name: 'COLL' }];

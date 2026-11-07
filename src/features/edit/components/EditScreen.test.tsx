@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -117,6 +117,33 @@ describe('EditScreen', () => {
     expect(input).toHaveAttribute('aria-invalid', 'true');
     await user.type(input, '{backspace}');
     expect(screen.queryByText(/読めない記号/)).not.toBeInTheDocument();
+  });
+
+  it('揃わない手順は欄を離れると知らせるが、保存はできる', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.type(input, "R U R' U' R' F R2 U' R' U' R U R' F'");
+    await user.tab();
+    expect(await screen.findByText(copy.detail.algMismatch)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: copy.edit.save }));
+    expect(registrationOf('pll-ua')).toMatchObject({ mainAlg: { text: "R U R' U' R' F R2 U' R' U' R U R' F'" } });
+  });
+
+  it('揃う手順に直すと知らせが消える', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    // 先に知らせを出してから直す (最初から出ていない状態では、判定を待ったことにならない)
+    await user.type(input, "R U R' U' R' F R2 U' R' U' R U R' F'");
+    await user.tab();
+    await screen.findByText(copy.detail.algMismatch);
+    await user.clear(input);
+    await user.type(input, "R U' R U R U R U' R' U' R2");
+    await user.tab();
+    await waitFor(() => {
+      expect(screen.queryByText(copy.detail.algMismatch)).not.toBeInTheDocument();
+    });
   });
 
   it('読めない記法のまま保存を押すと、保存せずに赤く示してその欄に焦点を移す', async () => {

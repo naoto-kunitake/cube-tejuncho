@@ -3,8 +3,10 @@ import { Link, useLocation } from 'react-router';
 
 import { algLabelOf } from '@/components/alg-label';
 import { Button } from '@/components/Button';
+import { CaseMismatchNotice } from '@/components/CaseMismatchNotice';
 import { Field, INPUT_CLASS, TextArea } from '@/components/Field';
 import { SECTION_LABEL_CLASS } from '@/components/Section';
+import { type CaseCheck, useCaseVerdict } from '@/components/useCaseVerdict';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +21,8 @@ type AlgEditCardProps = {
   usesKeypad: boolean;
   // 保存を押したあとは、欄を離れていなくても誤りを示す
   hasTriedToSave: boolean;
+  // 手順がパターンを揃えるかの判定に使う。自作はundefined (判定しない)
+  caseCheck: CaseCheck | undefined;
   onChange: (card: EditCard) => void;
   onFocus: () => void;
   // 欄を離れたときに呼ぶ。falseを返したら離れていない扱い (キーボードの切り替えで焦点を入れ直す間)
@@ -34,6 +38,7 @@ export function AlgEditCard({
   inputRef,
   usesKeypad,
   hasTriedToSave,
+  caseCheck,
   onChange,
   onFocus,
   onBlur,
@@ -46,8 +51,13 @@ export function AlgEditCard({
   // 検証は欄を離れたときと保存時 (打鍵ごとに赤くしない)。保存済みの手順が読めないときは開いた時点で示す。直した瞬間に消す
   const [hasLeft, setHasLeft] = useState(error !== null);
   const shownError = hasLeft || hasTriedToSave ? error : null;
+  // 揃わない知らせも誤りと同じ時機に出す。読めない手順は誤りの方を出す (判定はnull)
+  const verdict = useCaseVerdict(card.text, caseCheck);
+  const showsMismatch = (hasLeft || hasTriedToSave) && verdict === 'fails';
   const algId = `alg-${index}`;
   const errorId = `alg-error-${index}`;
+  const mismatchId = `alg-mismatch-${index}`;
+  const describedBy = shownError !== null ? errorId : showsMismatch ? mismatchId : undefined;
 
   return (
     <div
@@ -80,7 +90,7 @@ export function AlgEditCard({
         autoCorrect="off"
         inputMode={usesKeypad ? 'none' : undefined}
         aria-invalid={shownError !== null}
-        aria-describedby={shownError === null ? undefined : errorId}
+        aria-describedby={describedBy}
         className={cn(
           INPUT_CLASS,
           'h-11 px-3 font-mono text-alg-compact',
@@ -99,6 +109,7 @@ export function AlgEditCard({
           }
         }}
       />
+      {showsMismatch && <CaseMismatchNotice id={mismatchId} message={copy.detail.algMismatch} className="-mt-1.5" />}
       {shownError !== null && (
         <p id={errorId} className="-mt-1.5 text-label leading-normal text-danger">
           {copy.edit.algError(shownError)}{' '}

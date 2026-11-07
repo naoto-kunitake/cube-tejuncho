@@ -52,6 +52,7 @@ type Copy = {
     registerAlg: string;
     mnemonic: string;
     fingering: string;
+    algMismatch: string;
   };
   edit: {
     title: (name: string) => string;
@@ -304,6 +305,7 @@ export const copy = {
     registerAlg: '手順を登録',
     mnemonic: '覚え方',
     fingering: '指使い',
+    algMismatch: 'この手順を回しても揃いません',
   },
   edit: {
     title: (name) => `${name}を編集`,

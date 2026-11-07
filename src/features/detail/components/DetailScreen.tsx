@@ -8,6 +8,7 @@ import { IconButton, IconLink } from '@/components/IconButton';
 import { PlayerSheet } from '@/components/player/PlayerSheet';
 import { BackLink, Screen, ScreenBody, ScreenHeader } from '@/components/Screen';
 import { Section } from '@/components/Section';
+import { type CaseCheck, caseCheckOf } from '@/components/useCaseVerdict';
 import { copy } from '@/copy';
 import type { AlgEntry, CustomPattern, Registration, Settings } from '@/data/document';
 import { findRegistration } from '@/data/document';
@@ -51,11 +52,12 @@ type AltAlgsSectionProps = {
   altAlgs: readonly AlgEntry[];
   wideStyle: Settings['wideStyle'];
   editPath: string;
+  caseCheck: CaseCheck | undefined;
   onPlay: (algText: string) => void;
 };
 
 // ほかの手順。1つもなければ見出しも出さない。通し番号はメイン手順の次から
-function AltAlgsSection({ altAlgs, wideStyle, editPath, onPlay }: AltAlgsSectionProps) {
+function AltAlgsSection({ altAlgs, wideStyle, editPath, caseCheck, onPlay }: AltAlgsSectionProps) {
   if (altAlgs.length === 0) {
     return null;
   }
@@ -68,6 +70,7 @@ function AltAlgsSection({ altAlgs, wideStyle, editPath, onPlay }: AltAlgsSection
           wideStyle={wideStyle}
           index={index + 1}
           editPath={editPath}
+          caseCheck={caseCheck}
           onPlay={() => {
             onPlay(alg.text);
           }}
@@ -87,6 +90,7 @@ type PresetDetailProps = {
 function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailProps) {
   const addRegistration = useDocumentStore((state) => state.addRegistration);
   const editPath = `/p/${preset.id}/edit`;
+  const caseCheck = caseCheckOf(preset);
 
   return (
     <ScreenBody>
@@ -114,6 +118,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
             wideStyle={settings.wideStyle}
             index={0}
             editPath={editPath}
+            caseCheck={caseCheck}
             onPlay={() => {
               onPlay(registration.mainAlg.text);
             }}
@@ -124,6 +129,7 @@ function PresetDetail({ preset, registration, settings, onPlay }: PresetDetailPr
         altAlgs={registration?.altAlgs ?? []}
         wideStyle={settings.wideStyle}
         editPath={editPath}
+        caseCheck={caseCheck}
         onPlay={onPlay}
       />
     </ScreenBody>
@@ -163,6 +169,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
             wideStyle={settings.wideStyle}
             index={0}
             editPath={editPath}
+            caseCheck={undefined}
             onPlay={() => {
               onPlay(mainAlg);
             }}
@@ -173,6 +180,7 @@ function CustomDetail({ pattern, registration, settings, onPlay }: CustomDetailP
         altAlgs={registration?.altAlgs ?? []}
         wideStyle={settings.wideStyle}
         editPath={editPath}
+        caseCheck={undefined}
         onPlay={onPlay}
       />
     </ScreenBody>
