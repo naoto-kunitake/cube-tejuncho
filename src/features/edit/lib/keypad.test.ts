@@ -11,9 +11,10 @@ describe('insertionFor', () => {
     expect(typed('R', 1, 'U')).toEqual({ value: 'R U', caret: 3 });
   });
 
-  it("' と 2 と w は前の手にくっつく", () => {
+  it("' と 2 と 3 と w は前の手にくっつく", () => {
     expect(typed('R', 1, "'")).toEqual({ value: "R'", caret: 2 });
     expect(typed('R', 1, '2')).toEqual({ value: 'R2', caret: 2 });
+    expect(typed('R', 1, '3')).toEqual({ value: 'R3', caret: 2 });
     expect(typed('R', 1, 'w')).toEqual({ value: 'Rw', caret: 2 });
   });
 

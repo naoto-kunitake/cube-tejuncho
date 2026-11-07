@@ -13,11 +13,19 @@ type AlgKeypadProps = {
 export const KEYPAD_SPACE_CLASS = { padding: 'pb-60', scrollMargin: 'scroll-mb-60' } as const;
 
 // キーの地色はトークン (文字キーと操作キーでライトとダークの段が違う。tokens.cssを参照)。
-// 削除は文字の段の右端 (iOSのキーボードと同じ位置)、全消去・キーボード・完了は最下段を3等分
+// 文字キーは6個ずつ3段 (12列の格子で1つ2列ぶん)。操作キーは最下段に4つで、幅は文言の長さに合わせる
+// (320幅で4等分すると1つ66pxで「キーボード」の70pxが入らない)
 const KEY_CLASS =
   'h-11 rounded-sm border border-line font-mono text-alg-compact font-semibold text-ink pressable active:bg-press';
 const CHARACTER_KEY_CLASS = cn(KEY_CLASS, 'bg-key-character hover:bg-key-character-hover');
 const ACTION_KEY_CLASS = cn(KEY_CLASS, 'bg-key-action font-sans text-small font-medium hover:bg-key-action-hover');
+
+const ACTION_SPAN_CLASS: Record<ActionKey, string> = {
+  backspace: 'col-span-2',
+  clear: 'col-span-3',
+  keyboard: 'col-span-4',
+  done: 'col-span-3',
+};
 
 const ACTION_LABELS: Record<ActionKey, string> = {
   backspace: copy.keypad.backspace,
@@ -39,14 +47,14 @@ export function AlgKeypad({ onKey }: AlgKeypadProps) {
       aria-label={copy.a11y.keypad}
       className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface-2 px-4 pt-2 pb-safe-4 shadow-4 md:inset-x-auto md:left-1/2 md:w-full md:max-w-140 md:-translate-x-1/2"
     >
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-12 gap-2">
         {CHARACTER_KEYS.map((key) => (
           <button
             key={key}
             type="button"
             tabIndex={-1}
             onMouseDown={keepFocus}
-            className={CHARACTER_KEY_CLASS}
+            className={cn(CHARACTER_KEY_CLASS, 'col-span-2')}
             onClick={() => {
               onKey(key);
             }}
@@ -60,7 +68,7 @@ export function AlgKeypad({ onKey }: AlgKeypadProps) {
             type="button"
             tabIndex={-1}
             onMouseDown={keepFocus}
-            className={cn(ACTION_KEY_CLASS, key === 'backspace' ? 'col-span-1' : 'col-span-2')}
+            className={cn(ACTION_KEY_CLASS, ACTION_SPAN_CLASS[key])}
             onClick={() => {
               onKey(key);
             }}

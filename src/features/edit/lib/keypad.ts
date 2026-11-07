@@ -1,6 +1,7 @@
 // 手順入力の専用キーパッド。文字キーは記号を入れ、操作キーは 削除 / 全消去 / キーボード (普通のキーボードに切り替え) /
 // 完了 (欄を離れて閉じる。ほかの場所を押しても閉じるが、iOSのキーボードと同じく終え方を見せる)。
 // 空白のキーは置かない (文字キーが空白を自動で補い、解析器も空白を読み飛ばす)
+// 6個ずつ3段: 面 / 接尾辞と括弧 / 中層と持ち替え
 export const CHARACTER_KEYS = [
   'R',
   'U',
@@ -10,15 +11,16 @@ export const CHARACTER_KEYS = [
   'B',
   "'",
   '2',
+  '3',
   'w',
+  '(',
+  ')',
   'M',
   'E',
   'S',
   'x',
   'y',
   'z',
-  '(',
-  ')',
 ] as const;
 export type CharacterKey = (typeof CHARACTER_KEYS)[number];
 export const ACTION_KEYS = ['backspace', 'clear', 'keyboard', 'done'] as const;
@@ -28,7 +30,7 @@ export type KeypadKey = CharacterKey | ActionKey;
 export type TextEdit = { start: number; end: number; insert: string };
 
 // 前の手にくっつくキー (wは2層回しの接尾辞。x y zは持ち替えで独立した手なので入れない)
-const ATTACHED_KEYS: ReadonlySet<CharacterKey> = new Set(["'", '2', 'w', ')']);
+const ATTACHED_KEYS: ReadonlySet<CharacterKey> = new Set(["'", '2', '3', 'w', ')']);
 
 // 記号を入れるとき、直前が空白でも括弧でもなければ空白を補う (Rの後にUを押せばR Uになる)。くっつくキーは補わない
 export function insertionFor(value: string, start: number, end: number, key: CharacterKey): TextEdit {

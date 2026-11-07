@@ -15,6 +15,10 @@ describe('formatAlg', () => {
     expect(formatAlg("r U r'", 'Rw')).toBe("Rw U Rw'");
   });
 
+  it('3 の接尾はそのまま出す', () => {
+    expect(formatAlg("R3 r3'", 'Rw')).toBe("R3 Rw3'");
+  });
+
   it('括弧の塊と繰り返しを残す', () => {
     expect(formatAlg("(R U R' U')2 F", 'r')).toBe("(R U R' U')2 F");
   });

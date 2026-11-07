@@ -23,12 +23,16 @@ describe('cleanAlgText', () => {
     expect(cleanAlgText("U'2")).toBe("U2'");
   });
 
-  it("R3' を R に直す", () => {
-    expect(cleanAlgText("R3' U")).toBe('R U');
+  it("'3 を 3' に直す", () => {
+    expect(cleanAlgText("U'3")).toBe("U3'");
   });
 
-  it("R3 を R' に直す", () => {
-    expect(cleanAlgText('R3 U')).toBe("R' U");
+  it('R3 は読み替えない', () => {
+    expect(cleanAlgText('R3 U')).toBe('R3 U');
+  });
+
+  it("R3' も読み替えない", () => {
+    expect(cleanAlgText("R3' U")).toBe("R3' U");
   });
 
   it('上付きの 2 を 2 に直す', () => {
@@ -53,6 +57,13 @@ describe('parseAlg', () => {
 
   it("2' の接尾を 1 つの手として読む", () => {
     expect(parseOrThrow("U2'")).toEqual([{ kind: 'move', base: 'U', isWide: false, suffix: "2'" }]);
+  });
+
+  it("3 と 3' を回数の接尾として読む", () => {
+    expect(parseOrThrow("R3 Rw3'")).toEqual([
+      { kind: 'move', base: 'R', isWide: false, suffix: '3' },
+      { kind: 'move', base: 'R', isWide: true, suffix: "3'" },
+    ]);
   });
 
   it('括弧の塊を繰り返しの数ごと読む', () => {

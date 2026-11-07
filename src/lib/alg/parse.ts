@@ -1,7 +1,10 @@
 import { err, ok, type Result } from '@/lib/result';
 
 export type MoveBase = 'R' | 'L' | 'U' | 'D' | 'F' | 'B' | 'M' | 'E' | 'S' | 'x' | 'y' | 'z';
-export type MoveSuffix = '' | "'" | '2' | "2'";
+// 3は270° (R'と同じ向き) だが、書いた人の意図した回数なので読み替えない
+export type MoveSuffix = '' | "'" | '2' | "2'" | '3' | "3'";
+// 長い方から試す (2' を 2 と ' に分けない)
+const SUFFIXES: readonly MoveSuffix[] = ["2'", "3'", "'", '2', '3'];
 
 export type Move = {
   kind: 'move';
@@ -34,7 +37,7 @@ function isMoveBase(char: string): char is MoveBase {
   return FACE_BASES.has(char) || OTHER_BASES.has(char);
 }
 
-// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの2、Ri / R- / R3 / R3'の逆手順、'2の順
+// 直せる揺れは黙って受け付ける。全角、曲がった引用符、上付きの2、Ri / R-の逆手順、'2と'3の順
 export function cleanAlgText(raw: string): string {
   return raw
     .replace(/[！-～]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
@@ -42,9 +45,7 @@ export function cleanAlgText(raw: string): string {
     .replace(/[’‘′`´]/g, "'")
     .replace(/²/g, '2')
     .replace(/([RLUDFBMESxyzrludfb]w?)[i-](?![A-Za-z])/g, "$1'")
-    .replace(/([RLUDFBMESxyzrludfb]w?)3'(?![\d])/g, '$1')
-    .replace(/([RLUDFBMESxyzrludfb]w?)3(?![\d'])/g, "$1'")
-    .replace(/'2/g, "2'")
+    .replace(/'([23])/g, "$1'")
     .trim();
 }
 
@@ -52,12 +53,9 @@ type Scan = { text: string; index: number };
 
 function readSuffix(scan: Scan): MoveSuffix {
   const rest = scan.text.slice(scan.index);
-  const matched = /^(2'|'|2)/.exec(rest);
-  if (matched === null) {
-    return '';
-  }
-  scan.index += matched[0].length;
-  return matched[0] === "2'" ? "2'" : matched[0] === "'" ? "'" : '2';
+  const suffix = SUFFIXES.find((candidate) => rest.startsWith(candidate)) ?? '';
+  scan.index += suffix.length;
+  return suffix;
 }
 
 function readMove(scan: Scan): Move | null {

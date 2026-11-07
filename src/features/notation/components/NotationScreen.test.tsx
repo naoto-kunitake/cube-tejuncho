@@ -30,10 +30,10 @@ beforeEach(() => {
 });
 
 describe('NotationScreen', () => {
-  it('6 区画の見出しと、括弧を除く 20 行の再生ボタンがある', () => {
+  it('6 区画の見出しと、括弧を除く 21 行の再生ボタンがある', () => {
     renderNotation();
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(6);
-    expect(screen.getAllByRole('button', { name: /を再生$/ })).toHaveLength(20);
+    expect(screen.getAllByRole('button', { name: /を再生$/ })).toHaveLength(21);
   });
 
   it('括弧の行は図も再生もなく、説明だけを示す', () => {
