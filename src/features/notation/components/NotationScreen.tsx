@@ -101,7 +101,7 @@ export function NotationScreen() {
       {playingAlg !== null && (
         <PlayerSheet
           algText={playingAlg}
-          category={undefined}
+          caseCheck={undefined}
           settings={settings}
           onClose={() => {
             setPlayingAlg(null);

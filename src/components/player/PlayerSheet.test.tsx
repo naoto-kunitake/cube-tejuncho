@@ -38,10 +38,17 @@ const SETTINGS = {
   wideStyle: 'r',
 } as const;
 
-function renderSheet() {
+const UA = { category: 'pll', standardAlg: "M2 U M U2 M' U M2" } as const;
+const T_PERM = "R U R' U' R' F R2 U' R' U' R U R' F'";
+
+function renderSheet(algText = "R U R' U'", caseCheck?: typeof UA) {
   const onClose = vi.fn();
-  render(<PlayerSheet algText="R U R' U'" category="pll" settings={SETTINGS} onClose={onClose} />);
+  render(<PlayerSheet algText={algText} caseCheck={caseCheck} settings={SETTINGS} onClose={onClose} />);
   return onClose;
+}
+
+function setupAlgOf(twisty: TwistyModule): string | undefined {
+  return vi.mocked(twisty.TwistyPlayer).mock.calls[0]?.[0].experimentalSetupAlg?.toString();
 }
 
 beforeEach(() => {
@@ -78,6 +85,22 @@ describe('PlayerSheet', () => {
       await vi.advanceTimersByTimeAsync(10_000);
     });
     expect(screen.getByRole('button', { name: copy.player.retry })).toBeInTheDocument();
+  });
+
+  it('揃わない手順は図の状態 (基本手順の逆) から始める', async () => {
+    const twisty = fakeTwistyModule();
+    vi.mocked(loadTwisty).mockResolvedValue(twisty);
+    renderSheet(T_PERM, UA);
+    await screen.findByRole('button', { name: copy.a11y.play });
+    expect(setupAlgOf(twisty)).toBe("z2 M2' U' M U2' M' U' M2'");
+  });
+
+  it('揃う手順は手順の逆から始める', async () => {
+    const twisty = fakeTwistyModule();
+    vi.mocked(loadTwisty).mockResolvedValue(twisty);
+    renderSheet("R U' R U R U R U' R' U' R2", UA);
+    await screen.findByRole('button', { name: copy.a11y.play });
+    expect(setupAlgOf(twisty)).toBe("z2 R2' U R U R' U' R' U' R' U R'");
   });
 
   it('× で閉じる', async () => {

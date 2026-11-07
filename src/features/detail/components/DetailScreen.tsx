@@ -195,6 +195,8 @@ export function DetailScreen() {
   const pinned = useDocumentStore((state) => state.document.pinned);
   const togglePin = useDocumentStore((state) => state.togglePin);
   const ref = findPattern({ patterns }, id);
+  // 灰にする指定と揃うかの判定はプリセットだけ。自作は図がないので全色で出し、判定もしない
+  const caseCheck: CaseCheck | undefined = ref?.kind === 'preset' ? caseCheckOf(ref.preset) : undefined;
   const isPinned = pinned.includes(id);
   // 再生シートで開いている手順。開いているシートは文書に入れない (一時的な状態)
   const [playingAlg, setPlayingAlg] = useState<string | null>(null);
@@ -241,11 +243,10 @@ export function DetailScreen() {
           onPlay={setPlayingAlg}
         />
       )}
-      {/* 灰にする指定はプリセットのカテゴリごと。自作は図がないので全色で出す */}
       {playingAlg !== null && (
         <PlayerSheet
           algText={playingAlg}
-          category={ref?.kind === 'preset' ? ref.preset.category : undefined}
+          caseCheck={caseCheck}
           settings={settings}
           onClose={() => {
             setPlayingAlg(null);

@@ -6,24 +6,24 @@ import { Button } from '@/components/Button';
 import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { Sheet } from '@/components/Sheet';
+import type { CaseCheck } from '@/components/useCaseVerdict';
 import { copy } from '@/copy';
 import type { Settings } from '@/data/document';
-import type { StickeringCategory } from '@/lib/cube/stickering';
 
 import { PlayerControls } from './PlayerControls';
 import { usePlayer } from './usePlayer';
 
 type PlayerSheetProps = {
   algText: string;
-  category: StickeringCategory | undefined;
+  caseCheck: CaseCheck | undefined;
   settings: Pick<Settings, 'topColor' | 'frontColor' | 'playbackSpeed' | 'greyUnrelated' | 'wideStyle'>;
   onClose: () => void;
 };
 
 // × / 3Dの舞台 / 手順の文字 (今の手を強調) / 操作列 の順に縦に並べる (音楽アプリの再生中画面と同じ)
-export function PlayerSheet({ algText, category, settings, onClose }: PlayerSheetProps) {
+export function PlayerSheet({ algText, caseCheck, settings, onClose }: PlayerSheetProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const player = usePlayer({ algText, category, settings, stageRef });
+  const player = usePlayer({ algText, caseCheck, settings, stageRef });
 
   return (
     <Sheet label={copy.a11y.playerSheet} onClose={onClose}>

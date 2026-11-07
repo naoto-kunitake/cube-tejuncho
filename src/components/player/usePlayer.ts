@@ -1,8 +1,9 @@
 import type { TwistyPlayerConfig } from 'cubing/twisty';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 
+import type { CaseCheck } from '@/components/useCaseVerdict';
 import { toCubingAlg } from '@/lib/cube/alg';
-import type { StickeringCategory } from '@/lib/cube/stickering';
+import { solvesCase } from '@/lib/cube/verify';
 
 import {
   type CurrentMoveInfo,
@@ -23,7 +24,8 @@ const AUTOPLAY_DELAY_MS = 400;
 
 type UsePlayerArgs = {
   algText: string;
-  category: StickeringCategory | undefined;
+  // 判定に使うプリセットの情報。自作はundefined (判定せず、逆から始める)
+  caseCheck: CaseCheck | undefined;
   settings: PlayerSettings;
   stageRef: RefObject<HTMLDivElement | null>;
 };
@@ -50,8 +52,10 @@ function createPlayer(Player: TwistyModule['TwistyPlayer'], config: TwistyPlayer
   }
 }
 
-export function usePlayer({ algText, category, settings, stageRef }: UsePlayerArgs) {
+export function usePlayer({ algText, caseCheck, settings, stageRef }: UsePlayerArgs) {
   const [status, setStatus] = useState<PlayerStatus>('loading');
+  const category = caseCheck?.category;
+  const standardAlg = caseCheck?.standardAlg;
   const [attempt, setAttempt] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAtEnd, setIsAtEnd] = useState(false);
@@ -108,10 +112,26 @@ export function usePlayer({ algText, category, settings, stageRef }: UsePlayerAr
     if (!parsed.ok) {
       fail(parsed.error);
     } else {
-      // 3Dの読み込みと灰の指定の計算は独立しているので並列に待つ
+      const alg = parsed.value;
+      const standard = standardAlg === undefined ? undefined : toCubingAlg(standardAlg);
+      // 揃わない手順は図の状態 (基本手順の逆) から始め、揃わないまま終わらせる (揃わないこと自体が知らせ。
+      // 詳細のカードに文を出しているので、ここでは重ねて出さない)。揃う手順は逆から始めて揃って終わる
+      const startAlg =
+        category === undefined || !standard?.ok
+          ? Promise.resolve(alg)
+          : solvesCase(category, standard.value, alg)
+              .then((solves) => (solves ? alg : standard.value))
+              .catch((error: unknown) => {
+                // 判定できなくても再生は止めない (useCaseVerdictと同じ方針)。逆から始める
+                console.error('case verdict failed', error);
+                return alg;
+              });
+      // 3Dの読み込みと開始状態・灰の指定の計算は独立しているので並列に待つ
       Promise.all([
         loadTwisty(),
-        playerConfigFor(parsed.value, { topColor, frontColor, playbackSpeed, greyUnrelated }, category),
+        startAlg.then((start) =>
+          playerConfigFor(alg, { topColor, frontColor, playbackSpeed, greyUnrelated }, category, start),
+        ),
       ])
         .then(show)
         .catch(fail);
@@ -123,7 +143,7 @@ export function usePlayer({ algText, category, settings, stageRef }: UsePlayerAr
       playerRef.current?.remove();
       playerRef.current = null;
     };
-  }, [algText, category, topColor, frontColor, playbackSpeed, greyUnrelated, attempt, stageRef]);
+  }, [algText, category, standardAlg, topColor, frontColor, playbackSpeed, greyUnrelated, attempt, stageRef]);
 
   const withPlayer = (action: (player: PlayerLike) => void) => {
     const player = playerRef.current;
