@@ -4,7 +4,7 @@ import { cubingAlgOrThrow } from '@/lib/cube/alg.fixtures';
 import { caseStartState, cubeViewOf, pairMaskOf } from '@/lib/cube/view';
 
 import { F2L_PRESETS, F2L_SHAPE_ORDER } from './f2l';
-import { expectStandardAlgReadable, expectStandardAlgSolves } from './preset.fixtures';
+import { expectStandardAlgReadable, expectStandardAlgSolves, expectStandardAlgSolvesCase } from './preset.fixtures';
 
 const cases = F2L_PRESETS.map((preset) => [preset.name, preset] as const);
 
@@ -38,6 +38,10 @@ describe('F2L_PRESETS', () => {
 describe('F2L のプリセット', () => {
   it.each(cases)('%s の基本手順を開始状態に回すと揃う', async (_, preset) => {
     await expectStandardAlgSolves(preset.standardAlg);
+  });
+
+  it.each(cases)('%s の基本手順は判定でも揃う', async (_, preset) => {
+    await expectStandardAlgSolvesCase('f2l', preset.standardAlg);
   });
 
   it.each(cases)('%s の 3 面の図は手順から計算した状態と一致する', async (_, preset) => {

@@ -19,6 +19,22 @@ describe('playerConfigFor', () => {
     expect(config.experimentalSetupAlg).toBe("z2 R U' R'");
   });
 
+  it('開始状態の手順を別に渡すと、その逆から始める', async () => {
+    const config = await playerConfigFor(
+      cubingAlgOrThrow("R U R'"),
+      SETTINGS,
+      'pll',
+      cubingAlgOrThrow("M2 U M U2 M' U M2"),
+    );
+    // cubing.jsは2の逆を2'と書く
+    expect(config.experimentalSetupAlg).toBe("z2 M2' U' M U2' M' U' M2'");
+  });
+
+  it('開始状態の手順を別に渡すと、灰の指定もその手順から計算する', async () => {
+    const config = await playerConfigFor(cubingAlgOrThrow("R U R'"), SETTINGS, 'f2l', cubingAlgOrThrow("y' R' U' R"));
+    expect(config.experimentalStickeringMaskOrbits).toBe('EDGES:IIIIIIIIIII-,CORNERS:II-IIIII,CENTERS:------');
+  });
+
   it('速さの設定を tempoScale にする', async () => {
     const config = await playerConfigFor(cubingAlgOrThrow('R'), { ...SETTINGS, playbackSpeed: 'fast' });
     expect(config.tempoScale).toBe(TEMPO_SCALE.fast);

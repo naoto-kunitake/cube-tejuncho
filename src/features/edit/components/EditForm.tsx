@@ -10,6 +10,7 @@ import { BAR_ICON_PROPS } from '@/components/icon';
 import { IconButton } from '@/components/IconButton';
 import { ScreenBody, ScreenHeader } from '@/components/Screen';
 import { useToastStore } from '@/components/toast/toast-store';
+import { type CaseCheck, caseCheckOf } from '@/components/useCaseVerdict';
 import { copy } from '@/copy';
 import type { AlgEntry, Category, Registration, Settings } from '@/data/document';
 import { type DraftStore, draftStore as defaultDraftStore } from '@/data/draft';
@@ -147,6 +148,7 @@ export function EditForm({
   const isNameMissing = isCustom && form.name.trim() === '';
   const hasNameError = (hasLeftName || hasTriedToSave) && isNameMissing;
   const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
+  const caseCheck: CaseCheck | undefined = target.kind === 'preset' ? caseCheckOf(target.preset) : undefined;
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
   // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧
   const backPath = target.kind === 'new' ? `/?category=${target.categoryId}` : `/p/${draftId}`;
@@ -368,6 +370,7 @@ export function EditForm({
               }}
               usesKeypad={keypad.usesKeypad}
               hasTriedToSave={hasTriedToSave}
+              caseCheck={caseCheck}
               onChange={(next) => {
                 updateCard(index, next);
               }}

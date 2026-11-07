@@ -49,22 +49,25 @@ export type PlayerSettings = Pick<Settings, 'topColor' | 'frontColor' | 'playbac
 
 // 操作列は自前 (controlPanel: none)、背景なし、面の名前のヒントなし。
 // 灰にする指定は開始状態から決めるので、cubing.jsの3x3x3の定義を読むまで待つ
+// startAlgは開始状態を決める手順。普通は手順そのもの (逆から始めて揃って終わる)。
+// パターンを揃えない手順は基本手順を渡し、図の状態から始めて揃わないまま終わらせる
 export async function playerConfigFor(
   alg: Alg,
   settings: PlayerSettings,
   category?: StickeringCategory,
+  startAlg: Alg = alg,
 ): Promise<TwistyPlayerConfig> {
   const config: TwistyPlayerConfig = {
     puzzle: '3x3x3',
     alg,
-    experimentalSetupAlg: setupAlgFor(alg, settings),
+    experimentalSetupAlg: setupAlgFor(startAlg, settings),
     controlPanel: 'none',
     background: 'none',
     hintFacelets: 'none',
     tempoScale: TEMPO_SCALE[settings.playbackSpeed],
   };
   if (settings.greyUnrelated && category !== undefined) {
-    const mask = await stickeringMaskOf(category, settings, alg);
+    const mask = await stickeringMaskOf(category, settings, startAlg);
     if (mask !== null) {
       config.experimentalStickeringMaskOrbits = mask;
     }

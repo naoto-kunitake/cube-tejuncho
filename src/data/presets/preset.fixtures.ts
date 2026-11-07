@@ -3,6 +3,8 @@ import { expect } from 'vitest';
 import { parseAlg } from '@/lib/alg/parse';
 import { cubingAlgOrThrow } from '@/lib/cube/alg.fixtures';
 import { applyAlg, isSolved } from '@/lib/cube/kpuzzle';
+import type { StickeringCategory } from '@/lib/cube/stickering';
+import { solvesCase } from '@/lib/cube/verify';
 import { caseStartState, topViewOf } from '@/lib/cube/view';
 import type { TopView } from '@/lib/figure/view';
 
@@ -22,6 +24,12 @@ export function expectViewShape(view: TopView): void {
 export async function expectStandardAlgSolves(standardAlg: string): Promise<void> {
   const alg = cubingAlgOrThrow(standardAlg);
   expect(isSolved(applyAlg(await caseStartState(alg), alg))).toBe(true);
+}
+
+// 登録した手順の判定 (solvesCase) が基本手順そのものを「揃う」と判定すること。判定の側の回帰を全プリセットで押さえる
+export async function expectStandardAlgSolvesCase(category: StickeringCategory, standardAlg: string): Promise<void> {
+  const alg = cubingAlgOrThrow(standardAlg);
+  expect(await solvesCase(category, alg, alg)).toBe(true);
 }
 
 // 図はAUFを正規化した向きで持つので、上面を0〜3回まわしたどれかと一致すればよい
