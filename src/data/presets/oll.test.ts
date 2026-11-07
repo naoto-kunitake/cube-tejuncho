@@ -4,6 +4,7 @@ import { OLL_PRESETS, OLL_SHAPE_ORDER } from './oll';
 import {
   expectStandardAlgReadable,
   expectStandardAlgSolves,
+  expectStandardAlgSolvesCase,
   expectViewMatchesStandardAlg,
   expectViewShape,
 } from './preset.fixtures';
@@ -47,6 +48,10 @@ describe('OLL_PRESETS', () => {
 describe('OLL のプリセット', () => {
   it.each(cases)('%s の基本手順を開始状態に回すと揃う', async (_, preset) => {
     await expectStandardAlgSolves(preset.standardAlg);
+  });
+
+  it.each(cases)('%s の基本手順は判定でも揃う', async (_, preset) => {
+    await expectStandardAlgSolvesCase('oll', preset.standardAlg);
   });
 
   it.each(cases)('%s の図の配置は手順から計算した状態と一致する (上面の向きは 4 通りのどれか)', async (_, preset) => {

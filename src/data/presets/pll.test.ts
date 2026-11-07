@@ -6,6 +6,7 @@ import { PLL_PRESETS, PLL_SHAPE_ORDER } from './pll';
 import {
   expectStandardAlgReadable,
   expectStandardAlgSolves,
+  expectStandardAlgSolvesCase,
   expectViewMatchesStandardAlg,
   expectViewShape,
 } from './preset.fixtures';
@@ -197,6 +198,13 @@ describe('PLL のプリセット', () => {
     '%s の基本手順を開始状態に回すと揃う',
     async (_, preset) => {
       await expectStandardAlgSolves(preset.standardAlg);
+    },
+  );
+
+  it.each(PLL_PRESETS.map((preset) => [preset.name, preset] as const))(
+    '%s の基本手順は判定でも揃う',
+    async (_, preset) => {
+      await expectStandardAlgSolvesCase('pll', preset.standardAlg);
     },
   );
 
