@@ -1,8 +1,10 @@
-import type { KeyboardEvent } from 'react';
+import { type KeyboardEvent, useEffect, useRef } from 'react';
 
 import { PILL_TAP_AREA_CLASS } from '@/components/tap-area';
 import { copy } from '@/copy';
 import { cn } from '@/lib/utils';
+
+import { revealShiftOf } from '../lib/reveal';
 
 // role="tab"は対応するtabpanelを求める。一覧の中身は1つの器で入れ替わるので、器のidを共有する
 export const CATEGORY_PANEL_ID = 'category-panel';
@@ -18,6 +20,20 @@ type CategoryTabsProps = {
 };
 
 export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+  // スワイプで移った先 (や起動時に復元したタブ) が列の外にあると、どのタブにいるか見えないので列を横に寄せる。
+  // scrollIntoViewは使わない。詳細から戻ったときにも走り、ブラウザが復元した縦の位置を列まで巻き戻してしまう
+  useEffect(() => {
+    const list = listRef.current;
+    if (list === null) {
+      return;
+    }
+    const tab = list.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (tab === null) {
+      return;
+    }
+    list.scrollLeft += revealShiftOf(list.getBoundingClientRect(), tab.getBoundingClientRect());
+  }, [selectedId]);
   // 選ばれていないタブはtabIndex -1なので、矢印キーで隣へ移してフォーカスも動かす (WAI-ARIAのタブの型)
   const moveByArrow = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') {
@@ -37,6 +53,7 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
   return (
     <div className="flex items-center px-4 pb-2">
       <div
+        ref={listRef}
         role="tablist"
         aria-label={copy.a11y.categoryTabs}
         className="scrollbar-none flex gap-2 overflow-x-auto py-1"
