@@ -16,6 +16,9 @@ export function useCategory(available: readonly string[]) {
   const selectCategory = (next: string) => {
     setSearchParams({ [CATEGORY_PARAM]: next }, { replace: true });
     setLastTab(next);
+    // 中身は1つの器で入れ替わるので、前のタブで下まで送った位置が次のタブに残る。
+    // スワイプは下まで送った位置からでも起きるので、タブの列が見える先頭に戻す
+    window.scrollTo(0, 0);
   };
   return { categoryId, selectCategory };
 }

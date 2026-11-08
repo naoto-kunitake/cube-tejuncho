@@ -14,6 +14,7 @@ import { HOME_SCREEN_BANNER, useDocumentStore } from '@/data/store';
 import { cn } from '@/lib/utils';
 
 import { useCategory } from '../hooks/useCategory';
+import { useSwipeTabs } from '../hooks/useSwipeTabs';
 import { groupByShape } from '../lib/group-by-shape';
 import { homeScreenEnvironmentOf, isHomeScreenHintNeeded } from '../lib/home-screen-hint';
 import { tileNameOf } from '../lib/tile-name';
@@ -193,7 +194,9 @@ export function ListScreen() {
     id: entry.id,
     label: entry.kind === 'preset' ? copy.list.categories[entry.id] : entry.name,
   }));
-  const { categoryId, selectCategory } = useCategory(categories.map((category) => category.id));
+  const categoryIds = categories.map((category) => category.id);
+  const { categoryId, selectCategory } = useCategory(categoryIds);
+  const swipe = useSwipeTabs(categoryIds, categoryId, selectCategory);
   const selected = entries.find((entry) => entry.id === categoryId);
 
   return (
@@ -223,7 +226,9 @@ export function ListScreen() {
         id={CATEGORY_PANEL_ID}
         role="tabpanel"
         aria-labelledby={categoryTabId(categoryId)}
-        className="flex flex-col gap-4 px-4 pb-safe-6"
+        // 横の動きはこちらで受け、縦はブラウザのスクロールに任せる (pan-yがないと横の動きでもポインタを取り上げられる)
+        className="flex touch-pan-y touch-pinch-zoom flex-col gap-4 px-4 pb-safe-6"
+        {...swipe}
       >
         {showsHomeScreenBanner && (
           <HomeScreenBanner
