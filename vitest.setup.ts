@@ -18,8 +18,10 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
 // jsdomはポインタの捕捉も実装していない (ドラッグの部品がpointerdownで呼ぶ)
 HTMLElement.prototype.setPointerCapture = () => undefined;
 
-// jsdomはスクロールを実装していない (手順の欄をキーパッドの上に寄せる)
+// jsdomはscrollIntoViewを実装しておらず、呼ぶと例外になる (手順の欄をキーパッドの上に寄せる)
 Element.prototype.scrollIntoView = () => undefined;
+// jsdomのscrollToは呼べるが「Not implemented」の警告を出す。警告を消し、テストのvi.spyOnの対象を揃える (タブを切り替えると先頭に戻す)
+window.scrollTo = () => undefined;
 
 // jsdomはmatchMediaも実装していない (ホーム画面の案内がdisplay-modeを見る)。常に不一致を返す
 Object.defineProperty(window, 'matchMedia', {

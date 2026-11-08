@@ -256,4 +256,22 @@
   --shadow-5: var(--elevation-5);
   --shadow-segment: var(--segment-shadow);
   --shadow-dot: var(--dot-shadow);
+
+  /* タブの中身の切り替え (Materialのshared axis X): 30pxの滑りと透明からの現れ、300ms、standardのイージング。
+     出る側は即時に消えて重ならないので、フェードは遅らせず最初から始める (Materialの35%の遅れを置くと空白が見える) */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-slide-in-forward: slide-in-forward 300ms var(--ease-standard);
+  --animate-slide-in-backward: slide-in-backward 300ms var(--ease-standard);
+  @keyframes slide-in-forward {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+  }
+  @keyframes slide-in-backward {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+  }
 }

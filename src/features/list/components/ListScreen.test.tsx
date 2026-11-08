@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -364,5 +364,100 @@ describe('ホーム画面の案内', () => {
       </MemoryRouter>,
     );
     expect(screen.queryByRole('region', { name: copy.a11y.homeScreenHint })).toBeNull();
+  });
+});
+
+describe('タブのスワイプ', () => {
+  const TOUCH = { pointerId: 1, pointerType: 'touch', isPrimary: true };
+
+  const renderList = () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    return screen.getByRole('tabpanel');
+  };
+
+  it('中身を左に流すと右隣のタブに移り、先頭に戻る', () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo');
+    const panel = renderList();
+    fireEvent.pointerDown(panel, { ...TOUCH, clientX: 200, clientY: 100 });
+    fireEvent.pointerUp(panel, { ...TOUCH, clientX: 100, clientY: 110 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.oll })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: copy.list.categories.oll })).toHaveAttribute('aria-selected', 'true');
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+    scrollTo.mockRestore();
+  });
+
+  it('2本目の指が先に離れても、1本目の指のスワイプは成立する', () => {
+    const panel = renderList();
+    const second = { pointerId: 2, pointerType: 'touch', isPrimary: false };
+    fireEvent.pointerDown(panel, { ...TOUCH, clientX: 200, clientY: 100 });
+    fireEvent.pointerDown(panel, { ...second, clientX: 220, clientY: 140 });
+    fireEvent.pointerUp(panel, { ...second, clientX: 220, clientY: 140 });
+    fireEvent.pointerUp(panel, { ...TOUCH, clientX: 100, clientY: 100 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.oll })).toBeInTheDocument();
+  });
+
+  it('先頭のタブで右に流しても変わらない', () => {
+    const panel = renderList();
+    fireEvent.pointerDown(panel, { ...TOUCH, clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(panel, { ...TOUCH, clientX: 200, clientY: 100 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.pll })).toBeInTheDocument();
+  });
+
+  it('縦に流したスクロールでは切り替わらない', () => {
+    const panel = renderList();
+    fireEvent.pointerDown(panel, { ...TOUCH, clientX: 200, clientY: 100 });
+    fireEvent.pointerUp(panel, { ...TOUCH, clientX: 140, clientY: 300 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.pll })).toBeInTheDocument();
+  });
+
+  it('ブラウザがポインタを取り上げたら切り替わらない', () => {
+    const panel = renderList();
+    fireEvent.pointerDown(panel, { ...TOUCH, clientX: 200, clientY: 100 });
+    fireEvent.pointerCancel(panel, { ...TOUCH, clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(panel, { ...TOUCH, clientX: 100, clientY: 100 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.pll })).toBeInTheDocument();
+  });
+
+  it('マウスのドラッグでは切り替わらない', () => {
+    const panel = renderList();
+    const mouse = { ...TOUCH, pointerType: 'mouse' };
+    fireEvent.pointerDown(panel, { ...mouse, clientX: 200, clientY: 100 });
+    fireEvent.pointerUp(panel, { ...mouse, clientX: 100, clientY: 100 });
+    expect(screen.getByRole('tabpanel', { name: copy.list.categories.pll })).toBeInTheDocument();
+  });
+});
+
+describe('タブの切り替えの向き', () => {
+  const renderList = () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    return screen.getByRole('tabpanel');
+  };
+
+  it('起動時の中身は動かさない', () => {
+    const panel = renderList();
+    expect(panel.querySelector('[class*="animate-slide-in"]')).toBeNull();
+  });
+
+  it('右のタブへ進むと中身は右から入る', async () => {
+    const user = userEvent.setup();
+    const panel = renderList();
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    expect(panel.querySelector('.animate-slide-in-forward')).not.toBeNull();
+  });
+
+  it('左のタブへ戻ると中身は左から入る', async () => {
+    const user = userEvent.setup();
+    const panel = renderList();
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.pll }));
+    expect(panel.querySelector('.animate-slide-in-backward')).not.toBeNull();
   });
 });
