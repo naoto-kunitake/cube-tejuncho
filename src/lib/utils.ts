@@ -12,6 +12,11 @@ function isSafeAreaSpacing(value: string): boolean {
 // 生成の順で後にあるクラスが勝つ (キーパッドを避ける余白が効かなくなる)
 const twMerge = extendTailwindMerge({
   extend: {
+    // タブの中身の切り替えの動き。既定のanimate群はspin / ping / pulse / bounceだけなので、知らないと群に入らず、
+    // 重ねたanimateのクラスが両方残る
+    theme: {
+      animate: ['slide-in-forward', 'slide-in-backward'],
+    },
     classGroups: {
       'font-size': [{ text: ['title', 'alg', 'alg-compact', 'input', 'body', 'small', 'label', 'caption'] }],
       tracking: [{ tracking: ['title', 'count'] }],

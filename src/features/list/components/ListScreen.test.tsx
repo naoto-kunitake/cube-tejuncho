@@ -430,3 +430,34 @@ describe('タブのスワイプ', () => {
     expect(screen.getByRole('tabpanel', { name: copy.list.categories.pll })).toBeInTheDocument();
   });
 });
+
+describe('タブの切り替えの向き', () => {
+  const renderList = () => {
+    render(
+      <MemoryRouter>
+        <ListScreen />
+      </MemoryRouter>,
+    );
+    return screen.getByRole('tabpanel');
+  };
+
+  it('起動時の中身は動かさない', () => {
+    const panel = renderList();
+    expect(panel.querySelector('[class*="animate-slide-in"]')).toBeNull();
+  });
+
+  it('右のタブへ進むと中身は右から入る', async () => {
+    const user = userEvent.setup();
+    const panel = renderList();
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    expect(panel.querySelector('.animate-slide-in-forward')).not.toBeNull();
+  });
+
+  it('左のタブへ戻ると中身は左から入る', async () => {
+    const user = userEvent.setup();
+    const panel = renderList();
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.oll }));
+    await user.click(screen.getByRole('tab', { name: copy.list.categories.pll }));
+    expect(panel.querySelector('.animate-slide-in-backward')).not.toBeNull();
+  });
+});

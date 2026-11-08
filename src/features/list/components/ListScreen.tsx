@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 
 import { useCategory } from '../hooks/useCategory';
 import { useSwipeTabs } from '../hooks/useSwipeTabs';
+import { useTabSlide } from '../hooks/useTabSlide';
 import { groupByShape } from '../lib/group-by-shape';
 import { homeScreenEnvironmentOf, isHomeScreenHintNeeded } from '../lib/home-screen-hint';
 import { tileNameOf } from '../lib/tile-name';
@@ -196,7 +197,8 @@ export function ListScreen() {
   }));
   const categoryIds = categories.map((category) => category.id);
   const { categoryId, selectCategory } = useCategory(categoryIds);
-  const swipe = useSwipeTabs(categoryIds, categoryId, selectCategory);
+  const { select, slideClass } = useTabSlide(categoryIds, categoryId, selectCategory);
+  const swipe = useSwipeTabs(categoryIds, categoryId, select);
   const selected = entries.find((entry) => entry.id === categoryId);
 
   return (
@@ -221,7 +223,7 @@ export function ListScreen() {
           </>
         }
       />
-      <CategoryTabs categories={categories} selectedId={categoryId} onSelect={selectCategory} />
+      <CategoryTabs categories={categories} selectedId={categoryId} onSelect={select} />
       <div
         id={CATEGORY_PANEL_ID}
         role="tabpanel"
@@ -237,21 +239,24 @@ export function ListScreen() {
             }}
           />
         )}
-        {selected?.kind === 'custom' ? (
-          <CustomList
-            categoryId={selected.id}
-            settings={document.settings}
-            registrations={document.registrations}
-            pinnedIds={pinnedIds}
-          />
-        ) : (
-          <PresetList
-            category={selected?.kind === 'preset' ? selected.id : 'pll'}
-            settings={document.settings}
-            registrations={document.registrations}
-            pinnedIds={pinnedIds}
-          />
-        )}
+        {/* keyで作り直し、切り替えのたびに動きを最初から再生する。ホーム画面の案内はタブに属さないので外に置く */}
+        <div key={categoryId} className={cn('flex flex-col gap-4 motion-reduce:animate-none', slideClass)}>
+          {selected?.kind === 'custom' ? (
+            <CustomList
+              categoryId={selected.id}
+              settings={document.settings}
+              registrations={document.registrations}
+              pinnedIds={pinnedIds}
+            />
+          ) : (
+            <PresetList
+              category={selected?.kind === 'preset' ? selected.id : 'pll'}
+              settings={document.settings}
+              registrations={document.registrations}
+              pinnedIds={pinnedIds}
+            />
+          )}
+        </div>
       </div>
     </Screen>
   );
