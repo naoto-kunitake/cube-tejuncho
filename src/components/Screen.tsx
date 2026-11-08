@@ -46,10 +46,14 @@ type ScreenProps = {
   children: ReactNode;
 };
 
-// 画面の器。中央に置き、幅の上限で止める
+// 画面の器。中央に置き、幅の上限で止める。
+// 高さは窓いっぱいまで伸ばす。一覧の中身 (flex-1) がタイルの下の空きまで届き、そこでもスワイプを受けられる
 export function Screen({ label, isWide = false, children }: ScreenProps) {
   return (
-    <section aria-label={label} className={cn('mx-auto flex w-full flex-col', isWide ? 'max-w-186' : 'max-w-140')}>
+    <section
+      aria-label={label}
+      className={cn('mx-auto flex min-h-dvh w-full flex-col', isWide ? 'max-w-186' : 'max-w-140')}
+    >
       {children}
     </section>
   );

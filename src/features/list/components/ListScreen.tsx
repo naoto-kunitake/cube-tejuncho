@@ -228,8 +228,9 @@ export function ListScreen() {
         id={CATEGORY_PANEL_ID}
         role="tabpanel"
         aria-labelledby={categoryTabId(categoryId)}
-        // 横の動きはこちらで受け、縦はブラウザのスクロールに任せる (pan-yがないと横の動きでもポインタを取り上げられる)
-        className="flex touch-pan-y touch-pinch-zoom flex-col gap-4 px-4 pb-safe-6"
+        // 横の動きはこちらで受け、縦はブラウザのスクロールに任せる (pan-yがないと横の動きでもポインタを取り上げられる)。
+        // 画面の下端まで伸ばし (flex-1)、タイルが少ないタブでもタイルの下の空きでスワイプを受ける
+        className="flex flex-1 touch-pan-y touch-pinch-zoom flex-col gap-4 px-4 pb-safe-6"
         {...swipe}
       >
         {showsHomeScreenBanner && (
