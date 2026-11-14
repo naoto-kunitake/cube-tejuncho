@@ -425,7 +425,7 @@ export function EditForm({
           </div>
         )}
       </ScreenBody>
-      {keypad.isOpen && <AlgKeypad onKey={keypad.pressKey} />}
+      {keypad.isOpen && <AlgKeypad wideStyle={settings.wideStyle} onKey={keypad.pressKey} />}
       {dialog?.kind === 'discard' && (
         <ConfirmDialog
           title={copy.edit.discardTitle}
