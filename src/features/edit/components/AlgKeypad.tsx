@@ -1,3 +1,4 @@
+import { Delete } from 'lucide-react';
 import type { MouseEvent } from 'react';
 
 import { copy } from '@/copy';
@@ -28,8 +29,8 @@ const ACTION_SPAN_CLASS: Record<ActionKey, string> = {
   done: 'col-span-4',
 };
 
-const ACTION_LABELS: Record<ActionKey, string> = {
-  backspace: copy.keypad.backspace,
+// 削除は1文字の記号が並ぶ段にあるので、文字ではなく記号で出す (読み上げ名はcopy.keypad.backspace)
+const ACTION_LABELS: Record<Exclude<ActionKey, 'backspace'>, string> = {
   clear: copy.keypad.clear,
   keyboard: copy.keypad.keyboard,
   done: copy.keypad.done,
@@ -38,6 +39,14 @@ const ACTION_LABELS: Record<ActionKey, string> = {
 // キーを押しても欄から焦点を奪わない (mousedownの既定の動きを止める)。欄の選択範囲にそのまま効く
 function keepFocus(event: MouseEvent<HTMLButtonElement>) {
   event.preventDefault();
+}
+
+function contentOf(key: KeypadKey) {
+  if (key === 'backspace') {
+    // 外すと削除キーだけ右に寄って見える。枠は中央でも、中の×は中心より右に2.5px、塗りの重心は右に1.4pxある
+    return <Delete size={20} strokeWidth={1.8} aria-hidden="true" className="mx-auto block -translate-x-0.5" />;
+  }
+  return isActionKey(key) ? ACTION_LABELS[key] : key;
 }
 
 // 手順の欄の下に出る専用キーパッド。Tabでは辿らない (キーボードを持つ人は普通に打てる)
@@ -54,13 +63,14 @@ export function AlgKeypad({ wideStyle, onKey }: AlgKeypadProps) {
             key={key}
             type="button"
             tabIndex={-1}
+            aria-label={key === 'backspace' ? copy.keypad.backspace : undefined}
             onMouseDown={keepFocus}
             className={isActionKey(key) ? cn(ACTION_KEY_CLASS, ACTION_SPAN_CLASS[key]) : CHARACTER_KEY_CLASS}
             onClick={() => {
               onKey(key);
             }}
           >
-            {isActionKey(key) ? ACTION_LABELS[key] : key}
+            {contentOf(key)}
           </button>
         ))}
       </div>
