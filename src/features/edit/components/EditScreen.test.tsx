@@ -331,6 +331,32 @@ describe('EditScreen', () => {
     expect(screen.queryByRole('group', { name: copy.a11y.keypad })).not.toBeInTheDocument();
   });
 
+  it('2層回しの表記がrなら小文字のキーが出て、小文字で入る', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().updateSettings({ wideStyle: 'r' });
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.click(input);
+    const keypad = screen.getByRole('group', { name: copy.a11y.keypad });
+    await user.click(within(keypad).getByRole('button', { name: 'R' }));
+    await user.click(within(keypad).getByRole('button', { name: 'r' }));
+    expect(input).toHaveValue('R r');
+    expect(within(keypad).queryByRole('button', { name: 'Rw' })).not.toBeInTheDocument();
+  });
+
+  it('2層回しの表記がRwならRwのキーが出て、Rwで入る', async () => {
+    const user = userEvent.setup();
+    useDocumentStore.getState().updateSettings({ wideStyle: 'Rw' });
+    renderEdit();
+    const input = screen.getByLabelText(copy.edit.mainAlg);
+    await user.click(input);
+    const keypad = screen.getByRole('group', { name: copy.a11y.keypad });
+    await user.click(within(keypad).getByRole('button', { name: 'R' }));
+    await user.click(within(keypad).getByRole('button', { name: 'Rw' }));
+    expect(input).toHaveValue('R Rw');
+    expect(within(keypad).queryByRole('button', { name: 'r' })).not.toBeInTheDocument();
+  });
+
   it('「キーボード」を押すとキーパッドが閉じて端末のキーボードで打てる', async () => {
     const user = userEvent.setup();
     renderEdit();

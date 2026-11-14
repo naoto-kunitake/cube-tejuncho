@@ -117,8 +117,19 @@ describe('firstInvalidCardIndex', () => {
 describe('standardAlgToAdd', () => {
   it('表記の揺れがあっても同じ手順があれば出さない', () => {
     const form = { ...FIELDS, recognition: '', cards: [newCard({ ...EMPTY_CARD, text: "R　U　R'" })] };
-    expect(standardAlgToAdd(form, "R U R'")).toBeNull();
-    expect(standardAlgToAdd(form, "R U2 R'")).toBe("R U2 R'");
+    expect(standardAlgToAdd(form, "R U R'", 'r')).toBeNull();
+    expect(standardAlgToAdd(form, "R U2 R'", 'r')).toBe("R U2 R'");
+  });
+
+  it('2層回しを設定の表記に揃えて返す', () => {
+    const form = { ...FIELDS, recognition: '', cards: [newCard()] };
+    expect(standardAlgToAdd(form, "r U r'", 'Rw')).toBe("Rw U Rw'");
+    expect(standardAlgToAdd(form, "r U r'", 'r')).toBe("r U r'");
+  });
+
+  it('2層回しの表記だけが違う手順は同じ手順として出さない', () => {
+    const form = { ...FIELDS, recognition: '', cards: [newCard({ ...EMPTY_CARD, text: "Rw U Rw'" })] };
+    expect(standardAlgToAdd(form, "r U r'", 'r')).toBeNull();
   });
 });
 

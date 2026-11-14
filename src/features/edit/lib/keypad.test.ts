@@ -1,21 +1,64 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyEdit, clearingFor, deletionFor, insertionFor } from './keypad';
+import { applyEdit, clearingFor, deletionFor, insertionFor, isActionKey, keypadKeysOf } from './keypad';
 
 function typed(value: string, caret: number, key: Parameters<typeof insertionFor>[3]) {
   return applyEdit(value, insertionFor(value, caret, caret, key));
 }
+
+describe('keypadKeysOf', () => {
+  it('接尾辞の段は面の段の真下に並び、右端が削除', () => {
+    expect(keypadKeysOf('r').slice(0, 12)).toEqual([
+      'R',
+      'U',
+      'F',
+      'L',
+      'D',
+      'B',
+      "'",
+      '2',
+      '3',
+      '(',
+      ')',
+      'backspace',
+    ]);
+  });
+
+  it('2層回しの段は面と同じ並びで、設定の表記で出る', () => {
+    expect(keypadKeysOf('r').slice(12, 18)).toEqual(['r', 'u', 'f', 'l', 'd', 'b']);
+    expect(keypadKeysOf('Rw').slice(12, 18)).toEqual(['Rw', 'Uw', 'Fw', 'Lw', 'Dw', 'Bw']);
+  });
+
+  it('残りの操作キーは最後に並ぶ', () => {
+    expect(keypadKeysOf('r').slice(24)).toEqual(['clear', 'keyboard', 'done']);
+  });
+
+  it('wのキーはない', () => {
+    expect(keypadKeysOf('r')).not.toContain('w');
+    expect(keypadKeysOf('Rw')).not.toContain('w');
+  });
+});
+
+describe('isActionKey', () => {
+  it('操作キーだけがtrueになる', () => {
+    expect(keypadKeysOf('r').filter(isActionKey)).toEqual(['backspace', 'clear', 'keyboard', 'done']);
+  });
+});
 
 describe('insertionFor', () => {
   it('手の後に手を押すと空白を補う', () => {
     expect(typed('R', 1, 'U')).toEqual({ value: 'R U', caret: 3 });
   });
 
-  it("' と 2 と 3 と w は前の手にくっつく", () => {
+  it("' と 2 と 3 は前の手にくっつく", () => {
     expect(typed('R', 1, "'")).toEqual({ value: "R'", caret: 2 });
     expect(typed('R', 1, '2')).toEqual({ value: 'R2', caret: 2 });
     expect(typed('R', 1, '3')).toEqual({ value: 'R3', caret: 2 });
-    expect(typed('R', 1, 'w')).toEqual({ value: 'Rw', caret: 2 });
+  });
+
+  it('2層回しは独立した手なので、どちらの表記でも空白を補う', () => {
+    expect(typed('R', 1, 'r')).toEqual({ value: 'R r', caret: 3 });
+    expect(typed('R', 1, 'Rw')).toEqual({ value: 'R Rw', caret: 4 });
   });
 
   it('x y z は持ち替えで独立した手なので空白を補う', () => {
