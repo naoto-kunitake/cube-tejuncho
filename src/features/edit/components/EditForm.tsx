@@ -147,7 +147,8 @@ export function EditForm({
   // 自作は名前が必須
   const isNameMissing = isCustom && form.name.trim() === '';
   const hasNameError = (hasLeftName || hasTriedToSave) && isNameMissing;
-  const standardAlg = target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg) : null;
+  const standardAlg =
+    target.kind === 'preset' ? standardAlgToAdd(form, target.preset.standardAlg, settings.wideStyle) : null;
   const caseCheck: CaseCheck | undefined = target.kind === 'preset' ? caseCheckOf(target.preset) : undefined;
   const title = target.kind === 'new' ? copy.edit.newTitle : copy.edit.title(fields.name || presetName(target));
   // 閉じた先: 既存は詳細、新規はそのカテゴリの一覧

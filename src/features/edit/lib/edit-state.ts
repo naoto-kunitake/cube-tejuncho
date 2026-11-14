@@ -1,5 +1,6 @@
 import type { AlgEntry, Registration, RegistrationData } from '@/data/document';
-import { type AlgError, cleanAlgText, parseAlg } from '@/lib/alg/parse';
+import { formatAlg, type WideStyle } from '@/lib/alg/format';
+import { type AlgError, parseAlg } from '@/lib/alg/parse';
 
 // 編集中の手順カード。メイン手順も1枚目のカードとして同じ形で扱う。
 // idは並べ替えや削除の取り消しでReactが同じカードを追えるようにする印で、保存しない
@@ -88,10 +89,11 @@ export function firstInvalidCardIndex(form: EditFormState): number | null {
   return index === -1 ? null : index;
 }
 
-// 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあればnull (もう足せる物がない)
-export function standardAlgToAdd(form: EditFormState, standardAlg: string): string | null {
-  const target = cleanAlgText(standardAlg);
-  return form.cards.some((card) => cleanAlgText(card.text) === target) ? null : standardAlg;
+// 基本手順をあとから足す導線に出す手順。すでに同じ手順のカードがあればnull (もう足せる物がない)。
+// 設定の表記に揃えて返す (原文の小文字のまま欄に入れると、Rwの設定ではキーパッドで足す手と表記が混ざる)
+export function standardAlgToAdd(form: EditFormState, standardAlg: string, wideStyle: WideStyle): string | null {
+  const target = formatAlg(standardAlg, wideStyle);
+  return form.cards.some((card) => formatAlg(card.text, wideStyle) === target) ? null : target;
 }
 
 export function moveCardToFront(cards: readonly EditCard[], index: number): EditCard[] {
