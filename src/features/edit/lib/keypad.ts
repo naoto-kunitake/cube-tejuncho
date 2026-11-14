@@ -1,3 +1,5 @@
+import type { WideStyle } from '@/lib/alg/format';
+
 // 手順入力の専用キーパッド。文字キーは記号を入れ、操作キーは 削除 / 全消去 / キーボード (普通のキーボードに切り替え) /
 // 完了 (欄を離れて閉じる。ほかの場所を押しても閉じるが、iOSのキーボードと同じく終え方を見せる)。
 // 空白のキーは置かない (文字キーが空白を自動で補い、解析器も空白を読み飛ばす)
@@ -22,10 +24,34 @@ export const CHARACTER_KEYS = [
   'y',
   'z',
 ] as const;
-export type CharacterKey = (typeof CHARACTER_KEYS)[number];
+const FACE_KEYS = ['R', 'U', 'F', 'L', 'D', 'B'] as const;
+// 並びは面の段と同じ (Rと同じ列にr)
+const WIDE_KEYS = {
+  r: ['r', 'u', 'f', 'l', 'd', 'b'],
+  Rw: ['Rw', 'Uw', 'Fw', 'Lw', 'Dw', 'Bw'],
+} as const satisfies Record<WideStyle, readonly string[]>;
+const SUFFIX_KEYS = ["'", '2', '3', '(', ')'] as const;
+const SLICE_AND_ROTATION_KEYS = ['M', 'E', 'S', 'x', 'y', 'z'] as const;
+export type CharacterKey = (typeof CHARACTER_KEYS)[number] | (typeof WIDE_KEYS)[WideStyle][number];
 export const ACTION_KEYS = ['backspace', 'clear', 'keyboard', 'done'] as const;
 export type ActionKey = (typeof ACTION_KEYS)[number];
 export type KeypadKey = CharacterKey | ActionKey;
+
+// 6個ずつ4段 (面 / 接尾辞と括弧と削除 / 2層回し / 中層と持ち替え) と、最下段の操作キー3つ。
+// 接尾辞の段は面の段の真下に置く (基本手順119件の押下の94%がこの2段で、間に別の段を挟むとRから'までが1段遠くなる)。
+// 2層回しの段は設定の表記で出し、その文字のまま入れる
+export function keypadKeysOf(wideStyle: WideStyle): readonly KeypadKey[] {
+  return [
+    ...FACE_KEYS,
+    ...SUFFIX_KEYS,
+    'backspace',
+    ...WIDE_KEYS[wideStyle],
+    ...SLICE_AND_ROTATION_KEYS,
+    'clear',
+    'keyboard',
+    'done',
+  ];
+}
 
 export type TextEdit = { start: number; end: number; insert: string };
 
